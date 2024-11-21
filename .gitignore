@@ -1,0 +1,35 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+demo/
+
+# Logs
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.vscode/
+.DS_Store
+*.swp
+
+# Environment files
+.env
+.env.*.local
+
+# Git-related
+.git/
+*.lock
+
+# Test coverage
+coverage/
+
+# Local debugging
+*.log
+*.cache/
+
+# Miscellaneous
+*.tmp
+*.bak
+*.pid

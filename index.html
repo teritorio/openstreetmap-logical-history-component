@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/teritorio.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenStreeMap logical history component</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        font-family: 'Noto Sans';
+      }
+
+      #map {
+        height: calc(100vh - 64px);
+      }
+
+      header {
+        background-color: #082e4e;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        height: 48px;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin: 0;
+      }
+
+      header img {
+        height: 48px;
+        width: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img src="/teritorio.png" alt="Logo Teritorio" />
+      <h1>OpenStreeMap LoCha Component - Demo</h1>
+    </header>
+    <main>
+      <div id="map"></div>
+    </main>
+    <script type="module">
+      import maplibregl from 'maplibre-gl'
+      import 'maplibre-gl/dist/maplibre-gl.css'
+
+      const map = new maplibregl.Map({
+        hash: true,
+        container: "map",
+        style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=IJyLukjfd91xJcN3933f'
+      });
+    </script>
+  </body>
+</html>

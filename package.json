@@ -1,0 +1,64 @@
+{
+  "name": "@teritorio/openstreetmap-logical-history-component",
+  "type": "module",
+  "version": "0.0.0",
+  "packageManager": "yarn@4.5.3",
+  "description": "A demo of OpenStreetMap logical history (LoCha).",
+  "author": "Teritorio",
+  "license": "MIT",
+  "homepage": "https://github.com/teritorio/openstreetmap-logical-history-component#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/teritorio/openstreetmap-logical-history-component.git"
+  },
+  "bugs": {
+    "url": "https://github.com/teritorio/openstreetmap-logical-history-component/issues"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.umd.cjs"
+    }
+  },
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "build:demo": "vite build --mode demo",
+    "coverage": "vitest run --coverage",
+    "dev": "vite",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "preversion": "yarn build",
+    "prepare": "simple-git-hooks",
+    "preview": "vite preview",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.12.0",
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
+    "@vitest/coverage-v8": "^2.1.8",
+    "eslint": "^9.17.0",
+    "lint-staged": "^15.2.11",
+    "maplibre-gl": "^4.7.1",
+    "simple-git-hooks": "^2.11.1",
+    "typescript": "~5.6.2",
+    "vite": "^5.4.10",
+    "vite-plugin-dts": "^4.3.0",
+    "vitest": "^2.1.8"
+  },
+  "simple-git-hooks": {
+    "commit-msg": "yarn dlx commitlint --edit $1",
+    "pre-commit": "yarn dlx lint-staged",
+    "preserveUnused": true
+  },
+  "lint-staged": {
+    "*": "yarn lint:fix"
+  }
+}
