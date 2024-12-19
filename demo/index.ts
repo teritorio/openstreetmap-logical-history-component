@@ -1,6 +1,15 @@
 import maplibregl, { GeoJSONSource } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
+let apiBaseUrl: string
+
+if (import.meta.env.MODE === 'development') {
+  apiBaseUrl = 'http://localhost:5173'
+}
+else {
+  apiBaseUrl = 'https://osm-logical-history-dev.teritorio.xyz'
+}
+
 const sourceID = 'lochas'
 const loadingElement = document.getElementById('loading') as HTMLDivElement
 const errorMessage = document.getElementById('error-message') as HTMLDivElement
@@ -125,7 +134,7 @@ async function fetchData(params?: URLSearchParams): Promise<GeoJSON.FeatureColle
     loadingElement.style.display = 'flex'
 
     // Construct the full API URL with query parameters
-    let apiUrl = '/api/0.1/overpass_logical_history'
+    let apiUrl = `${apiBaseUrl}/api/0.1/overpass_logical_history`
 
     if (params) {
       apiUrl += `?${params.toString()}`

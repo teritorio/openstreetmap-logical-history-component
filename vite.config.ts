@@ -1,15 +1,9 @@
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
-const serverProxy = {
-  server: {
-    proxy: {
-      '/api': {
-        target: 'https://osm-logical-history-dev.teritorio.xyz',
-        changeOrigin: true,
-      },
-    },
-  },
+const baseConfig = {
+  root: 'demo',
+  publicDir: '../public',
 }
 
 export default defineConfig(({ command, mode }) => {
@@ -18,9 +12,9 @@ export default defineConfig(({ command, mode }) => {
     return {
       base: '/openstreetmap-logical-history-component/',
       build: {
-        outDir: './demo',
+        outDir: '../demo-dist',
       },
-      ...serverProxy,
+      ...baseConfig,
     }
   }
 
@@ -53,6 +47,14 @@ export default defineConfig(({ command, mode }) => {
 
   // Local Development config
   return {
-    ...serverProxy,
+    ...baseConfig,
+    server: {
+      proxy: {
+        '/api': {
+          target: 'https://osm-logical-history-dev.teritorio.xyz',
+          changeOrigin: true,
+        },
+      },
+    },
   }
 })
