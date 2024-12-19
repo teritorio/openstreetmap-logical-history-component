@@ -1,9 +1,11 @@
+import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 const baseConfig = {
   root: 'demo',
   publicDir: '../public',
+  plugins: [vue()],
 }
 
 export default defineConfig(({ command, mode }) => {
@@ -29,15 +31,17 @@ export default defineConfig(({ command, mode }) => {
         },
         sourcemap: true,
         rollupOptions: {
-          external: ['maplibre-gl'], // Exclude maplibre-gl from the bundle
+          external: ['maplibre-gl', 'vue'],
           output: {
             globals: {
-              'maplibre-gl': 'maplibregl', // Define the global variable for maplibre-gl in the browser
+              'vue': 'Vue',
+              'maplibre-gl': 'maplibregl',
             },
           },
         },
       },
       plugins: [
+        vue(),
         dts({
           rollupTypes: true,
         }),
