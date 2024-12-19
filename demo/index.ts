@@ -17,7 +17,7 @@ const errorMessage = document.getElementById('error-message') as HTMLDivElement
 const map = new maplibregl.Map({
   hash: true,
   container: 'map',
-  style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=IJyLukjfd91xJcN3933f',
+  style: 'https://vecto.teritorio.xyz/styles/teritorio-tourism-latest/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i',
 })
 
 map.addControl(new maplibregl.NavigationControl())
