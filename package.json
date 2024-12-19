@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "packageManager": "yarn@4.5.3",
-  "description": "A demo of OpenStreetMap logical history (LoCha).",
+  "description": "An OpenStreetMap logical history (LoCha) UI component.",
   "author": "Teritorio",
   "license": "MIT",
   "homepage": "https://github.com/teritorio/openstreetmap-logical-history-component#readme",

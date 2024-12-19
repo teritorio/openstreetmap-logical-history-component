@@ -1,4 +1,4 @@
-# OpenStreetMap logical history component
+# OpenStreetMap logical history (LoCha) UI component
 
 ## Run project locally
 Install dependencies
