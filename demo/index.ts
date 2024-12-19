@@ -48,6 +48,8 @@ map.on('load', async () => {
   }
 })
 
+map.on('moveend', setBBox)
+
 // Event listeners for form validation and submission
 dateStartInput.addEventListener('input', validateDateRange)
 dateEndInput.addEventListener('input', validateDateRange)
@@ -208,4 +210,17 @@ function createQueryParams(): URLSearchParams | undefined {
   }
 
   return undefined
+}
+
+// Update bbox input value based on current map position
+function setBBox(): void {
+  const bounds = map.getBounds()
+  const bbox = [
+    bounds.getSouthWest().lng,
+    bounds.getSouthWest().lat,
+    bounds.getNorthEast().lng,
+    bounds.getNorthEast().lat,
+  ].join(',')
+
+  bboxInput.value = bbox
 }
