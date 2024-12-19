@@ -84,6 +84,18 @@
       cursor: pointer;
     }
 
+    #loading {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: inherit;
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      z-index: 15;
+    }
+
     #map {
       flex: 1;
     }
@@ -130,6 +142,7 @@
         </button>
       </form>
     </aside>
+    <div id="loading">Loading data...</div>
     <div id="map"></div>
   </main>
   <script type="module" src="index.ts"></script>

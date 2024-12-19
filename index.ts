@@ -2,6 +2,7 @@ import maplibregl, { GeoJSONSource } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const sourceID = 'lochas'
+const loadingElement = document.getElementById('loading') as HTMLDivElement
 
 const map = new maplibregl.Map({
   hash: true,
@@ -10,16 +11,28 @@ const map = new maplibregl.Map({
 })
 
 map.on('load', async () => {
-  const data = await fetchData()
+  await fetchData()
+    .then((data) => {
+      map.addSource(sourceID, {
+        type: 'geojson',
+        data,
+      })
 
-  map.addSource(sourceID, {
-    type: 'geojson',
-    data,
-    cluster: true,
-    clusterRadius: 50,
-    clusterMaxZoom: 14,
-    maxzoom: 24,
-  })
+      map.addLayer({
+        id: 'lochas-features',
+        type: 'fill',
+        source: sourceID,
+        paint: {
+          'fill-color': '#888888',
+          'fill-outline-color': 'red',
+          'fill-opacity': 0.4,
+        },
+        // filter for (multi)polygons; for also displaying linestrings
+        // or points add more layers with different filters
+        filter: ['==', '$type', 'Polygon'],
+      })
+    })
+    .catch(error => loadingElement.innerHTML = error)
 })
 
 // Add event listener for form submission
@@ -44,22 +57,28 @@ form.addEventListener('submit', async (event) => {
     })
   }
 
-  const data = await fetchData(params)
-  const source = map.getSource(sourceID)
+  await fetchData(params)
+    .then((data) => {
+      const source = map.getSource(sourceID)
 
-  if (!source) {
-    throw new Error(`Source ${sourceID} is not found.`)
-  }
+      if (!source) {
+        throw new Error(`Source ${sourceID} is not found.`)
+      }
 
-  if (!(source instanceof GeoJSONSource)) {
-    throw new TypeError(`Source ${sourceID} is not a GeoJSONSource.`)
-  }
+      if (!(source instanceof GeoJSONSource)) {
+        throw new TypeError(`Source ${sourceID} is not a GeoJSONSource.`)
+      }
 
-  source.setData(data)
+      source.setData(data)
+    })
+    .catch(error => loadingElement.innerHTML = error)
 })
 
 async function fetchData(params?: URLSearchParams): Promise<GeoJSON.FeatureCollection> {
   try {
+    // Show loading spinner
+    loadingElement.style.display = 'flex'
+
     // Construct the full API URL with query parameters
     let apiUrl = '/api/0.1/overpass_logical_history'
 
@@ -77,6 +96,9 @@ async function fetchData(params?: URLSearchParams): Promise<GeoJSON.FeatureColle
     }
 
     const data = await response.json()
+
+    // Hide the loading spinner once the data is loaded and displayed
+    loadingElement.style.display = 'none'
 
     return data
 
