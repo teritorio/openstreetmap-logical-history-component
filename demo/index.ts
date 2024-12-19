@@ -201,7 +201,7 @@ function validateDateRange(): boolean {
 
 // Create query parameters for the API
 function createQueryParams(): URLSearchParams | undefined {
-  if (dateStartInput.value || dateEndInput.value || bboxInput.value) {
+  if (dateStartInput.value && dateEndInput.value && bboxInput.value) {
     return new URLSearchParams({
       date_start: new Date(dateStartInput.value).toISOString(),
       date_end: new Date(dateEndInput.value).toISOString(),
