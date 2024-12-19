@@ -1,6 +1,17 @@
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
+const serverProxy = {
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://osm-logical-history-dev.teritorio.xyz',
+        changeOrigin: true,
+      },
+    },
+  },
+}
+
 export default defineConfig(({ command, mode }) => {
   // Demo build config
   if (command === 'build' && mode === 'demo') {
@@ -9,6 +20,7 @@ export default defineConfig(({ command, mode }) => {
       build: {
         outDir: './demo',
       },
+      ...serverProxy,
     }
   }
 
@@ -40,5 +52,7 @@ export default defineConfig(({ command, mode }) => {
   }
 
   // Local Development config
-  return {}
+  return {
+    ...serverProxy,
+  }
 })
