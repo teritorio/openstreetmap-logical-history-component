@@ -10,6 +10,8 @@ const map = new maplibregl.Map({
   style: 'https://api.maptiler.com/maps/openstreetmap/style.json?key=IJyLukjfd91xJcN3933f',
 })
 
+map.addControl(new maplibregl.NavigationControl())
+
 map.on('load', async () => {
   await fetchData()
     .then((data) => {
@@ -19,17 +21,27 @@ map.on('load', async () => {
       })
 
       map.addLayer({
-        id: 'lochas-features',
-        type: 'fill',
+        id: 'points',
+        type: 'circle',
         source: sourceID,
         paint: {
-          'fill-color': '#888888',
-          'fill-outline-color': 'red',
-          'fill-opacity': 0.4,
+          'circle-radius': 5,
+          'circle-color': '#FF5722',
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#FFFFFF',
         },
-        // filter for (multi)polygons; for also displaying linestrings
-        // or points add more layers with different filters
-        filter: ['==', '$type', 'Polygon'],
+        filter: ['==', '$type', 'Point'],
+      })
+
+      map.addLayer({
+        id: 'lines',
+        type: 'line',
+        source: sourceID,
+        paint: {
+          'line-width': 3,
+          'line-color': '#0074D9',
+        },
+        filter: ['==', '$type', 'LineString'],
       })
     })
     .catch(error => loadingElement.innerHTML = error)
@@ -58,21 +70,23 @@ form.addEventListener('submit', async (event) => {
   }
 
   await fetchData(params)
-    .then((data) => {
-      const source = map.getSource(sourceID)
-
-      if (!source) {
-        throw new Error(`Source ${sourceID} is not found.`)
-      }
-
-      if (!(source instanceof GeoJSONSource)) {
-        throw new TypeError(`Source ${sourceID} is not a GeoJSONSource.`)
-      }
-
-      source.setData(data)
-    })
+    .then(data => getSource().setData(data))
     .catch(error => loadingElement.innerHTML = error)
 })
+
+function getSource(): GeoJSONSource {
+  const source = map.getSource(sourceID)
+
+  if (!source) {
+    throw new Error(`Source ${sourceID} is not found.`)
+  }
+
+  if (!(source instanceof GeoJSONSource)) {
+    throw new TypeError(`Source ${sourceID} is not a GeoJSONSource.`)
+  }
+
+  return source
+}
 
 async function fetchData(params?: URLSearchParams): Promise<GeoJSON.FeatureCollection> {
   try {
