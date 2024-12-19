@@ -100,6 +100,11 @@
       flex: 1;
     }
 
+    #error-message {
+      color: red;
+      display: none;
+    }
+
     @media (max-width: 768px) {
       aside {
         width: 100%;
@@ -121,6 +126,7 @@
   </header>
   <main>
     <aside>
+      <div id="error-message"></div>
       <form id="searchForm">
         <div>
           <label for="date_start">From:</label>
@@ -138,7 +144,7 @@
           >
         </div>
         <button type="submit">
-          Apply
+          Search
         </button>
       </form>
     </aside>

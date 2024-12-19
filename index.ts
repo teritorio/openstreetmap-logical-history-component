@@ -3,6 +3,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 
 const sourceID = 'lochas'
 const loadingElement = document.getElementById('loading') as HTMLDivElement
+const errorMessage = document.getElementById('error-message') as HTMLDivElement
 
 const map = new maplibregl.Map({
   hash: true,
@@ -47,25 +48,30 @@ map.on('load', async () => {
     .catch(error => loadingElement.innerHTML = error)
 })
 
-// Add event listener for form submission
 const form = document.getElementById('searchForm') as HTMLFormElement
+const date_start = document.getElementById('date_start') as HTMLInputElement
+const date_end = document.getElementById('date_end') as HTMLInputElement
+const bbox = document.getElementById('bbox') as HTMLInputElement
+
+// Add event listener to validate date range on input change
+date_start.addEventListener('input', validateDateRange)
+date_end.addEventListener('input', validateDateRange)
 
 form.addEventListener('submit', async (event) => {
   event.preventDefault() // Prevent form from reloading the page
 
-  // Get input values
-  const date_start = (document.getElementById('date_start') as HTMLInputElement).value
-  const date_end = (document.getElementById('date_end') as HTMLInputElement).value
-  const bbox = (document.getElementById('bbox') as HTMLInputElement).value
+  if (!validateDateRange) {
+    return
+  }
 
   // Construct the query parameters
   let params: URLSearchParams | undefined
 
-  if (date_start || date_end || bbox) {
+  if (date_start.value || date_end.value || bbox.value) {
     params = new URLSearchParams({
-      date_start,
-      date_end,
-      bbox,
+      date_start: new Date(date_start.value).toISOString(),
+      date_end: new Date(date_end.value).toISOString(),
+      bbox: bbox.value,
     })
   }
 
@@ -73,6 +79,31 @@ form.addEventListener('submit', async (event) => {
     .then(data => getSource().setData(data))
     .catch(error => loadingElement.innerHTML = error)
 })
+
+function validateDateRange(): boolean {
+  const dateStart = new Date(date_start.value)
+  const dateEnd = new Date(date_end.value)
+
+  // Check if both dates are selected
+  if (!dateStart || !dateEnd) {
+    return true
+  }
+
+  // Calculate the difference in months
+  const maxDateEnd = new Date(dateStart)
+  maxDateEnd.setMonth(maxDateEnd.getMonth() + 1)
+
+  // Validate the date range
+  if (dateEnd > maxDateEnd) {
+    errorMessage.textContent = 'The date range must not exceed 1 month.'
+    errorMessage.style.display = 'block'
+    form.reset()
+    return false
+  }
+
+  errorMessage.style.display = 'none'
+  return true
+}
 
 function getSource(): GeoJSONSource {
   const source = map.getSource(sourceID)
