@@ -1,4 +1,5 @@
-import maplibregl, { GeoJSONSource } from 'maplibre-gl'
+import { bbox as turfBbox } from '@turf/bbox'
+import { GeoJSONSource, LngLatBounds, Map, NavigationControl } from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 let apiBaseUrl: string
@@ -14,13 +15,14 @@ const sourceID = 'lochas'
 const loadingElement = document.getElementById('loading') as HTMLDivElement
 const errorMessage = document.getElementById('error-message') as HTMLDivElement
 
-const map = new maplibregl.Map({
+const map = new Map({
   hash: true,
   container: 'map',
+  center: [0, 0],
   style: 'https://vecto.teritorio.xyz/styles/teritorio-tourism-latest/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i',
 })
 
-map.addControl(new maplibregl.NavigationControl())
+map.addControl(new NavigationControl())
 
 map.on('load', async () => {
   await fetchData()
@@ -53,6 +55,8 @@ map.on('load', async () => {
         },
         filter: ['==', '$type', 'LineString'],
       })
+
+      map.fitBounds(getBoundingBox(data), { padding: 20 })
     })
     .catch(error => loadingElement.innerHTML = error)
 })
@@ -88,6 +92,15 @@ form.addEventListener('submit', async (event) => {
     .then(data => getSource().setData(data))
     .catch(error => loadingElement.innerHTML = error)
 })
+
+function getBoundingBox(data: GeoJSON.FeatureCollection): LngLatBounds {
+  const bbox = turfBbox(data)
+
+  return new LngLatBounds(
+    [bbox[0], bbox[1]],
+    [bbox[2], bbox[3]],
+  )
+}
 
 function validateDateRange(): boolean {
   const dateStart = new Date(date_start.value)
