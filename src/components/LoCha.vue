@@ -7,3 +7,9 @@ const message = 'hello world'
     {{ message }}
   </div>
 </template>
+
+<style lang="css" scoped>
+div {
+  flex: 1;
+}
+</style>

@@ -1,18 +1,27 @@
 {
   "compilerOptions": {
-    "target": "ESNext", // Use ES module syntax
-    "lib": ["DOM", "ESNext"], // Required for Vite + TS
-    "useDefineForClassFields": true, // Use modern JavaScript features
-    "module": "ESNext", // Include DOM and ESNext APIs
-    "moduleResolution": "Node", // Output directory for compiled files
-    "strict": true, // Resolve modules like Node.js
-    "declaration": true, // Generate declaration files
-    "declarationMap": true, // Generate declaration maps
-    "outDir": "./dist", // Enable strict type checking
-    "esModuleInterop": true, // Skip type checking of declaration files
-    "isolatedModules": true, // Enable interoperability with CommonJS
-    "skipLibCheck": true // Align with ECMAScript private field semantics
+    "target": "esnext",
+    "jsx": "preserve",
+    "lib": ["esnext", "dom"],
+    "baseUrl": ".",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "skipLibCheck": true
   },
-  "include": ["src"], // Include source files
-  "exclude": ["node_modules", "dist"] // Exclude build and dependency files
+  "include": [
+    "src/**/*",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }

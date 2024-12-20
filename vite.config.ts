@@ -3,8 +3,6 @@ import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 const baseConfig = {
-  root: 'demo',
-  publicDir: '../public',
   plugins: [vue()],
 }
 
@@ -14,7 +12,7 @@ export default defineConfig(({ command, mode }) => {
     return {
       base: '/openstreetmap-logical-history-component/',
       build: {
-        outDir: '../demo-dist',
+        outDir: './demo-dist',
       },
       ...baseConfig,
     }
@@ -25,7 +23,7 @@ export default defineConfig(({ command, mode }) => {
     return {
       build: {
         lib: {
-          entry: './src/index.ts',
+          entry: './src/main.ts',
           name: 'OSMLoChaComponent',
           fileName: 'index',
         },

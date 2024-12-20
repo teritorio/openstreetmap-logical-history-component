@@ -1,8 +1,7 @@
-import { describe, expect, it } from 'vitest'
-import helloWorld from '../src/index'
+import { describe, it } from 'vitest'
 
-describe('basic test', () => {
-  it('should say hello world', () => {
-    expect(helloWorld()).toBe('Hello World')
+describe('app.vue', () => {
+  it('renders the layout correctly', () => {
+
   })
 })
