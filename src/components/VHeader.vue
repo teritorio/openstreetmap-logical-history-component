@@ -19,12 +19,12 @@ header {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-header img {
+img {
   height: 40px;
   width: 40px;
 }
 
-header h1 {
+h1 {
   font-size: 20px;
   margin-left: 16px;
 }

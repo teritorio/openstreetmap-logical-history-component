@@ -15,6 +15,7 @@ const { error } = $api
 const geojson = ref<ApiResponse>()
 const loading = ref(true)
 const bbox = ref('')
+const lochaRef = ref<InstanceType<typeof LoCha>>()
 
 onMounted(async () => {
   geojson.value = await $api.fetchData()
@@ -53,7 +54,7 @@ function handleError(err: Error) {
     <VError v-if="error.message" :message="error.message" :type="error.type" />
     <MapFilters :bbox="bbox" @submit="handleSubmit" />
     <section>
-      <LoCha />
+      <LoCha ref="lochaRef" :data="geojson" />
       <VMap
         :data="geojson"
         @error="handleError"
