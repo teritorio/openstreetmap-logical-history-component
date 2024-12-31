@@ -19,7 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const SOURCE_ID = 'lochas'
-const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/teritorio-tourism-latest/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
+const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/teritorio-basic/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
 
 const map = ref<Map>()
 const isLoaded = ref(false)
@@ -63,28 +63,40 @@ function setupMapLayers(data: GeoJSON.FeatureCollection): void {
   if (map.value) {
     map.value.addSource(SOURCE_ID, { type: 'geojson', data })
 
-    // Add points layer
+    // Point type
     map.value.addLayer({
-      id: 'points',
+      id: 'feature-points',
       type: 'circle',
       source: SOURCE_ID,
       paint: {
-        'circle-radius': 5,
-        'circle-color': '#FF5722',
-        'circle-stroke-width': 1,
-        'circle-stroke-color': '#FFFFFF',
+        'circle-color': [
+          'case',
+          ['==', ['get', 'is_removed'], true],
+          '#FF0000',
+          ['==', ['get', 'is_created'], true],
+          '#FFBB00',
+          '#F0F0F0',
+        ],
+        'circle-radius': 12,
       },
       filter: ['==', '$type', 'Point'],
     })
 
-    // Add lines layer
+    // LineString type
     map.value.addLayer({
-      id: 'lines',
+      id: 'feature-lines',
       type: 'line',
       source: SOURCE_ID,
       paint: {
-        'line-width': 3,
-        'line-color': '#0074D9',
+        'line-width': 6,
+        'line-color': [
+          'case',
+          ['==', ['get', 'is_removed'], true],
+          '#FF0000',
+          ['==', ['get', 'is_created'], true],
+          '#FFBB00',
+          '#F0F0F0',
+        ],
       },
       filter: ['==', '$type', 'LineString'],
     })

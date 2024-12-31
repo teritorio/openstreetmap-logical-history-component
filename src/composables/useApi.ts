@@ -2,6 +2,14 @@ interface ApiComposable {
   buildApiUrl: (params?: URLSearchParams) => string
 }
 
+type ApiLinks = Array<{ before?: string, after?: string }>
+
+export interface ApiResponse extends GeoJSON.FeatureCollection {
+  metadata: {
+    links: ApiLinks
+  }
+}
+
 export function useApiConfig(): ApiComposable {
   const API_BASE_URL_DEV = 'http://localhost:5173'
   const API_BASE_URL_PROD = 'https://osm-logical-history-dev.teritorio.xyz'

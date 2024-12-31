@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { ApiResponse } from './composables/useApi'
 import type { Error, FormData } from './types'
 import { onMounted, reactive, ref } from 'vue'
 import LoCha from './components/LoCha.vue'
@@ -8,7 +9,7 @@ import VHeader from './components/VHeader.vue'
 import VMap from './components/VMap.vue'
 import { useApiConfig } from './composables/useApi'
 
-const geojson = ref<GeoJSON.FeatureCollection>()
+const geojson = ref<ApiResponse>()
 const loading = ref(true)
 const bbox = ref('')
 let error = reactive<Error>({
@@ -39,20 +40,59 @@ async function handleSubmit(formData: FormData) {
 
 // Fetch data from API
 const { buildApiUrl } = useApiConfig()
-async function fetchData(params?: URLSearchParams) {
+async function fetchData(params?: URLSearchParams): Promise<ApiResponse | undefined> {
   return await fetch(buildApiUrl(params), { method: 'GET' })
     .then(async (res) => {
       if (!res.ok)
         throw new Error('API request failed')
 
-      return await res.json()
+      return await res.json() as ApiResponse
     })
+    .then(data => transformData(data))
     .catch((err) => {
       error = {
         message: err.message,
         type: 'error',
       }
+      return undefined
     })
+}
+
+function transformData(data: ApiResponse) {
+  return {
+    ...data,
+    features: data.features.map((feature) => {
+      if (!feature.id)
+        return feature
+
+      const link = data.metadata.links.find(({ before, after }) => before === feature.id!.toString() || after === feature.id!.toString())
+
+      if (!link)
+        throw new Error(`Feature ${feature.id} has no link.`)
+
+      if (link.before && !link.after) {
+        return {
+          ...feature,
+          properties: {
+            ...feature.properties,
+            is_removed: true,
+          },
+        }
+      }
+
+      if (!link.before && link.after) {
+        return {
+          ...feature,
+          properties: {
+            ...feature.properties,
+            is_created: true,
+          },
+        }
+      }
+
+      return feature
+    }),
+  }
 }
 
 function handleBboxUpdate(value: string) {
@@ -71,7 +111,12 @@ function handleError(err: Error) {
     <MapFilters :bbox="bbox" @submit="handleSubmit" />
     <section>
       <LoCha />
-      <VMap :loading="loading" :data="geojson" @error="handleError" @update-bbox="handleBboxUpdate" />
+      <VMap
+        :loading="loading"
+        :data="geojson"
+        @error="handleError"
+        @update-bbox="handleBboxUpdate"
+      />
     </section>
   </main>
 </template>
