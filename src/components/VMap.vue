@@ -19,7 +19,7 @@ const emit = defineEmits<{
 }>()
 
 const SOURCE_ID = 'lochas'
-const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/teritorio-basic/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
+const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/teritorio-tourism-latest/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
 
 const map = ref<Map>()
 const isLoaded = ref(false)
@@ -114,12 +114,12 @@ function getBoundingBox(data: GeoJSON.FeatureCollection): LngLatBounds {
 function resetMapLayers(): void {
   if (map.value) {
     // Remove existing layers if they exist
-    if (map.value.getLayer('points')) {
-      map.value.removeLayer('points')
+    if (map.value.getLayer('feature-points')) {
+      map.value.removeLayer('feature-points')
     }
 
-    if (map.value.getLayer('lines')) {
-      map.value.removeLayer('lines')
+    if (map.value.getLayer('feature-lines')) {
+      map.value.removeLayer('feature-lines')
     }
 
     // Remove the source if it exists
