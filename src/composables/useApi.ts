@@ -7,16 +7,21 @@ interface ApiComposable {
   fetchData: (params?: URLSearchParams) => Promise<ApiResponse | undefined>
 }
 
-type ApiLinks = Array<{ before?: string, after?: string }>
+interface ApiLink {
+  id: string
+  before?: string
+  after?: string
+}
 
 export interface ApiResponse extends GeoJSON.FeatureCollection {
   metadata: {
-    links: ApiLinks
+    links: ApiLink[]
   }
 }
 
 /**
  * Constants for API base URLs, dependent on the environment.
+ *
  * @constant {string} API_BASE_URL_DEV - The base URL for the development environment.
  * @constant {string} API_BASE_URL_PROD - The base URL for the production environment.
  */
@@ -25,6 +30,7 @@ const API_BASE_URL_PROD = 'https://osm-logical-history-dev.teritorio.xyz'
 
 /**
  * Provides a composable for API configuration and interaction.
+ *
  * @returns {ApiComposable} The API composable object with error state and fetch functionality.
  */
 export function useApiConfig(): ApiComposable {
@@ -39,6 +45,7 @@ export function useApiConfig(): ApiComposable {
 
   /**
    * Constructs the full API URL with optional query parameters.
+   *
    * @param {URLSearchParams} [params] - Optional query parameters to append to the API endpoint.
    * @returns {string} The constructed API URL.
    */
@@ -49,6 +56,7 @@ export function useApiConfig(): ApiComposable {
 
   /**
    * Fetches data from the API and processes the response.
+   *
    * @param {URLSearchParams} [params] - Optional query parameters to include in the API request.
    * @returns {Promise<ApiResponse | undefined>} The API response with transformed features, or undefined if an error occurred.
    */
@@ -66,6 +74,7 @@ export function useApiConfig(): ApiComposable {
       .then(data => ({
         ...data,
         features: transformFeatures(data),
+        metadata: transformMetadata(data.metadata),
       }))
       .catch((err) => {
         error.value = {
@@ -78,7 +87,23 @@ export function useApiConfig(): ApiComposable {
   }
 
   /**
+   * Transforms the metadata of an API response by adding a unique `id` field to each link.
+   *
+   * @param {ApiResponse['metadata']} metadata - The metadata object containing links to be transformed.
+   * @returns {ApiResponse['metadata']} The transformed metadata with an `id` field added to each link.
+   */
+  function transformMetadata(metadata: ApiResponse['metadata']): ApiResponse['metadata'] {
+    return {
+      links: metadata.links.map(link => ({
+        ...link,
+        id: `${link.before ?? ''}${link.after ?? ''}`,
+      })),
+    }
+  }
+
+  /**
    * Transforms the features of the API response to include additional metadata.
+   *
    * @param {ApiResponse} data - The API response containing features and metadata.
    * @returns {Array<GeoJSON.Feature>} The transformed features with additional properties.
    * @throws {Error} If a feature is missing a link in the metadata.
@@ -98,7 +123,7 @@ export function useApiConfig(): ApiComposable {
           ...feature,
           properties: {
             ...feature.properties,
-            is_removed: true,
+            is_deleted: true,
           },
         }
       }

@@ -3,6 +3,7 @@ import type { Error } from 'src/types'
 import { bbox as turfBbox } from '@turf/bbox'
 import { LngLatBounds, Map, NavigationControl } from 'maplibre-gl'
 import { onMounted, shallowRef, watchEffect } from 'vue'
+import { actionColors } from '../types'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
@@ -80,11 +81,11 @@ function setupMapLayers(data: GeoJSON.FeatureCollection): void {
     paint: {
       'circle-color': [
         'case',
-        ['==', ['get', 'is_removed'], true],
-        '#FF0000',
+        ['==', ['get', 'is_deleted'], true],
+        actionColors.delete,
         ['==', ['get', 'is_created'], true],
-        '#FFBB00',
-        '#F0F0F0',
+        actionColors.create,
+        actionColors.update,
       ],
       'circle-radius': 12,
     },
@@ -100,11 +101,11 @@ function setupMapLayers(data: GeoJSON.FeatureCollection): void {
       'line-width': 6,
       'line-color': [
         'case',
-        ['==', ['get', 'is_removed'], true],
-        '#FF0000',
+        ['==', ['get', 'is_deleted'], true],
+        actionColors.delete,
         ['==', ['get', 'is_created'], true],
-        '#FFBB00',
-        '#F0F0F0',
+        actionColors.create,
+        actionColors.update,
       ],
     },
     filter: ['==', '$type', 'LineString'],

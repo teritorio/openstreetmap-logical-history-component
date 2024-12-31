@@ -53,7 +53,7 @@ function handleError(err: Error) {
     <VError v-if="error.message" :message="error.message" :type="error.type" />
     <MapFilters :bbox="bbox" @submit="handleSubmit" />
     <section>
-      <LoCha />
+      <LoCha :data="geojson" />
       <VMap
         :data="geojson"
         @error="handleError"

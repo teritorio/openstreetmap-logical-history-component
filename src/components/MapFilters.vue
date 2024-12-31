@@ -91,7 +91,7 @@ function validateDateRange(): boolean {
 <style lang="css" scoped>
 aside {
   width: 300px;
-  background-color: #f8f9fa;
+  background-color: #fefefe;
   border-right: 1px solid #ddd;
   padding: 16px;
   box-sizing: border-box;
