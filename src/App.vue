@@ -6,6 +6,7 @@ import LoCha from './components/LoCha.vue'
 import MapFilters from './components/MapFilters.vue'
 import VError from './components/VError.vue'
 import VHeader from './components/VHeader.vue'
+import VLoading from './components/VLoading.vue'
 import VMap from './components/VMap.vue'
 import { useApiConfig } from './composables/useApi'
 
@@ -47,13 +48,13 @@ function handleError(err: Error) {
 
 <template>
   <VHeader />
+  <VLoading v-if="loading" />
   <main>
     <VError v-if="error.message" :message="error.message" :type="error.type" />
     <MapFilters :bbox="bbox" @submit="handleSubmit" />
     <section>
       <LoCha />
       <VMap
-        :loading="loading"
         :data="geojson"
         @error="handleError"
         @update-bbox="handleBboxUpdate"

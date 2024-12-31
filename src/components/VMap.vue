@@ -3,15 +3,11 @@ import type { Error } from 'src/types'
 import { bbox as turfBbox } from '@turf/bbox'
 import { LngLatBounds, Map, NavigationControl } from 'maplibre-gl'
 import { onMounted, shallowRef, watchEffect } from 'vue'
-import VLoading from './VLoading.vue'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
-const props = withDefaults(defineProps<{
-  loading?: boolean
+const props = defineProps<{
   data?: GeoJSON.FeatureCollection
-}>(), {
-  loading: false,
-})
+}>()
 
 const emit = defineEmits<{
   (e: 'updateBbox', payload: string): void
@@ -163,9 +159,7 @@ function updateBoundingBox(): void {
 </script>
 
 <template>
-  <div id="map">
-    <VLoading v-if="loading" />
-  </div>
+  <div id="map" />
 </template>
 
 <style lang="css" scoped>
