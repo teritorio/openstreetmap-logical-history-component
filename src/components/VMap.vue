@@ -2,7 +2,7 @@
 import type { Error } from 'src/types'
 import { bbox as turfBbox } from '@turf/bbox'
 import { LngLatBounds, Map, NavigationControl } from 'maplibre-gl'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, shallowRef, watchEffect } from 'vue'
 import VLoading from './VLoading.vue'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -20,12 +20,18 @@ const emit = defineEmits<{
 
 const SOURCE_ID = 'lochas'
 const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/teritorio-tourism-latest/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
+const LAYERS = {
+  Point: 'feature-points',
+  LineString: 'feature-lines',
+}
 
-const map = ref<Map>()
-const isLoaded = ref(false)
+const map = shallowRef<Map>()
+const isLoaded = shallowRef(false)
 
-onMounted(() => {
-  // Initialize Map
+onMounted(() => initializeMap())
+
+// Initialize the map and set up event listeners
+function initializeMap() {
   map.value = new Map({
     hash: true,
     container: 'map',
@@ -37,111 +43,122 @@ onMounted(() => {
 
   map.value.on('load', () => {
     isLoaded.value = true
-    map.value!.on('moveend', setBBox)
+    map.value?.on('moveend', updateBoundingBox)
   })
-})
+}
 
-watch(() => props.data, (newValue) => {
-  if (map.value && isLoaded.value && newValue) {
-    setupMapLayers(newValue)
-
-    if (newValue.features.length) {
-      map.value.fitBounds(getBoundingBox(newValue), { padding: 20 })
-    }
-    else {
-      emit('error', { message: '0 changes has been found ! ', type: 'warning' })
-      map.value.setCenter([0, 0])
-      map.value.setZoom(0)
-    }
+// Watch for changes in `props.data` and react accordingly
+watchEffect(() => {
+  if (props.data && map.value && isLoaded.value) {
+    handleMapDataUpdate(props.data)
   }
 })
 
-// Set up map source and layers
-function setupMapLayers(data: GeoJSON.FeatureCollection): void {
+// Handle updates to the map data
+function handleMapDataUpdate(data: GeoJSON.FeatureCollection) {
   resetMapLayers()
+  setupMapLayers(data)
 
-  if (map.value) {
-    map.value.addSource(SOURCE_ID, { type: 'geojson', data })
-
-    // Point type
-    map.value.addLayer({
-      id: 'feature-points',
-      type: 'circle',
-      source: SOURCE_ID,
-      paint: {
-        'circle-color': [
-          'case',
-          ['==', ['get', 'is_removed'], true],
-          '#FF0000',
-          ['==', ['get', 'is_created'], true],
-          '#FFBB00',
-          '#F0F0F0',
-        ],
-        'circle-radius': 12,
-      },
-      filter: ['==', '$type', 'Point'],
-    })
-
-    // LineString type
-    map.value.addLayer({
-      id: 'feature-lines',
-      type: 'line',
-      source: SOURCE_ID,
-      paint: {
-        'line-width': 6,
-        'line-color': [
-          'case',
-          ['==', ['get', 'is_removed'], true],
-          '#FF0000',
-          ['==', ['get', 'is_created'], true],
-          '#FFBB00',
-          '#F0F0F0',
-        ],
-      },
-      filter: ['==', '$type', 'LineString'],
-    })
+  if (data.features.length) {
+    map.value!.fitBounds(getBoundingBox(data), { padding: 20 })
+  }
+  else {
+    emit('error', { message: '0 changes have been found!', type: 'warning' })
+    map.value!.setCenter([0, 0])
+    map.value!.setZoom(0)
   }
 }
 
-// Get bounding box from data
+// Set up map layers based on provided data
+function setupMapLayers(data: GeoJSON.FeatureCollection): void {
+  if (!map.value)
+    return
+
+  map.value.addSource(SOURCE_ID, { type: 'geojson', data })
+
+  // Point type
+  map.value.addLayer({
+    id: LAYERS.Point,
+    type: 'circle',
+    source: SOURCE_ID,
+    paint: {
+      'circle-color': [
+        'case',
+        ['==', ['get', 'is_removed'], true],
+        '#FF0000',
+        ['==', ['get', 'is_created'], true],
+        '#FFBB00',
+        '#F0F0F0',
+      ],
+      'circle-radius': 12,
+    },
+    filter: ['==', '$type', 'Point'],
+  })
+
+  // LineString type
+  map.value.addLayer({
+    id: LAYERS.LineString,
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-width': 6,
+      'line-color': [
+        'case',
+        ['==', ['get', 'is_removed'], true],
+        '#FF0000',
+        ['==', ['get', 'is_created'], true],
+        '#FFBB00',
+        '#F0F0F0',
+      ],
+    },
+    filter: ['==', '$type', 'LineString'],
+  })
+}
+
+// Get the bounding box from the data
 function getBoundingBox(data: GeoJSON.FeatureCollection): LngLatBounds {
   const bbox = turfBbox(data)
-
   return new LngLatBounds([bbox[0], bbox[1]], [bbox[2], bbox[3]])
 }
 
-// Reset map source and layers
+// Reset map layers
 function resetMapLayers(): void {
-  if (map.value) {
-    // Remove existing layers if they exist
-    if (map.value.getLayer('feature-points')) {
-      map.value.removeLayer('feature-points')
-    }
+  if (!map.value)
+    return
 
-    if (map.value.getLayer('feature-lines')) {
-      map.value.removeLayer('feature-lines')
+  Object.values(LAYERS).forEach((layer) => {
+    if (map.value!.getLayer(layer)) {
+      map.value!.removeLayer(layer)
     }
+  })
 
-    // Remove the source if it exists
-    if (map.value.getSource(SOURCE_ID)) {
-      map.value.removeSource(SOURCE_ID)
-    }
+  resetMapSource()
+}
+
+// Reset map source
+function resetMapSource(): void {
+  if (!map.value)
+    return
+
+  if (map.value.getSource(SOURCE_ID)) {
+    map.value.removeSource(SOURCE_ID)
   }
 }
 
-// Update bbox input value based on current map position
-function setBBox(): void {
-  if (map.value) {
-    const bounds = map.value.getBounds()
-    const bbox = [
-      bounds.getSouthWest().lng,
-      bounds.getSouthWest().lat,
-      bounds.getNorthEast().lng,
-      bounds.getNorthEast().lat,
-    ].join(',')
+// Update bounding box and emit event
+function updateBoundingBox(): void {
+  if (!map.value)
+    return
 
-    emit('updateBbox', bbox)
-  }
+  const bounds = map.value.getBounds()
+  const bbox = [
+    bounds.getSouthWest().lng,
+    bounds.getSouthWest().lat,
+    bounds.getNorthEast().lng,
+    bounds.getNorthEast().lat,
+  ].join(',')
+
+  emit('updateBbox', bbox)
 }
 </script>
 
