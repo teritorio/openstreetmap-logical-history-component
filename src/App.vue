@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { ApiResponse } from './composables/useApi'
-import type { Error, FormData } from './types'
+import type { ApiResponse } from '@/composables/useApi'
+import type { Error, FormData } from '@/types'
+import LoCha from '@/components/LoCha/LoCha.vue'
+import MapFilters from '@/components/MapFilters.vue'
+import VError from '@/components/VError.vue'
+import VHeader from '@/components/VHeader.vue'
+import VLoading from '@/components/VLoading.vue'
+import VMap from '@/components/VMap.vue'
+import { useApiConfig } from '@/composables/useApi'
 import { onMounted, ref } from 'vue'
-import LoCha from './components/LoCha.vue'
-import MapFilters from './components/MapFilters.vue'
-import VError from './components/VError.vue'
-import VHeader from './components/VHeader.vue'
-import VLoading from './components/VLoading.vue'
-import VMap from './components/VMap.vue'
-import { useApiConfig } from './composables/useApi'
 
 const $api = useApiConfig()
 const { error } = $api
@@ -49,8 +49,8 @@ function handleError(err: Error) {
 <template>
   <VHeader />
   <VLoading v-if="loading" />
-  <main>
-    <VError v-if="error.message" :message="error.message" :type="error.type" />
+  <VError v-if="error.message" :message="error.message" :type="error.type" />
+  <main v-if="!loading && geojson">
     <MapFilters :bbox="bbox" @submit="handleSubmit" />
     <section>
       <LoCha :data="geojson" />

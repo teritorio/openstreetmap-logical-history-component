@@ -6,6 +6,9 @@
     "baseUrl": ".",
     "module": "esnext",
     "moduleResolution": "node",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "resolveJsonModule": true,
     "allowJs": true,
     "strict": true,
@@ -17,7 +20,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/**/*",
+    "src",
     "vite.config.ts"
   ],
   "exclude": [

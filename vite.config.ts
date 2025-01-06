@@ -1,10 +1,17 @@
+import type { UserConfig } from 'vite'
+import { resolve } from 'node:path'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 import dts from 'vite-plugin-dts'
 
 const baseConfig = {
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+    },
+  },
   plugins: [vue()],
-}
+} satisfies UserConfig
 
 export default defineConfig(({ command, mode }) => {
   // Demo build config
@@ -38,8 +45,9 @@ export default defineConfig(({ command, mode }) => {
           },
         },
       },
+      ...baseConfig,
       plugins: [
-        vue(),
+        ...baseConfig.plugins,
         dts({
           rollupTypes: true,
         }),

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ErrorType } from 'src/types'
+import type { ErrorType } from '@/types'
 
 defineProps<{
   message: string

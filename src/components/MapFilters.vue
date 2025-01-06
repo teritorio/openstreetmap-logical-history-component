@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FormData } from 'src/types'
+import type { FormData } from '@/types'
 import { reactive, ref, watch } from 'vue'
 
 const props = defineProps<{

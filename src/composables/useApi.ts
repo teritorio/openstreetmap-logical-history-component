@@ -1,5 +1,5 @@
+import type { Error } from '@/types'
 import type { Ref } from 'vue'
-import type { Error } from '../types'
 import { ref } from 'vue'
 
 interface ApiComposable {
@@ -7,7 +7,7 @@ interface ApiComposable {
   fetchData: (params?: URLSearchParams) => Promise<ApiResponse | undefined>
 }
 
-interface ApiLink {
+export interface ApiLink {
   id: string
   before?: string
   after?: string

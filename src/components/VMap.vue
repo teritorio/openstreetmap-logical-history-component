@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { Error } from 'src/types'
-import { bbox as turfBbox } from '@turf/bbox'
+import type { Error } from '@/types'
+import { loChaColors } from '@/composables/useLoCha'
 import { LngLatBounds, Map, NavigationControl } from 'maplibre-gl'
-import { onMounted, shallowRef, watchEffect } from 'vue'
-import { actionColors } from '../types'
+import { onMounted, shallowRef } from 'vue'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
-  data?: GeoJSON.FeatureCollection
+  data: GeoJSON.FeatureCollection
 }>()
 
 const emit = defineEmits<{
@@ -23,7 +22,6 @@ const LAYERS = {
 }
 
 const map = shallowRef<Map>()
-const isLoaded = shallowRef(false)
 
 onMounted(() => initializeMap())
 
@@ -39,17 +37,10 @@ function initializeMap() {
   map.value.addControl(new NavigationControl())
 
   map.value.on('load', () => {
-    isLoaded.value = true
     map.value?.on('moveend', updateBoundingBox)
+    handleMapDataUpdate(props.data)
   })
 }
-
-// Watch for changes in `props.data` and react accordingly
-watchEffect(() => {
-  if (props.data && map.value && isLoaded.value) {
-    handleMapDataUpdate(props.data)
-  }
-})
 
 // Handle updates to the map data
 function handleMapDataUpdate(data: GeoJSON.FeatureCollection) {
@@ -57,9 +48,11 @@ function handleMapDataUpdate(data: GeoJSON.FeatureCollection) {
   setupMapLayers(data)
 
   if (data.features.length) {
-    map.value!.fitBounds(getBoundingBox(data), { padding: 20 })
+    if (data.bbox)
+      map.value!.fitBounds(new LngLatBounds(data.bbox as [number, number, number, number]), { padding: 20 })
   }
-  else {
+
+  if (!data.features.length) {
     emit('error', { message: '0 changes have been found!', type: 'warning' })
     map.value!.setCenter([0, 0])
     map.value!.setZoom(0)
@@ -82,10 +75,10 @@ function setupMapLayers(data: GeoJSON.FeatureCollection): void {
       'circle-color': [
         'case',
         ['==', ['get', 'is_deleted'], true],
-        actionColors.delete,
+        loChaColors.delete,
         ['==', ['get', 'is_created'], true],
-        actionColors.create,
-        actionColors.update,
+        loChaColors.create,
+        loChaColors.update,
       ],
       'circle-radius': 12,
     },
@@ -102,20 +95,14 @@ function setupMapLayers(data: GeoJSON.FeatureCollection): void {
       'line-color': [
         'case',
         ['==', ['get', 'is_deleted'], true],
-        actionColors.delete,
+        loChaColors.delete,
         ['==', ['get', 'is_created'], true],
-        actionColors.create,
-        actionColors.update,
+        loChaColors.create,
+        loChaColors.update,
       ],
     },
     filter: ['==', '$type', 'LineString'],
   })
-}
-
-// Get the bounding box from the data
-function getBoundingBox(data: GeoJSON.FeatureCollection): LngLatBounds {
-  const bbox = turfBbox(data)
-  return new LngLatBounds([bbox[0], bbox[1]], [bbox[2], bbox[3]])
 }
 
 // Reset map layers
@@ -147,15 +134,7 @@ function updateBoundingBox(): void {
   if (!map.value)
     return
 
-  const bounds = map.value.getBounds()
-  const bbox = [
-    bounds.getSouthWest().lng,
-    bounds.getSouthWest().lat,
-    bounds.getNorthEast().lng,
-    bounds.getNorthEast().lat,
-  ].join(',')
-
-  emit('updateBbox', bbox)
+  emit('updateBbox', map.value.getBounds().toArray().join(','))
 }
 </script>
 
