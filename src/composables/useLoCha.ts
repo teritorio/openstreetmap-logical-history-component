@@ -9,13 +9,13 @@ export type Color = {
     ? '#52c41a'
     : key extends 'delete'
       ? '#FF0000'
-      : '#F0F0F0';
+      : '#E6A23C';
 }
 
 export const loChaColors = {
   create: '#52c41a',
   delete: '#FF0000',
-  update: '#F0F0F0',
+  update: '#E6A23C',
 } satisfies Color
 
 export const loChaStatus = Object.fromEntries(

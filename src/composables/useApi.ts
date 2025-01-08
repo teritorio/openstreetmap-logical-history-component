@@ -113,6 +113,8 @@ export function useApiConfig(): ApiComposable {
       if (!feature.id)
         return feature
 
+      // TODO: As of today it find only the first occurence of the feature ID
+      // Need to find them all because we have a many-to-many relation with links
       const link = data.metadata.links.find(({ before, after }) => before === feature.id!.toString() || after === feature.id!.toString())
 
       if (!link)
@@ -134,6 +136,26 @@ export function useApiConfig(): ApiComposable {
           properties: {
             ...feature.properties,
             is_created: true,
+          },
+        }
+      }
+
+      if (feature.id === link.before) {
+        return {
+          ...feature,
+          properties: {
+            ...feature.properties,
+            is_before: true,
+          },
+        }
+      }
+
+      if (feature.id === link.after) {
+        return {
+          ...feature,
+          properties: {
+            ...feature.properties,
+            is_after: true,
           },
         }
       }

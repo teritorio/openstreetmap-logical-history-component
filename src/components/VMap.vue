@@ -17,8 +17,14 @@ const emit = defineEmits<{
 const SOURCE_ID = 'lochas'
 const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/teritorio-tourism-latest/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
 const LAYERS = {
-  Point: 'feature-points',
-  LineString: 'feature-lines',
+  LineStringCreate: 'feature-lines-create',
+  LineStringDelete: 'feature-lines-delete',
+  LineStringAfter: 'feature-lines-after',
+  LineStringBefore: 'feature-lines-before',
+  PointCreate: 'feature-points-create',
+  PointDelete: 'feature-points-delete',
+  PointBefore: 'feature-points-before',
+  PointAfter: 'feature-points-after',
 }
 
 const map = shallowRef<Map>()
@@ -66,42 +72,140 @@ function setupMapLayers(data: GeoJSON.FeatureCollection): void {
 
   map.value.addSource(SOURCE_ID, { type: 'geojson', data })
 
-  // Point type
-  map.value.addLayer({
-    id: LAYERS.Point,
-    type: 'circle',
-    source: SOURCE_ID,
-    paint: {
-      'circle-color': [
-        'case',
-        ['==', ['get', 'is_deleted'], true],
-        loChaColors.delete,
-        ['==', ['get', 'is_created'], true],
-        loChaColors.create,
-        loChaColors.update,
-      ],
-      'circle-radius': 12,
-    },
-    filter: ['==', '$type', 'Point'],
-  })
-
   // LineString type
   map.value.addLayer({
-    id: LAYERS.LineString,
+    id: LAYERS.LineStringCreate,
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 6,
-      'line-color': [
-        'case',
-        ['==', ['get', 'is_deleted'], true],
-        loChaColors.delete,
-        ['==', ['get', 'is_created'], true],
-        loChaColors.create,
-        loChaColors.update,
-      ],
+      'line-width': 2,
+      'line-color': loChaColors.create,
     },
-    filter: ['==', '$type', 'LineString'],
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'LineString'],
+      ['==', ['get', 'is_created'], true],
+    ],
+  })
+
+  map.value.addLayer({
+    id: LAYERS.LineStringDelete,
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-width': 2,
+      'line-color': loChaColors.delete,
+    },
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'LineString'],
+      ['==', ['get', 'is_deleted'], true],
+    ],
+  })
+
+  map.value.addLayer({
+    id: LAYERS.LineStringBefore,
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-width': 2,
+      'line-color': loChaColors.update,
+      'line-opacity': 0.5,
+      'line-offset': 8,
+      'line-dasharray': [4, 2],
+    },
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'LineString'],
+      ['==', ['get', 'is_before'], true],
+    ],
+  })
+
+  map.value.addLayer({
+    id: LAYERS.LineStringAfter,
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-width': 2,
+      'line-color': loChaColors.update,
+      'line-dasharray': [4, 2],
+    },
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'LineString'],
+      ['==', ['get', 'is_after'], true],
+    ],
+  })
+
+  // Point type
+  map.value.addLayer({
+    id: LAYERS.PointCreate,
+    type: 'circle',
+    source: SOURCE_ID,
+    paint: {
+      'circle-color': loChaColors.create,
+      'circle-radius': 12,
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 4,
+    },
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'Point'],
+      ['==', ['get', 'is_created'], true],
+    ],
+  })
+
+  map.value.addLayer({
+    id: LAYERS.PointDelete,
+    type: 'circle',
+    source: SOURCE_ID,
+    paint: {
+      'circle-color': loChaColors.delete,
+      'circle-radius': 12,
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 4,
+    },
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'Point'],
+      ['==', ['get', 'is_deleted'], true],
+    ],
+  })
+
+  map.value.addLayer({
+    id: LAYERS.PointBefore,
+    type: 'circle',
+    source: SOURCE_ID,
+    paint: {
+      'circle-color': loChaColors.update,
+      'circle-radius': 12,
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 4,
+      'circle-opacity': 0.5,
+      'circle-translate': [28, 0],
+    },
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'Point'],
+      ['==', ['get', 'is_before'], true],
+    ],
+  })
+
+  map.value.addLayer({
+    id: LAYERS.PointAfter,
+    type: 'circle',
+    source: SOURCE_ID,
+    paint: {
+      'circle-color': loChaColors.update,
+      'circle-radius': 12,
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 4,
+    },
+    filter: [
+      'all',
+      ['==', ['geometry-type'], 'Point'],
+      ['==', ['get', 'is_after'], true],
+    ],
   })
 }
 
