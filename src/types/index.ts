@@ -4,6 +4,10 @@ export interface FormData {
   bbox: string
 }
 
+export interface Preset extends FormData {
+  title: string
+}
+
 export type ErrorType = 'error' | 'warning' | 'success' | 'info'
 
 export interface Error {

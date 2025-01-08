@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { FormData } from '@/types'
-import { reactive, ref, watch } from 'vue'
+import type { Error, FormData, Preset } from '@/types'
+import { reactive, ref, watchEffect } from 'vue'
 
 const props = defineProps<{
   bbox: string
@@ -8,7 +8,10 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'submit', payload: FormData): void
+  (e: 'error', payload: Error): void
 }>()
+
+defineExpose({ resetForm })
 
 const initialFormValues = {
   dateStart: '',
@@ -16,56 +19,68 @@ const initialFormValues = {
   bbox: '',
 } satisfies FormData
 
+const presets = [{
+  title: '01/01/2023 - 09/01/2024 (Ondres)',
+  dateStart: new Date('2023-01-01').toISOString().split('T')[0],
+  dateEnd: new Date('2024-09-01').toISOString().split('T')[0],
+  bbox: '43.57582751611194,-1.4865185506147705,43.57668833005737,-1.4857594854635559',
+
+}] satisfies Preset[]
+
 const formRef = ref<InstanceType<typeof HTMLFormElement>>()
-const errorMessage = ref<string>()
 const formValues = reactive<FormData>(initialFormValues)
 
-watch(() => props.bbox, (newValue) => {
-  formValues.bbox = newValue
+watchEffect(() => {
+  if (props.bbox)
+    formValues.bbox = props.bbox
 })
 
 function resetForm() {
-  Object.assign(formValues, initialFormValues)
+  Object.assign(formValues, { dateStart: '', dateEnd: '', bbox: '' })
 }
 
 function handleSubmit() {
-  if (!validateDateRange()) {
-    return
-  }
+  // if (!validateDateRange()) {
+  //   return
+  // }
 
   emit('submit', formValues)
 }
 
 // Validate the date range
-function validateDateRange(): boolean {
-  const dateStart = new Date(formValues.dateStart)
-  const dateEnd = new Date(formValues.dateEnd)
+// function validateDateRange(): boolean {
+//   const dateStart = new Date(formValues.dateStart)
+//   const dateEnd = new Date(formValues.dateEnd)
 
-  if (!dateStart || !dateEnd)
-    return true
+//   if (!dateStart || !dateEnd)
+//     return true
 
-  const maxDateEnd = new Date(dateStart)
-  maxDateEnd.setMonth(maxDateEnd.getMonth() + 1)
+//   const maxDateEnd = new Date(dateStart)
+//   maxDateEnd.setMonth(maxDateEnd.getMonth() + 1)
 
-  if (dateEnd > maxDateEnd) {
-    errorMessage.value = 'The date range must not exceed 1 month.'
-    resetForm()
+//   if (dateEnd > maxDateEnd) {
+//     emit('error', { message: 'Date range must not exceed 1 month.', type: 'error' })
+//     resetForm()
 
-    return false
-  }
+//     return false
+//   }
 
-  errorMessage.value = undefined
+//   return true
+// }
 
-  return true
+function setPreset(index: number) {
+  const { title, ...preset } = presets[index]
+
+  Object.assign(formValues, preset)
+
+  handleSubmit()
 }
 </script>
 
 <template>
   <aside>
-    <p v-if="errorMessage">
-      {{ errorMessage }}
-    </p>
     <form ref="formRef" @submit.prevent="handleSubmit">
+      <h2>Data</h2>
       <div>
         <label for="date_start">From:</label>
         <input v-model="formValues.dateStart" type="date" required>
@@ -85,23 +100,45 @@ function validateDateRange(): boolean {
         Search
       </button>
     </form>
+
+    <h2>Presets</h2>
+    <ul>
+      <li
+        v-for="(preset, index) in presets"
+        :key="preset.title"
+        @click="setPreset(index)"
+      >
+        <button>{{ preset.title }}</button>
+      </li>
+      <li>
+        ...
+      </li>
+    </ul>
   </aside>
 </template>
 
 <style lang="css" scoped>
 aside {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   width: 300px;
   background-color: #fefefe;
   border-right: 1px solid #ddd;
   padding: 16px;
-  box-sizing: border-box;
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+  margin: 0;
 }
 
 aside form {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background-color: #f1f1f1;
+  padding: 8px;
 }
 
 aside form div {
@@ -111,7 +148,6 @@ aside form div {
 
 aside label {
   margin-bottom: 8px;
-  font-weight: bold;
   color: #333;
 }
 
@@ -119,7 +155,6 @@ aside input,
 aside [type="submit"] {
   padding: 8px;
   border: 1px solid #ddd;
-  border-radius: 4px;
   font-size: 14px;
 }
 
@@ -133,11 +168,6 @@ aside [type="submit"] {
   background: #082e4e;
   color: #fff;
   cursor: pointer;
-}
-
-p {
-  color: red;
-  display: none;
 }
 
 @media (max-width: 768px) {

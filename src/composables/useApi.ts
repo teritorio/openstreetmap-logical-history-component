@@ -1,10 +1,12 @@
 import type { Error } from '@/types'
-import type { Ref } from 'vue'
-import { ref } from 'vue'
+import type { Reactive, Ref } from 'vue'
+import { reactive, ref } from 'vue'
 
 interface ApiComposable {
-  error: Ref<Error>
+  error: Reactive<Error>
   fetchData: (params?: URLSearchParams) => Promise<ApiResponse | undefined>
+  loading: Ref<boolean>
+  setError: (err: Error) => void
 }
 
 export interface ApiLink {
@@ -38,10 +40,13 @@ export function useApiConfig(): ApiComposable {
     ? API_BASE_URL_DEV
     : API_BASE_URL_PROD
 
-  const error = ref<Error>({
+  const errorInitialState = {
     message: undefined,
     type: 'info',
-  })
+  } satisfies Error
+
+  const error = reactive<Error>(errorInitialState)
+  const loading = ref(false)
 
   /**
    * Constructs the full API URL with optional query parameters.
@@ -61,6 +66,9 @@ export function useApiConfig(): ApiComposable {
    * @returns {Promise<ApiResponse | undefined>} The API response with transformed features, or undefined if an error occurred.
    */
   async function fetchData(params?: URLSearchParams): Promise<ApiResponse | undefined> {
+    resetError()
+    loading.value = true
+
     return await fetch(
       buildApiUrl(params),
       { method: 'GET' },
@@ -77,13 +85,14 @@ export function useApiConfig(): ApiComposable {
         metadata: transformMetadata(data.metadata),
       }))
       .catch((err) => {
-        error.value = {
+        setError({
           message: err.message,
           type: 'error',
-        }
+        })
 
         return undefined
       })
+      .finally(() => loading.value = false)
   }
 
   /**
@@ -164,8 +173,22 @@ export function useApiConfig(): ApiComposable {
     })
   }
 
+  function setError(err: Error): void {
+    Object.assign(error, err)
+
+    setTimeout(() => {
+      resetError()
+    }, 3000)
+  }
+
+  function resetError(): void {
+    Object.assign(error, { message: undefined, type: 'info' })
+  }
+
   return {
-    fetchData,
     error,
+    fetchData,
+    loading,
+    setError,
   }
 }

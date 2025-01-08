@@ -2,11 +2,11 @@
 import type { Error } from '@/types'
 import { loChaColors } from '@/composables/useLoCha'
 import { LngLatBounds, Map, NavigationControl } from 'maplibre-gl'
-import { onMounted, shallowRef } from 'vue'
+import { onMounted, shallowRef, watchEffect } from 'vue'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
-  data: GeoJSON.FeatureCollection
+  data?: GeoJSON.FeatureCollection
 }>()
 
 const emit = defineEmits<{
@@ -31,6 +31,12 @@ const map = shallowRef<Map>()
 
 onMounted(() => initializeMap())
 
+watchEffect(() => {
+  if (props.data) {
+    handleMapDataUpdate(props.data)
+  }
+})
+
 // Initialize the map and set up event listeners
 function initializeMap() {
   map.value = new Map({
@@ -44,7 +50,8 @@ function initializeMap() {
 
   map.value.on('load', () => {
     map.value?.on('moveend', updateBoundingBox)
-    handleMapDataUpdate(props.data)
+    if (props.data)
+      handleMapDataUpdate(props.data)
   })
 }
 

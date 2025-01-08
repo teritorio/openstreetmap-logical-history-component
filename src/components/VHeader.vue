@@ -14,6 +14,7 @@ header {
   color: #fff;
   display: flex;
   align-items: center;
+  gap: 8px;
   padding: 0 16px;
   height: 64px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -22,10 +23,5 @@ header {
 img {
   height: 40px;
   width: 40px;
-}
-
-h1 {
-  font-size: 20px;
-  margin-left: 16px;
 }
 </style>

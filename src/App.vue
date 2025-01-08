@@ -8,21 +8,15 @@ import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import VMap from '@/components/VMap.vue'
 import { useApiConfig } from '@/composables/useApi'
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 
 const $api = useApiConfig()
-const { error } = $api
+const { error, loading, setError } = $api
 const geojson = ref<ApiResponse>()
-const loading = ref(true)
 const bbox = ref('')
-
-onMounted(async () => {
-  geojson.value = await $api.fetchData()
-  loading.value = false
-})
+const mapFiltersRef = ref<InstanceType<typeof MapFilters>>()
 
 async function handleSubmit(formData: FormData) {
-  loading.value = true
   let params: URLSearchParams | undefined
 
   if (formData.dateStart && formData.dateEnd && formData.bbox) {
@@ -34,15 +28,17 @@ async function handleSubmit(formData: FormData) {
   }
 
   geojson.value = await $api.fetchData(params)
-  loading.value = false
 }
 
 function handleBboxUpdate(value: string) {
   bbox.value = value
 }
 
-function handleError(err: Error) {
-  error.value = err
+function handleError(err: Error): void {
+  setError(err)
+
+  if (mapFiltersRef.value)
+    mapFiltersRef.value.resetForm()
 }
 </script>
 
@@ -50,8 +46,13 @@ function handleError(err: Error) {
   <VHeader />
   <VLoading v-if="loading" />
   <VError v-if="error.message" :message="error.message" :type="error.type" />
-  <main v-if="!loading && geojson">
-    <MapFilters :bbox="bbox" @submit="handleSubmit" />
+  <main>
+    <MapFilters
+      ref="mapFiltersRef"
+      :bbox="bbox"
+      @submit="handleSubmit"
+      @error="handleError"
+    />
     <section>
       <LoCha :data="geojson" />
       <VMap

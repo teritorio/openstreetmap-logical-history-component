@@ -25,10 +25,3 @@ const titleContent = computed(() => {
     {{ titleContent }}
   </h2>
 </template>
-
-<style lang="css" scoped>
-h2 {
-  font-size: 18px;
-  margin: 0;
-}
-</style>
