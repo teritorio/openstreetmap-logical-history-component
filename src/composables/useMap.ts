@@ -1,8 +1,8 @@
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
-import type { GeoJSONSource } from 'maplibre-gl'
+import type { GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
-import { LngLatBounds, Map, NavigationControl } from 'maplibre-gl'
+import { LngLatBounds, Map, NavigationControl, Popup } from 'maplibre-gl'
 import { ref, shallowRef } from 'vue'
 
 export interface IMap {
@@ -12,7 +12,7 @@ export interface IMap {
 
 export interface MapEmits {
   (e: 'error', payload: Error): void
-  (e: 'updateBbox', bbox: string): void
+  (e: 'update-bbox', bbox: string): void
 }
 
 const SOURCE_ID = 'lochas'
@@ -49,7 +49,7 @@ const map = shallowRef<Map>()
 const source = ref<GeoJSONSource>()
 
 export function useMap(): IMap {
-  const { featureCount } = useLoCha()
+  const { featureCount, loCha } = useLoCha()
 
   function init(emits: MapEmits): void {
     emit = emits
@@ -64,11 +64,13 @@ export function useMap(): IMap {
     map.value.addControl(new NavigationControl())
 
     map.value.on('load', () => {
+      map.value?.on('click', _openPopup)
+
       map.value?.on('moveend', _updateBoundingBox)
 
       map.value?.addSource(SOURCE_ID, {
         type: 'geojson',
-        data: {
+        data: loCha.value || {
           type: 'FeatureCollection',
           features: [],
         },
@@ -78,6 +80,23 @@ export function useMap(): IMap {
 
       _setupMapLayers()
     })
+  }
+
+  function _openPopup(e: MapMouseEvent): void {
+    if (!map.value)
+      throw new Error('Call useMap.init() function first.')
+
+    const features = map.value.queryRenderedFeatures(e.point, {
+      layers: [LAYERS.Point, LAYERS.PointAfter, LAYERS.PointBefore],
+    })
+
+    if (!features.length || features[0].geometry.type !== 'Point')
+      return
+
+    new Popup()
+      .setLngLat(features[0].geometry.coordinates as [number, number])
+      .setHTML(features[0].properties.id.toString())
+      .addTo(map.value)
   }
 
   function _setupMapLayers(): void {
@@ -215,7 +234,7 @@ export function useMap(): IMap {
     const bounds = map.value.getBounds()
     const { lat: neLat, lng: neLng } = bounds.getNorthEast()
     const { lat: swLat, lng: swLng } = bounds.getSouthWest()
-    emit('updateBbox', [[swLat, swLng], [neLat, neLng]].toString())
+    emit('update-bbox', [[swLat, swLng], [neLat, neLng]].toString())
   }
 
   return {

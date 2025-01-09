@@ -22,9 +22,3 @@ watch(() => loCha, (newValue) => {
 <template>
   <div id="map" />
 </template>
-
-<style lang="css" scoped>
-#map {
-  position: relative;
-}
-</style>
