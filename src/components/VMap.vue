@@ -10,8 +10,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  (e: 'updateBbox', payload: string): void
   (e: 'error', payload: Error): void
+  (e: 'updateBbox', bbox: string): void
 }>()
 
 const SOURCE_ID = 'lochas'
@@ -255,7 +255,6 @@ function updateBoundingBox(): void {
 
 <style lang="css" scoped>
 #map {
-  flex: 1;
   position: relative;
 }
 </style>

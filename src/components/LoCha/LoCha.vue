@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
+import type { Error } from '@/types'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
+import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
 import { watchEffect } from 'vue'
 
 const props = defineProps<{
   data?: ApiResponse
+}>()
+
+const emit = defineEmits<{
+  (e: 'error', payload: Error): void
+  (e: 'updateBbox', bbox: string): void
 }>()
 
 const {
@@ -32,6 +39,11 @@ watchEffect(() => {
       <LoChaList :features="beforeFeatures" title="Before" />
       <LoChaList :features="afterFeatures" title="After" />
     </div>
+    <VMap
+      :data="data"
+      @error="emit('error', $event)"
+      @update-bbox="emit('updateBbox', $event)"
+    />
   </section>
 </template>
 
@@ -39,15 +51,21 @@ watchEffect(() => {
 .locha {
   display: flex;
   flex-direction: column;
+  gap: 1em;
   background-color: #f4f4f4;
-  padding: 2em;
   height: inherit;
 }
 
 .locha-content {
   display: flex;
+  flex: 70%;
   gap: 1em;
   overflow: hidden;
+  padding: 1em;
+}
+
+#map {
+  flex: 50%;
 }
 
 .locha-content > div {

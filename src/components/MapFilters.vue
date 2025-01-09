@@ -164,6 +164,7 @@ aside {
   transform: translateX(50%);
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
   font-size: 1.2em;
+  z-index: 1;
 }
 
 .toggle-button:hover {

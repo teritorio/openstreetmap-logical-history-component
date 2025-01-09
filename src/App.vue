@@ -6,7 +6,6 @@ import MapFilters from '@/components/MapFilters.vue'
 import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
-import VMap from '@/components/VMap.vue'
 import { useApiConfig } from '@/composables/useApi'
 import { ref } from 'vue'
 
@@ -60,8 +59,7 @@ function handleError(err: Error): void {
       @error="handleError"
       @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen"
     />
-    <LoCha :data="geojson" />
-    <VMap
+    <LoCha
       :data="geojson"
       @error="handleError"
       @update-bbox="handleBboxUpdate"
