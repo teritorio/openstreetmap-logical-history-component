@@ -31,16 +31,51 @@ export interface MapEmits {
   (e: 'update-bbox', bbox: string): void
 }
 
+/**
+ * The ID used for the map data source.
+ * @constant {string} SOURCE_ID
+ */
 const SOURCE_ID = 'lochas'
+
+/**
+ * The URL of the map style used by MapLibre.
+ * @constant {string} MAP_STYLE_URL
+ */
 const MAP_STYLE_URL = 'https://vecto-dev.teritorio.xyz/styles/positron/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
+
+/**
+ * An object defining the layer types used in the map. Each layer corresponds to a specific feature type
+ * in the map's configuration (e.g., polygons, lines, or points).
+ * @constant {object} LAYERS
+ * @property {string} Polygon - The layer ID for rendering polygons.
+ * @property {string} Line - The layer ID for rendering lines.
+ * @property {string} Point - The layer ID for rendering points.
+ */
 const LAYERS = {
   Polygon: 'feature-polygons',
   Line: 'feature-lines',
   Point: 'feature-points',
 }
 
+/**
+ * A variable that holds the `MapEmits` function, which is used to emit custom events in the map component.
+ * This is typically used to communicate state changes or errors back to the parent component.
+ * @type {MapEmits}
+ */
 let emit: MapEmits
+
+/**
+ * A reactive reference to the `Map` object. This holds the MapLibre map instance that is used to interact
+ * with the map, add layers, and listen for map events.
+ * @constant {ShallowRef<Map>} map
+ */
 const map = shallowRef<Map>()
+
+/**
+ * A reactive reference to the map data source of type `GeoJSONSource`. This holds the map's data source,
+ * which contains the geoJSON data that is visualized on the map.
+ * @constant {Ref<GeoJSONSource>}
+ */
 const source = ref<GeoJSONSource>()
 
 /**
@@ -170,11 +205,15 @@ export function useMap(): IMap {
       .addTo(map.value)
   }
 
+  /**
+   * Configures the map layers for different geometry types (Polygon, LineString, Point).
+   * Each layer is styled based on feature properties.
+   */
   function _setupMapLayers(): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 
-    // Polygon type
+    // Polygon layer configuration
     map.value.addLayer({
       id: LAYERS.Polygon,
       type: 'fill',
@@ -195,7 +234,7 @@ export function useMap(): IMap {
       filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
     })
 
-    // LineString type
+    // LineString layer configuration
     map.value.addLayer({
       id: LAYERS.Line,
       type: 'line',
@@ -226,7 +265,7 @@ export function useMap(): IMap {
       filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
     })
 
-    // Point type
+    // Point layer configuration
     map.value.addLayer({
       id: LAYERS.Point,
       type: 'circle',
@@ -251,6 +290,10 @@ export function useMap(): IMap {
     })
   }
 
+  /**
+   * Updates the bounding box based on the map's current view.
+   * Emits the updated bounding box coordinates.
+   */
   function _updateBoundingBox(): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
