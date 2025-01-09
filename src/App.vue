@@ -60,14 +60,12 @@ function handleError(err: Error): void {
       @error="handleError"
       @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen"
     />
-    <section>
-      <LoCha :data="geojson" />
-      <VMap
-        :data="geojson"
-        @error="handleError"
-        @update-bbox="handleBboxUpdate"
-      />
-    </section>
+    <LoCha :data="geojson" />
+    <VMap
+      :data="geojson"
+      @error="handleError"
+      @update-bbox="handleBboxUpdate"
+    />
   </main>
 </template>
 
@@ -75,13 +73,7 @@ function handleError(err: Error): void {
 main {
   display: grid;
   grid-template-rows: 1fr;
-  height: 100%;
-  overflow: hidden;
+  height: calc(100vh - 72px);
   transition: grid-template-columns 0.3s ease;
-}
-
-section {
-  background-color: #f4f4f4;
-  padding: 2em;
 }
 </style>

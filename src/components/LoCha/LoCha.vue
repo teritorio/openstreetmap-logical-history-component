@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
-import LoChaBody from '@/components/LoCha/LoChaBody.vue'
-import LoChaHeader from '@/components/LoCha/LoChaHeader.vue'
+import LoChaList from '@/components/LoCha/LoChaList.vue'
 import { useLoCha } from '@/composables/useLoCha'
 import { watchEffect } from 'vue'
 
@@ -9,7 +8,13 @@ const props = defineProps<{
   data?: ApiResponse
 }>()
 
-const { featureCount, linkCount, setLoCha } = useLoCha()
+const {
+  afterFeatures,
+  beforeFeatures,
+  featureCount,
+  linkCount,
+  setLoCha,
+} = useLoCha()
 
 watchEffect(() => {
   if (props.data) {
@@ -19,28 +24,46 @@ watchEffect(() => {
 </script>
 
 <template>
-  <p v-if="!featureCount || !linkCount" class="user-feedback">
-    ⚠️ No data
-  </p>
-  <div v-else class="locha">
-    <LoChaHeader />
-    <LoChaBody />
-  </div>
+  <section class="locha">
+    <p v-if="!featureCount || !linkCount" class="user-feedback">
+      ⚠️ No data
+    </p>
+    <div v-else class="locha-content">
+      <LoChaList :features="beforeFeatures" title="Before" />
+      <LoChaList :features="afterFeatures" title="After" />
+    </div>
+  </section>
 </template>
 
 <style lang="css" scoped>
-.locha,
-.user-feedback {
-  flex: 1;
+.locha {
+  display: flex;
+  flex-direction: column;
+  background-color: #f4f4f4;
+  padding: 2em;
+  height: inherit;
 }
 
-.locha {
+.locha-content {
+  display: flex;
+  gap: 1em;
+  overflow: hidden;
+}
+
+.locha-content > div {
+  flex: 1;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+.locha-content > div:deep(ul) {
+  overflow-y: auto;
+}
+
 .user-feedback {
   display: grid;
-  place-items: center;
+  place-content: center;
+  height: 100%;
 }
 </style>

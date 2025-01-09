@@ -13,7 +13,7 @@
   width: 100%;
   height: 100%;
   z-index: 15;
-  color: #FFF;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;

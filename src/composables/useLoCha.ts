@@ -1,4 +1,4 @@
-import type { ApiLink, ApiResponse } from '@/composables/useApi'
+import type { ApiResponse } from '@/composables/useApi'
 import type { ComputedRef, Ref } from 'vue'
 import { computed, ref } from 'vue'
 
@@ -23,62 +23,51 @@ export const loChaStatus = Object.fromEntries(
 ) as Record<Status, Status>
 
 export interface LoCha {
-  color: ComputedRef<Color[Status]>
-  counter: Ref<number>
-  featureAfter: ComputedRef<GeoJSON.Feature | undefined>
-  featureBefore: ComputedRef<GeoJSON.Feature | undefined>
+  afterFeatures: Ref<GeoJSON.Feature[]>
+  beforeFeatures: Ref<GeoJSON.Feature[]>
   featureCount: ComputedRef<number | undefined>
-  link: ComputedRef<ApiLink | undefined>
   linkCount: ComputedRef<number | undefined>
-  status: ComputedRef<Status>
   setLoCha: (loCha: ApiResponse) => void
-  updateCounter: (direction: boolean) => void
 }
 
-const counter = ref<number>(0)
 const loCha = ref<ApiResponse>()
+const afterFeatures = ref<GeoJSON.Feature[]>([])
+const beforeFeatures = ref<GeoJSON.Feature[]>([])
 
 export function useLoCha(): LoCha {
-  const link = computed(() => loCha.value?.metadata.links[counter.value])
-
-  const status = computed(() => {
-    if (!link.value?.before && link.value?.after)
-      return loChaStatus.create
-
-    if (link.value?.before && !link.value.after)
-      return loChaStatus.delete
-
-    return loChaStatus.update
-  })
-
-  const color = computed(() => loChaColors[status.value])
-
-  const featureAfter = computed(() => loCha.value?.features.find(feature => feature.id?.toString() === link.value?.after))
-
-  const featureBefore = computed(() => loCha.value?.features.find(feature => feature.id?.toString() === link.value?.before))
-
   const featureCount = computed(() => loCha.value?.features.length)
 
   const linkCount = computed(() => loCha.value?.metadata.links.length)
 
-  function updateCounter(direction: boolean): void {
-    counter.value = direction ? counter.value + 1 : counter.value - 1
+  function populateBeforeAfterFeatures(): void {
+    if (!loCha.value || !loCha.value.features.length)
+      return
+
+    loCha.value.features.forEach((feature) => {
+      if (feature.properties?.is_before)
+        beforeFeatures.value.push(feature)
+
+      if (feature.properties?.is_deleted)
+        beforeFeatures.value.push(feature)
+
+      if (feature.properties?.is_after)
+        afterFeatures.value.push(feature)
+
+      if (feature.properties?.is_created)
+        afterFeatures.value.push(feature)
+    })
   }
 
   function setLoCha(data: ApiResponse): void {
     loCha.value = data
+    populateBeforeAfterFeatures()
   }
 
   return {
-    color,
-    counter,
-    featureAfter,
-    featureBefore,
+    afterFeatures,
+    beforeFeatures,
     featureCount,
-    link,
     linkCount,
-    status,
     setLoCha,
-    updateCounter,
   }
 }

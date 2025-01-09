@@ -128,29 +128,29 @@ function setPreset(index: number) {
 aside {
   display: flex;
   flex-direction: column;
-  gap: .5em;
+  gap: 0.5em;
   border-right: 1px solid #ddd;
   padding: 1em;
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
   position: relative;
-
+  height: inherit;
 }
 
-aside.minimized {
+.minimized {
   padding-left: 0;
   padding-right: 0;
 }
 
-aside.minimized .toggle-button {
+.minimized .toggle-button {
   transform: translateX(calc(100% + 1em));
 }
 
-aside.minimized *:not(.toggle-button) {
+.minimized *:not(.toggle-button) {
   display: none;
 }
 
 .toggle-button {
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   color: #fff;
   border-radius: 50%;
   border: none;
@@ -170,7 +170,11 @@ aside.minimized *:not(.toggle-button) {
   background-color: #f4f4f4;
 }
 
-aside form {
+ul {
+  list-style: none;
+}
+
+form {
   display: flex;
   flex-direction: column;
   gap: 1em;
@@ -178,28 +182,28 @@ aside form {
   padding: 1em;
 }
 
-aside form div {
+form div {
   display: flex;
   flex-direction: column;
 }
 
-aside label {
-  margin-bottom: .5em;
+label {
+  margin-bottom: 0.5em;
   color: #333;
 }
 
-aside input,
-aside [type="submit"] {
+input,
+[type='submit'] {
   padding: 8px;
   border: 1px solid #ddd;
   font-size: 14px;
 }
 
-aside input {
+input {
   background: #fff;
 }
 
-aside [type="submit"] {
+[type='submit'] {
   font-family: inherit;
   border: none;
   background: #082e4e;

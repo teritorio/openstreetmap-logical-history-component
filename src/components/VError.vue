@@ -37,7 +37,9 @@ const colors = {
   gap: 10px;
   z-index: 20;
   opacity: 0;
-  animation: slideIn 0.5s ease-out forwards, fadeOut 0.5s 3s ease-out forwards;
+  animation:
+    slideIn 0.5s ease-out forwards,
+    fadeOut 0.5s 3s ease-out forwards;
 }
 
 .alert::before {
