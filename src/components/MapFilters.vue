@@ -54,33 +54,33 @@ function resetForm() {
 }
 
 function handleSubmit() {
-  // if (!validateDateRange()) {
-  //   return
-  // }
+  if (!validateDateRange()) {
+    return
+  }
 
   emit('submit', formValues)
 }
 
 // Validate the date range
-// function validateDateRange(): boolean {
-//   const dateStart = new Date(formValues.dateStart)
-//   const dateEnd = new Date(formValues.dateEnd)
+function validateDateRange(): boolean {
+  const dateStart = new Date(formValues.dateStart)
+  const dateEnd = new Date(formValues.dateEnd)
 
-//   if (!dateStart || !dateEnd)
-//     return true
+  if (!dateStart || !dateEnd)
+    return true
 
-//   const maxDateEnd = new Date(dateStart)
-//   maxDateEnd.setMonth(maxDateEnd.getMonth() + 1)
+  const maxDateEnd = new Date(dateStart)
+  maxDateEnd.setMonth(maxDateEnd.getMonth() + 1)
 
-//   if (dateEnd > maxDateEnd) {
-//     emit('error', { message: 'Date range must not exceed 1 month.', type: 'error' })
-//     resetForm()
+  if (dateEnd > maxDateEnd) {
+    emit('error', { message: 'Date range must not exceed 1 month.', type: 'error' })
+    resetForm()
 
-//     return false
-//   }
+    return false
+  }
 
-//   return true
-// }
+  return true
+}
 
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
