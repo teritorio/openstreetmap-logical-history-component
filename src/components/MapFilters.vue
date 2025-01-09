@@ -127,9 +127,6 @@ function setPreset(index: number) {
       >
         <button>{{ preset.title }}</button>
       </li>
-      <li>
-        ...
-      </li>
     </ul>
   </aside>
 </template>
