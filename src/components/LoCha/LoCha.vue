@@ -37,7 +37,6 @@ watchEffect(() => {
 .locha {
   display: flex;
   flex-direction: column;
-  background-color: #fefefe;
 }
 
 .user-feedback {

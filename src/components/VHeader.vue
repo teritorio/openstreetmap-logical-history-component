@@ -15,9 +15,9 @@ header {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 16px;
-  height: 64px;
+  padding: 1em;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
 }
 
 img {

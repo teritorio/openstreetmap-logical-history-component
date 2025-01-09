@@ -2,13 +2,17 @@
 import type { Error, FormData, Preset } from '@/types'
 import { reactive, ref, watchEffect } from 'vue'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
+  isOpen?: boolean
   bbox: string
-}>()
+}>(), {
+  isOpen: true,
+})
 
 const emit = defineEmits<{
   (e: 'submit', payload: FormData): void
   (e: 'error', payload: Error): void
+  (e: 'toggleMenu'): void
 }>()
 
 defineExpose({ resetForm })
@@ -78,7 +82,10 @@ function setPreset(index: number) {
 </script>
 
 <template>
-  <aside>
+  <aside :class="{ minimized: !isOpen }">
+    <button class="toggle-button" @click="emit('toggleMenu')">
+      {{ isOpen ? '⬅️' : '➡️' }}
+    </button>
     <form ref="formRef" @submit.prevent="handleSubmit">
       <h2>Data</h2>
       <div>
@@ -121,24 +128,54 @@ function setPreset(index: number) {
 aside {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  width: 300px;
-  background-color: #fefefe;
+  gap: .5em;
   border-right: 1px solid #ddd;
-  padding: 16px;
+  padding: 1em;
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+  position: relative;
+
 }
 
-h2 {
-  margin: 0;
+aside.minimized {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+aside.minimized .toggle-button {
+  transform: translateX(calc(100% + 1em));
+}
+
+aside.minimized *:not(.toggle-button) {
+  display: none;
+}
+
+.toggle-button {
+  background-color: #FFFFFF;
+  color: #fff;
+  border-radius: 50%;
+  border: none;
+  padding: 0.5em;
+  cursor: pointer;
+  height: 48px;
+  width: 48px;
+  position: absolute;
+  right: 0;
+  bottom: 1em;
+  transform: translateX(50%);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+  font-size: 1.2em;
+}
+
+.toggle-button:hover {
+  background-color: #f4f4f4;
 }
 
 aside form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  background-color: #f1f1f1;
-  padding: 8px;
+  gap: 1em;
+  background-color: #f4f4f4;
+  padding: 1em;
 }
 
 aside form div {
@@ -147,7 +184,7 @@ aside form div {
 }
 
 aside label {
-  margin-bottom: 8px;
+  margin-bottom: .5em;
   color: #333;
 }
 

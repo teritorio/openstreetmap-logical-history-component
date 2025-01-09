@@ -1,9 +1,19 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
 h1 {
   font-size: 20px;
-  margin: 0;
 }
 
 h2 {
   font-size: 18px;
-  margin: 0;
 }

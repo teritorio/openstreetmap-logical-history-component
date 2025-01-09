@@ -15,6 +15,7 @@ const { error, loading, setError } = $api
 const geojson = ref<ApiResponse>()
 const bbox = ref('')
 const mapFiltersRef = ref<InstanceType<typeof MapFilters>>()
+const mapFiltersIsOpen = ref(true)
 
 async function handleSubmit(formData: FormData) {
   let params: URLSearchParams | undefined
@@ -46,12 +47,18 @@ function handleError(err: Error): void {
   <VHeader />
   <VLoading v-if="loading" />
   <VError v-if="error.message" :message="error.message" :type="error.type" />
-  <main>
+  <main
+    :style="{
+      gridTemplateColumns: mapFiltersIsOpen ? '300px 1fr' : '0px 1fr',
+    }"
+  >
     <MapFilters
       ref="mapFiltersRef"
+      :is-open="mapFiltersIsOpen"
       :bbox="bbox"
       @submit="handleSubmit"
       @error="handleError"
+      @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen"
     />
     <section>
       <LoCha :data="geojson" />
@@ -66,20 +73,15 @@ function handleError(err: Error): void {
 
 <style lang="css" scoped>
 main {
-  display: flex;
-  height: calc(100vh - 64px);
-  position: relative;
+  display: grid;
+  grid-template-rows: 1fr;
+  height: 100%;
+  overflow: hidden;
+  transition: grid-template-columns 0.3s ease;
 }
 
 section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-@media (max-width: 768px) {
-  main {
-    flex-direction: column;
-  }
+  background-color: #f4f4f4;
+  padding: 2em;
 }
 </style>
