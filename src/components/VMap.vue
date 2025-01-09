@@ -1,18 +1,18 @@
 <script setup lang="ts">
+import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
-import { loChaColors } from '@/composables/useLoCha'
+import type { GeoJSONSource } from 'maplibre-gl'
+import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { LngLatBounds, Map, NavigationControl } from 'maplibre-gl'
-import { onMounted, shallowRef, watchEffect } from 'vue'
+import { onMounted, ref, shallowRef, watch } from 'vue'
 import 'maplibre-gl/dist/maplibre-gl.css'
-
-const props = defineProps<{
-  data?: GeoJSON.FeatureCollection
-}>()
 
 const emit = defineEmits<{
   (e: 'error', payload: Error): void
   (e: 'updateBbox', bbox: string): void
 }>()
+
+const { loCha, featureCount } = useLoCha()
 
 const SOURCE_ID = 'lochas'
 const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/teritorio-tourism-latest/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
@@ -28,14 +28,7 @@ const LAYERS = {
 }
 
 const map = shallowRef<Map>()
-
-onMounted(() => initializeMap())
-
-watchEffect(() => {
-  if (props.data) {
-    handleMapDataUpdate(props.data)
-  }
-})
+const source = ref<GeoJSONSource>()
 
 // Initialize the map and set up event listeners
 function initializeMap() {
@@ -50,34 +43,40 @@ function initializeMap() {
 
   map.value.on('load', () => {
     map.value?.on('moveend', updateBoundingBox)
-    if (props.data)
-      handleMapDataUpdate(props.data)
+    // console.log('load', loCha.value)
+
+    map.value?.addSource(SOURCE_ID, {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [],
+      },
+    })
+
+    source.value = map.value?.getSource(SOURCE_ID)
+
+    setupMapLayers()
   })
 }
 
 // Handle updates to the map data
-function handleMapDataUpdate(data: GeoJSON.FeatureCollection) {
-  resetMapLayers()
-  setupMapLayers(data)
+function handleMapDataUpdate(data: ApiResponse) {
+  source.value?.setData(data)
 
-  if (data.features.length) {
-    if (data.bbox)
-      map.value!.fitBounds(new LngLatBounds(data.bbox as [number, number, number, number]), { padding: 20 })
+  if (featureCount.value && data.bbox) {
+    map.value?.fitBounds(new LngLatBounds(data.bbox as [number, number, number, number]), { padding: 20 })
   }
-
-  if (!data.features.length) {
+  else {
+    map.value?.setCenter([0, 0])
+    map.value?.setZoom(0)
     emit('error', { message: '0 changes have been found!', type: 'warning' })
-    map.value!.setCenter([0, 0])
-    map.value!.setZoom(0)
   }
 }
 
-// Set up map layers based on provided data
-function setupMapLayers(data: GeoJSON.FeatureCollection): void {
+// Set up map layers
+function setupMapLayers(): void {
   if (!map.value)
     return
-
-  map.value.addSource(SOURCE_ID, { type: 'geojson', data })
 
   // LineString type
   map.value.addLayer({
@@ -216,37 +215,24 @@ function setupMapLayers(data: GeoJSON.FeatureCollection): void {
   })
 }
 
-// Reset map layers
-function resetMapLayers(): void {
-  if (!map.value)
-    return
-
-  Object.values(LAYERS).forEach((layer) => {
-    if (map.value!.getLayer(layer)) {
-      map.value!.removeLayer(layer)
-    }
-  })
-
-  resetMapSource()
-}
-
-// Reset map source
-function resetMapSource(): void {
-  if (!map.value)
-    return
-
-  if (map.value.getSource(SOURCE_ID)) {
-    map.value.removeSource(SOURCE_ID)
-  }
-}
-
 // Update bounding box and emit event
 function updateBoundingBox(): void {
   if (!map.value)
     return
 
-  emit('updateBbox', map.value.getBounds().toArray().join(','))
+  const bounds = map.value.getBounds()
+  const { lat: neLat, lng: neLng } = bounds.getNorthEast()
+  const { lat: swLat, lng: swLng } = bounds.getSouthWest()
+  emit('updateBbox', [[swLat, swLng], [neLat, neLng]].toString())
 }
+
+onMounted(() => initializeMap())
+
+watch(() => loCha, (newValue) => {
+  if (source.value && newValue.value) {
+    handleMapDataUpdate(newValue.value)
+  }
+}, { deep: true })
 </script>
 
 <template>

@@ -27,6 +27,7 @@ export interface LoCha {
   beforeFeatures: Ref<GeoJSON.Feature[]>
   featureCount: ComputedRef<number | undefined>
   linkCount: ComputedRef<number | undefined>
+  loCha: Ref<ApiResponse | undefined>
   setLoCha: (loCha: ApiResponse) => void
 }
 
@@ -40,10 +41,10 @@ export function useLoCha(): LoCha {
   const linkCount = computed(() => loCha.value?.metadata.links.length)
 
   function populateBeforeAfterFeatures(): void {
-    if (!loCha.value || !loCha.value.features.length)
+    if (!featureCount.value)
       return
 
-    loCha.value.features.forEach((feature) => {
+    loCha.value?.features.forEach((feature) => {
       if (feature.properties?.is_before)
         beforeFeatures.value.push(feature)
 
@@ -59,8 +60,15 @@ export function useLoCha(): LoCha {
   }
 
   function setLoCha(data: ApiResponse): void {
+    resetLoCha()
     loCha.value = data
     populateBeforeAfterFeatures()
+  }
+
+  function resetLoCha(): void {
+    loCha.value = undefined
+    afterFeatures.value = []
+    beforeFeatures.value = []
   }
 
   return {
@@ -68,6 +76,7 @@ export function useLoCha(): LoCha {
     beforeFeatures,
     featureCount,
     linkCount,
+    loCha,
     setLoCha,
   }
 }

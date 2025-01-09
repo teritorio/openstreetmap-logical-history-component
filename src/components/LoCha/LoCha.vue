@@ -40,7 +40,6 @@ watchEffect(() => {
       <LoChaList :features="afterFeatures" title="After" />
     </div>
     <VMap
-      :data="data"
       @error="emit('error', $event)"
       @update-bbox="emit('updateBbox', $event)"
     />
