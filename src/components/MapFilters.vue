@@ -29,6 +29,16 @@ const presets = [{
   dateEnd: new Date('2024-09-01').toISOString().split('T')[0],
   bbox: '43.57582751611194,-1.4865185506147705,43.57668833005737,-1.4857594854635559',
 
+}, {
+  title: 'Tête de pond - lines',
+  dateStart: new Date('2024-07-01').toISOString().split('T')[0],
+  dateEnd: new Date('2024-09-01').toISOString().split('T')[0],
+  bbox: '44.82039347351967,-0.5420824675324966,44.82208861548204,-0.5393090634110976',
+}, {
+  title: 'Bâtiments - surfaces',
+  dateStart: new Date('2024-12-10').toISOString().split('T')[0],
+  dateEnd: new Date('2024-12-15').toISOString().split('T')[0],
+  bbox: '42.685107065011486,-1.6537454710167148,42.68686379572838,-1.6509720668953156',
 }] satisfies Preset[]
 
 const formRef = ref<InstanceType<typeof HTMLFormElement>>()

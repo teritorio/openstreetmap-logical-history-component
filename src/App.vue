@@ -71,7 +71,7 @@ function handleError(err: Error): void {
 main {
   display: grid;
   grid-template-rows: 1fr;
-  height: calc(100vh - 72px);
+  height: calc(100vh - 56px);
   transition: grid-template-columns 0.3s ease;
 }
 </style>
