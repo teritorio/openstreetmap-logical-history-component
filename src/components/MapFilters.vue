@@ -70,10 +70,10 @@ function validateDateRange(): boolean {
     return true
 
   const maxDateEnd = new Date(dateStart)
-  maxDateEnd.setMonth(maxDateEnd.getMonth() + 1)
+  maxDateEnd.setMonth(maxDateEnd.getMonth() + 12)
 
   if (dateEnd > maxDateEnd) {
-    emit('error', { message: 'Date range must not exceed 1 month.', type: 'error' })
+    emit('error', { message: 'Date range must not exceed 12 months.', type: 'error' })
     resetForm()
 
     return false
