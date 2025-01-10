@@ -63,4 +63,8 @@ h3 {
   border: 2px solid v-bind(color);
   background-color: color-mix(in srgb, v-bind(color) 20%, white 80%);
 }
+
+article:hover {
+  cursor: pointer;
+}
 </style>

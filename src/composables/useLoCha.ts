@@ -22,8 +22,8 @@ export type Color = {
     : key extends 'delete'
       ? '#FF0000'
       : key extends 'updateAfter'
-        ? '#E6A23C'
-        : '#CE7E00'
+        ? '#CE7E00'
+        : '#EE82EE'
 }
 
 /**
@@ -32,8 +32,8 @@ export type Color = {
 export const loChaColors = {
   create: '#52c41a',
   delete: '#FF0000',
-  updateAfter: '#E6A23C',
-  updateBefore: '#CE7E00',
+  updateAfter: '#CE7E00',
+  updateBefore: '#EE82EE',
 } satisfies Color
 
 /**
@@ -58,6 +58,8 @@ export interface LoCha {
   linkCount: ComputedRef<number | undefined>
   loCha: Ref<ApiResponse | undefined>
   resetFilters: () => void
+  selectedLink: Ref<ApiLink | undefined>
+  selectedLinkFeatures: ComputedRef<GeoJSON.Feature[] | undefined>
   setLoCha: (loCha: ApiResponse) => void
 }
 
@@ -67,6 +69,7 @@ const afterFeatures = ref<GeoJSON.Feature[]>([])
 const afterFeaturesFilter = ref<GeoJSON.Feature[]>()
 const beforeFeatures = ref<GeoJSON.Feature[]>([])
 const beforeFeaturesFilter = ref<GeoJSON.Feature[]>()
+const selectedLink = ref<ApiLink>()
 
 /**
  * The `useLoCha` composable provides reactive state and functions for managing and manipulating LoCha data.
@@ -86,6 +89,22 @@ export function useLoCha(): LoCha {
    */
   const linkCount = computed(() => loCha.value?.metadata.links.length)
 
+  const selectedLinkFeatures = computed(() => {
+    if (!selectedLink.value)
+      return
+
+    let after: GeoJSON.Feature | undefined
+    let before: GeoJSON.Feature | undefined
+
+    if (selectedLink.value.after)
+      after = _getFeature(selectedLink.value.after)
+
+    if (selectedLink.value.before)
+      before = _getFeature(selectedLink.value.before)
+
+    return [after, before].filter(t => t !== undefined)
+  })
+
   /**
    * Sets the LoCha data and populates the before and after features.
    * @param data - The LoCha API response data to set.
@@ -101,6 +120,8 @@ export function useLoCha(): LoCha {
 
     if (!link)
       throw new Error(`Link for ${id} and ${status} status not found.`)
+
+    selectedLink.value = link
 
     switch (status) {
       case 'create':
@@ -124,6 +145,11 @@ export function useLoCha(): LoCha {
   function resetFilters(): void {
     afterFeaturesFilter.value = undefined
     beforeFeaturesFilter.value = undefined
+    selectedLink.value = undefined
+  }
+
+  function _getFeature(id: string): GeoJSON.Feature | undefined {
+    return loCha.value?.features.find(feature => feature.id?.toString() === id)
   }
 
   /**
@@ -197,6 +223,8 @@ export function useLoCha(): LoCha {
     linkCount,
     loCha,
     resetFilters,
+    selectedLink,
+    selectedLinkFeatures,
     setLoCha,
   }
 }

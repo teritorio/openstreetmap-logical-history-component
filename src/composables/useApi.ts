@@ -183,24 +183,25 @@ export function useApiConfig(): ApiComposable {
           },
         }
       }
-
-      if (feature.id === link.before) {
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            is_before: true,
-          },
+      else {
+        if (feature.id === link.before) {
+          feature = {
+            ...feature,
+            properties: {
+              ...feature.properties,
+              is_before: true,
+            },
+          }
         }
-      }
 
-      if (feature.id === link.after) {
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            is_after: true,
-          },
+        if (feature.id === link.after) {
+          feature = {
+            ...feature,
+            properties: {
+              ...feature.properties,
+              is_after: true,
+            },
+          }
         }
       }
 

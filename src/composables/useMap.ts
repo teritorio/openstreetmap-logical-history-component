@@ -1,14 +1,16 @@
-import type { ApiResponse } from '@/composables/useApi'
+import type { ApiLink, ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
-import type { GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
+import type { AddLayerObject, ExpressionSpecification, GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { LngLatBounds, Map, NavigationControl, Popup } from 'maplibre-gl'
-import { ref, shallowRef } from 'vue'
+import { onMounted, ref, shallowRef, watch } from 'vue'
 
 /**
  * Interface defining the map functionality.
  */
 export interface IMap {
+  applyFilter: (link: ApiLink) => void
+
   /**
    * Initializes the map and sets up necessary controls and layers.
    * @param emits - The emits object for emitting events.
@@ -52,10 +54,98 @@ const MAP_STYLE_URL = 'https://vecto-dev.teritorio.xyz/styles/positron/style.jso
  * @property {string} Point - The layer ID for rendering points.
  */
 const LAYERS = {
-  Polygon: 'feature-polygons',
-  Line: 'feature-lines',
-  Point: 'feature-points',
-}
+  Polygon: {
+    id: 'feature-polygons',
+    type: 'fill',
+    source: SOURCE_ID,
+    paint: {
+      'fill-opacity': [
+        'case',
+        ['==', ['get', 'is_created'], true],
+        1,
+        ['==', ['get', 'is_deleted'], true],
+        1,
+        ['==', ['get', 'is_before'], true],
+        1,
+        0.5,
+      ],
+      'fill-color': [
+        'case',
+        ['==', ['get', 'is_created'], true],
+        loChaColors.create,
+        ['==', ['get', 'is_deleted'], true],
+        loChaColors.delete,
+        ['==', ['get', 'is_before'], true],
+        loChaColors.updateBefore,
+        loChaColors.updateAfter,
+      ],
+    },
+    filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
+  },
+  LineString: {
+    id: 'feature-lines',
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-width': 4,
+      'line-opacity': [
+        'case',
+        ['==', ['get', 'is_created'], true],
+        1,
+        ['==', ['get', 'is_deleted'], true],
+        1,
+        ['==', ['get', 'is_before'], true],
+        1,
+        0.5,
+      ],
+      'line-color': [
+        'case',
+        ['==', ['get', 'is_created'], true],
+        loChaColors.create,
+        ['==', ['get', 'is_deleted'], true],
+        loChaColors.delete,
+        ['==', ['get', 'is_before'], true],
+        loChaColors.updateBefore,
+        loChaColors.updateAfter,
+      ],
+    },
+    filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
+  },
+  Point: {
+    id: 'feature-points',
+    type: 'circle',
+    source: SOURCE_ID,
+    paint: {
+      'circle-radius': 12,
+      'circle-stroke-color': '#000000',
+      'circle-stroke-width': 2,
+      'circle-opacity': [
+        'case',
+        ['==', ['get', 'is_created'], true],
+        1,
+        ['==', ['get', 'is_deleted'], true],
+        1,
+        ['==', ['get', 'is_before'], true],
+        1,
+        0.5,
+      ],
+      'circle-color': [
+        'case',
+        ['==', ['get', 'is_created'], true],
+        loChaColors.create,
+        ['==', ['get', 'is_deleted'], true],
+        loChaColors.delete,
+        ['==', ['get', 'is_before'], true],
+        loChaColors.updateBefore,
+        loChaColors.updateAfter,
+      ],
+    },
+    filter: ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]],
+  },
+} satisfies Record<string, AddLayerObject>
+
+type LayerKey = keyof typeof LAYERS
+// type LayerValue = typeof LAYERS[LayerKey]
 
 /**
  * A variable that holds the `MapEmits` function, which is used to emit custom events in the map component.
@@ -78,12 +168,22 @@ const map = shallowRef<Map>()
  */
 const source = ref<GeoJSONSource>()
 
+const filteredLayers = new Set<LayerKey>()
+const hiddenLayers = new Set<LayerKey>()
+
 /**
  * Provides methods to initialize and manage the map.
  * @returns The map-related functions such as `init` and `handleMapDataUpdate`.
  */
 export function useMap(): IMap {
-  const { featureCount, loCha } = useLoCha()
+  const { featureCount, loCha, selectedLink, selectedLinkFeatures } = useLoCha()
+
+  onMounted(() => _setHiddenLayers())
+
+  watch(selectedLink, (newValue) => {
+    if (!newValue)
+      resetFilter()
+  })
 
   /**
    * Initializes the map, sets up the event listeners, and configures layers and sources.
@@ -147,6 +247,73 @@ export function useMap(): IMap {
     }
   }
 
+  function applyFilter(): void {
+    if (!map.value)
+      throw new Error('Call useMap.init() function first.')
+
+    // const expression: ExpressionSpecification = ['any']
+
+    selectedLinkFeatures.value?.forEach((feature) => {
+      if (!feature.properties)
+        throw new Error(`Feature ${feature.id} has no properties.`)
+
+      let layer: LayerKey
+
+      const featureExpression = [
+        'all',
+        ['==', ['get', 'objtype'], feature.properties.objtype],
+        ['==', ['get', 'version'], feature.properties.version],
+        ['==', ['get', 'id'], feature.properties.id],
+      ] as ExpressionSpecification
+
+      switch (feature.geometry.type) {
+        case 'LineString':
+        case 'MultiLineString':
+          layer = 'LineString'
+          break
+        case 'Point':
+        case 'MultiPoint':
+          layer = 'Point'
+          break
+        case 'MultiPolygon':
+        case 'Polygon':
+          layer = 'Polygon'
+          break
+        default:
+          throw new Error(`Geometry ${feature.geometry.type} not supported.`)
+      }
+
+      map.value?.setFilter(LAYERS[layer].id, ['all', LAYERS[layer].filter, featureExpression])
+      filteredLayers.add(layer)
+    })
+
+    hiddenLayers.difference(filteredLayers).forEach((layer) => {
+      if (map.value?.getLayer(LAYERS[layer].id))
+        map.value?.setLayoutProperty(LAYERS[layer].id, 'visibility', 'none')
+    })
+  }
+
+  function resetFilter(): void {
+    if (!map.value)
+      throw new Error('Call useMap.init() function first.')
+
+    hiddenLayers.difference(filteredLayers).forEach((layer) => {
+      if (map.value?.getLayer(LAYERS[layer].id))
+        map.value?.setLayoutProperty(LAYERS[layer].id, 'visibility', 'visible')
+    })
+
+    filteredLayers.forEach((layer) => {
+      map.value?.setFilter(LAYERS[layer].id, LAYERS[layer].filter)
+    })
+
+    _setHiddenLayers()
+    filteredLayers.clear()
+  }
+
+  function _setHiddenLayers(): void {
+    Object.keys(LAYERS).map(l => hiddenLayers.add(l as LayerKey))
+  }
+
   /**
    * Sets up the event listeners for the map.
    * Includes handling for map click, hover, and movement.
@@ -154,33 +321,23 @@ export function useMap(): IMap {
   function _setEventListeners(): void {
     map.value?.on('click', _openPopup)
 
-    map.value?.on('mouseenter', LAYERS.Point, () => {
-      if (!map.value)
-        throw new Error('Call useMap.init() function first.')
-
-      map.value.getCanvas().style.cursor = 'pointer'
-    })
-    map.value?.on('mouseenter', LAYERS.Line, () => {
-      if (!map.value)
-        throw new Error('Call useMap.init() function first.')
-
-      map.value.getCanvas().style.cursor = 'pointer'
-    })
-
-    map.value?.on('mouseleave', LAYERS.Point, () => {
-      if (!map.value)
-        throw new Error('Call useMap.init() function first.')
-
-      map.value.getCanvas().style.cursor = ''
-    })
-    map.value?.on('mouseleave', LAYERS.Line, () => {
-      if (!map.value)
-        throw new Error('Call useMap.init() function first.')
-
-      map.value.getCanvas().style.cursor = ''
-    })
-
     map.value?.on('moveend', _updateBoundingBox)
+
+    Object.values(LAYERS).forEach((layer) => {
+      map.value?.on('mouseenter', layer.id, () => {
+        if (!map.value)
+          throw new Error('Call useMap.init() function first.')
+
+        map.value.getCanvas().style.cursor = 'pointer'
+      })
+
+      map.value?.on('mouseleave', layer.id, () => {
+        if (!map.value)
+          throw new Error('Call useMap.init() function first.')
+
+        map.value.getCanvas().style.cursor = ''
+      })
+    })
   }
 
   /**
@@ -193,7 +350,7 @@ export function useMap(): IMap {
       throw new Error('Call useMap.init() function first.')
 
     const features = map.value.queryRenderedFeatures(e.point, {
-      layers: Object.values(LAYERS),
+      layers: Object.values(LAYERS).map(l => l.id),
     })
 
     if (!features.length)
@@ -214,98 +371,13 @@ export function useMap(): IMap {
       throw new Error('Call useMap.init() function first.')
 
     // Polygon layer configuration
-    map.value.addLayer({
-      id: LAYERS.Polygon,
-      type: 'fill',
-      source: SOURCE_ID,
-      paint: {
-        'fill-opacity': [
-          'case',
-          ['==', ['get', 'is_created'], true],
-          1,
-          ['==', ['get', 'is_deleted'], true],
-          1,
-          ['==', ['get', 'is_before'], true],
-          1,
-          0.5,
-        ],
-        'fill-color': [
-          'case',
-          ['==', ['get', 'is_created'], true],
-          loChaColors.create,
-          ['==', ['get', 'is_deleted'], true],
-          loChaColors.delete,
-          ['==', ['get', 'is_before'], true],
-          loChaColors.updateBefore,
-          loChaColors.updateAfter,
-        ],
-      },
-      filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
-    })
+    map.value.addLayer(LAYERS.Polygon)
 
     // LineString layer configuration
-    map.value.addLayer({
-      id: LAYERS.Line,
-      type: 'line',
-      source: SOURCE_ID,
-      paint: {
-        'line-width': 4,
-        'line-opacity': [
-          'case',
-          ['==', ['get', 'is_created'], true],
-          1,
-          ['==', ['get', 'is_deleted'], true],
-          1,
-          ['==', ['get', 'is_before'], true],
-          1,
-          0.5,
-        ],
-        'line-color': [
-          'case',
-          ['==', ['get', 'is_created'], true],
-          loChaColors.create,
-          ['==', ['get', 'is_deleted'], true],
-          loChaColors.delete,
-          ['==', ['get', 'is_before'], true],
-          loChaColors.updateBefore,
-          loChaColors.updateAfter,
-        ],
-      },
-      filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
-    })
+    map.value.addLayer(LAYERS.LineString)
 
     // Point layer configuration
-    map.value.addLayer({
-      id: LAYERS.Point,
-      type: 'circle',
-      source: SOURCE_ID,
-      paint: {
-        'circle-radius': 12,
-        'circle-stroke-color': '#000000',
-        'circle-stroke-width': 2,
-        'circle-opacity': [
-          'case',
-          ['==', ['get', 'is_created'], true],
-          1,
-          ['==', ['get', 'is_deleted'], true],
-          1,
-          ['==', ['get', 'is_before'], true],
-          1,
-          0.5,
-        ],
-        'circle-color': [
-          'case',
-          ['==', ['get', 'is_created'], true],
-          loChaColors.create,
-          ['==', ['get', 'is_deleted'], true],
-          loChaColors.delete,
-          ['==', ['get', 'is_before'], true],
-          loChaColors.updateBefore,
-          loChaColors.updateAfter,
-        ],
-      },
-      filter: ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]],
-    })
+    map.value.addLayer(LAYERS.Point)
   }
 
   /**
@@ -323,6 +395,7 @@ export function useMap(): IMap {
   }
 
   return {
+    applyFilter,
     init,
     handleMapDataUpdate,
   }
