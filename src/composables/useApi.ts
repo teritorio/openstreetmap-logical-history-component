@@ -140,7 +140,7 @@ export function useApiConfig(): ApiComposable {
     return {
       links: metadata.links.map(link => ({
         ...link,
-        id: `${link.before ?? ''}${link.after ?? ''}`,
+        id: `${link.before ?? ''}-${link.after ?? ''}`,
       })),
     }
   }

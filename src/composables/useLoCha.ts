@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/composables/useApi'
+import type { ApiLink, ApiResponse } from '@/composables/useApi'
 import type { ComputedRef, Ref } from 'vue'
 import { computed, ref } from 'vue'
 
@@ -8,7 +8,7 @@ import { computed, ref } from 'vue'
  * - 'delete': Deleted features.
  * - 'update': Updated features.
  */
-export type Status = 'create' | 'delete' | 'update'
+export type Status = 'create' | 'delete' | 'updateBefore' | 'updateAfter'
 
 /**
  * The Color type defines colors based on feature status.
@@ -21,7 +21,9 @@ export type Color = {
     ? '#52c41a'
     : key extends 'delete'
       ? '#FF0000'
-      : '#E6A23C';
+      : key extends 'updateAfter'
+        ? '#E6A23C'
+        : '#CE7E00'
 }
 
 /**
@@ -30,7 +32,8 @@ export type Color = {
 export const loChaColors = {
   create: '#52c41a',
   delete: '#FF0000',
-  update: '#E6A23C',
+  updateAfter: '#E6A23C',
+  updateBefore: '#CE7E00',
 } satisfies Color
 
 /**
@@ -38,7 +41,7 @@ export const loChaColors = {
  * This is useful for status-based filtering or logic.
  */
 export const loChaStatus = Object.fromEntries(
-  ['create', 'delete', 'update'].map(key => [key, key]),
+  ['create', 'delete', 'updateAfter', 'updateBefore'].map(key => [key, key]),
 ) as Record<Status, Status>
 
 /**
@@ -47,17 +50,23 @@ export const loChaStatus = Object.fromEntries(
  */
 export interface LoCha {
   afterFeatures: Ref<GeoJSON.Feature[]>
+  afterFeaturesFilter: Ref<GeoJSON.Feature[] | undefined>
   beforeFeatures: Ref<GeoJSON.Feature[]>
+  beforeFeaturesFilter: Ref<GeoJSON.Feature[] | undefined>
   featureCount: ComputedRef<number | undefined>
+  showLink: (id: string, status: Status) => void
   linkCount: ComputedRef<number | undefined>
   loCha: Ref<ApiResponse | undefined>
+  resetFilters: () => void
   setLoCha: (loCha: ApiResponse) => void
 }
 
 // Internal state variables
 const loCha = ref<ApiResponse>()
 const afterFeatures = ref<GeoJSON.Feature[]>([])
+const afterFeaturesFilter = ref<GeoJSON.Feature[]>()
 const beforeFeatures = ref<GeoJSON.Feature[]>([])
+const beforeFeaturesFilter = ref<GeoJSON.Feature[]>()
 
 /**
  * The `useLoCha` composable provides reactive state and functions for managing and manipulating LoCha data.
@@ -78,56 +87,116 @@ export function useLoCha(): LoCha {
   const linkCount = computed(() => loCha.value?.metadata.links.length)
 
   /**
+   * Sets the LoCha data and populates the before and after features.
+   * @param data - The LoCha API response data to set.
+   */
+  function setLoCha(data: ApiResponse): void {
+    _resetLoCha()
+    loCha.value = data
+    _populateBeforeAfterFeatures()
+  }
+
+  function showLink(id: string, status: Status): void {
+    const link = _getLink(id, status)
+
+    if (!link)
+      throw new Error(`Link for ${id} and ${status} status not found.`)
+
+    switch (status) {
+      case 'create':
+        afterFeaturesFilter.value = afterFeatures.value.filter(feature => feature.id?.toString() === link.after)
+        beforeFeaturesFilter.value = []
+        break
+      case 'delete':
+        afterFeaturesFilter.value = []
+        beforeFeaturesFilter.value = beforeFeatures.value.filter(feature => feature.id?.toString() === link.before)
+        break
+      case 'updateAfter':
+      case 'updateBefore':
+        afterFeaturesFilter.value = afterFeatures.value.filter(feature => feature.id?.toString() === link.after)
+        beforeFeaturesFilter.value = beforeFeatures.value.filter(feature => feature.id?.toString() === link.before)
+        break
+      default:
+        throw new Error('Status not found.')
+    }
+  }
+
+  function resetFilters(): void {
+    afterFeaturesFilter.value = undefined
+    beforeFeaturesFilter.value = undefined
+  }
+
+  /**
    * Populates the `beforeFeatures` and `afterFeatures` arrays based on the properties of the features.
    * - Features marked as 'is_before' are added to `beforeFeatures`.
    * - Features marked as 'is_deleted' are also added to `beforeFeatures`.
    * - Features marked as 'is_after' are added to `afterFeatures`.
    * - Features marked as 'is_created' are added to `afterFeatures`.
    */
-  function populateBeforeAfterFeatures(): void {
+  function _populateBeforeAfterFeatures(): void {
+    if (!loCha.value)
+      throw new Error('LoCha not initialized, call setLoCha() first.')
+
     if (!featureCount.value)
       return
 
-    loCha.value?.features.forEach((feature) => {
-      if (feature.properties?.is_before)
+    loCha.value.features.forEach((feature) => {
+      if (!feature.properties)
+        return
+
+      if (feature.properties.is_before)
         beforeFeatures.value.push(feature)
 
-      if (feature.properties?.is_deleted)
+      if (feature.properties.is_deleted)
         beforeFeatures.value.push(feature)
 
-      if (feature.properties?.is_after)
+      if (feature.properties.is_after)
         afterFeatures.value.push(feature)
 
-      if (feature.properties?.is_created)
+      if (feature.properties.is_created)
         afterFeatures.value.push(feature)
     })
   }
 
-  /**
-   * Sets the LoCha data and populates the before and after features.
-   * @param data - The LoCha API response data to set.
-   */
-  function setLoCha(data: ApiResponse): void {
-    resetLoCha()
-    loCha.value = data
-    populateBeforeAfterFeatures()
+  function _getLink(id: string, status: Status): ApiLink | undefined {
+    if (!loCha.value)
+      throw new Error('LoCha not initialized, call setLoCha() first.')
+
+    if (!linkCount.value)
+      return
+
+    switch (status) {
+      case 'create':
+      case 'updateAfter':
+        return loCha.value.metadata.links.find(link => link.after === id)
+      case 'updateBefore':
+      case 'delete':
+        return loCha.value.metadata.links.find(link => link.before === id)
+      default:
+        return undefined
+    }
   }
 
   /**
    * Resets the LoCha state by clearing the LoCha data and resetting the feature arrays.
    */
-  function resetLoCha(): void {
+  function _resetLoCha(): void {
     loCha.value = undefined
     afterFeatures.value = []
     beforeFeatures.value = []
+    resetFilters()
   }
 
   return {
     afterFeatures,
+    afterFeaturesFilter,
     beforeFeatures,
+    beforeFeaturesFilter,
     featureCount,
+    showLink,
     linkCount,
     loCha,
+    resetFilters,
     setLoCha,
   }
 }

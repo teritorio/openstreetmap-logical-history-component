@@ -17,9 +17,12 @@ const emit = defineEmits<{
 
 const {
   afterFeatures,
+  afterFeaturesFilter,
   beforeFeatures,
+  beforeFeaturesFilter,
   featureCount,
   linkCount,
+  resetFilters,
   setLoCha,
 } = useLoCha()
 
@@ -36,8 +39,11 @@ watchEffect(() => {
       ⚠️ No data
     </p>
     <div v-else class="locha-content">
-      <LoChaList :features="beforeFeatures" title="Before" />
-      <LoChaList :features="afterFeatures" title="After" />
+      <button v-show="afterFeaturesFilter || beforeFeaturesFilter" id="filter-reset" @click="resetFilters">
+        🔄 Reset selection
+      </button>
+      <LoChaList :features=" beforeFeaturesFilter || beforeFeatures" title="Before" />
+      <LoChaList :features="afterFeaturesFilter || afterFeatures" title="After" />
     </div>
     <VMap
       @error="emit('error', $event)"
@@ -56,11 +62,18 @@ watchEffect(() => {
 }
 
 .locha-content {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto 1fr;
   flex: 70%;
   gap: 1em;
   overflow: hidden;
   padding: 1em;
+}
+
+#filter-reset {
+  grid-column: 2 span;
+  place-self: flex-end;
 }
 
 #map {

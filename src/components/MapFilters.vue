@@ -32,7 +32,7 @@ const presets = [{
 }, {
   title: 'Tête de pond - (Lines)',
   dateStart: new Date('2024-07-01').toISOString().split('T')[0],
-  dateEnd: new Date('2024-09-01').toISOString().split('T')[0],
+  dateEnd: new Date('2024-08-01').toISOString().split('T')[0],
   bbox: '44.82039347351967,-0.5420824675324966,44.82208861548204,-0.5393090634110976',
 }, {
   title: 'Bâtiments - (Surfaces)',

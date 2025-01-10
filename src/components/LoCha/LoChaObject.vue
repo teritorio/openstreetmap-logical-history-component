@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { loChaColors, loChaStatus } from '@/composables/useLoCha'
+import { loChaColors, loChaStatus, useLoCha } from '@/composables/useLoCha'
 import { computed } from 'vue'
 
 const props = defineProps<{
@@ -18,7 +18,11 @@ const status = computed(() => {
     return loChaStatus.delete
   }
 
-  return loChaStatus.update
+  if (props.feature.properties!.is_before) {
+    return loChaStatus.updateBefore
+  }
+
+  return loChaStatus.updateAfter
 })
 
 const title = computed(() => {
@@ -29,17 +33,27 @@ const title = computed(() => {
       return `\u2795 ${content}`
     case 'delete':
       return `\u2716 ${content}`
-    case 'update':
+    case 'updateAfter':
+    case 'updateBefore':
     default:
       return `\u{1F503} ${content}`
   }
 })
 
 const color = computed(() => loChaColors[status.value])
+
+const { showLink } = useLoCha()
+
+function handleClick(id?: string) {
+  if (!id)
+    throw new Error('Object not found')
+
+  showLink(id, status.value)
+}
 </script>
 
 <template>
-  <article>
+  <article @click="handleClick(feature.id?.toString())">
     <h3>{{ title }}</h3>
   </article>
 </template>
