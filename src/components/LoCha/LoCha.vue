@@ -23,6 +23,7 @@ const {
   featureCount,
   linkCount,
   resetFilters,
+  selectedLink,
   setLoCha,
 } = useLoCha()
 
@@ -42,8 +43,11 @@ watchEffect(() => {
       <button v-show="afterFeaturesFilter || beforeFeaturesFilter" id="filter-reset" @click="resetFilters">
         🔄 Reset selection
       </button>
-      <LoChaList :features=" beforeFeaturesFilter || beforeFeatures" title="Before" />
-      <LoChaList :features="afterFeaturesFilter || afterFeatures" title="After" />
+      <LoChaList v-show="!selectedLink || (selectedLink && beforeFeaturesFilter?.length) || !beforeFeaturesFilter" :features=" beforeFeaturesFilter || beforeFeatures" title="Before" />
+      <div v-show="selectedLink">
+        Diff
+      </div>
+      <LoChaList v-show="!selectedLink || (selectedLink && afterFeaturesFilter?.length) || !afterFeaturesFilter" :features="afterFeaturesFilter || afterFeatures" title="After" />
     </div>
     <VMap
       @error="emit('error', $event)"
@@ -63,7 +67,7 @@ watchEffect(() => {
 
 .locha-content {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   grid-template-rows: auto 1fr;
   flex: 70%;
   gap: 1em;
@@ -72,7 +76,7 @@ watchEffect(() => {
 }
 
 #filter-reset {
-  grid-column: 2 span;
+  grid-column-start: 3;
   place-self: flex-end;
 }
 
@@ -85,6 +89,18 @@ watchEffect(() => {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+.locha-content > div:first-of-type {
+  grid-column-start: 1;
+}
+
+.locha-content > div:nth-of-type(2) {
+  grid-column-start: 2;
+}
+
+.locha-content > div:last-of-type {
+  grid-column-start: 3;
 }
 
 .locha-content > div:deep(ul) {
