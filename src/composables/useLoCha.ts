@@ -21,9 +21,9 @@ export type Color = {
     ? '#52c41a'
     : key extends 'delete'
       ? '#FF0000'
-      : key extends 'updateAfter'
-        ? '#CE7E00'
-        : '#EE82EE'
+      : key extends 'updateBefore'
+        ? '#FFA479'
+        : '#F2BE00'
 }
 
 /**
@@ -32,8 +32,8 @@ export type Color = {
 export const loChaColors = {
   create: '#52c41a',
   delete: '#FF0000',
-  updateAfter: '#CE7E00',
-  updateBefore: '#EE82EE',
+  updateBefore: '#FFA479',
+  updateAfter: '#F2BE00',
 } satisfies Color
 
 /**

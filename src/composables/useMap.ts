@@ -59,16 +59,7 @@ const LAYERS = {
     type: 'fill',
     source: SOURCE_ID,
     paint: {
-      'fill-opacity': [
-        'case',
-        ['==', ['get', 'is_created'], true],
-        1,
-        ['==', ['get', 'is_deleted'], true],
-        1,
-        ['==', ['get', 'is_before'], true],
-        1,
-        0.5,
-      ],
+      'fill-opacity': 0.5,
       'fill-color': [
         'case',
         ['==', ['get', 'is_created'], true],
@@ -119,16 +110,7 @@ const LAYERS = {
       'circle-radius': 12,
       'circle-stroke-color': '#000000',
       'circle-stroke-width': 2,
-      'circle-opacity': [
-        'case',
-        ['==', ['get', 'is_created'], true],
-        1,
-        ['==', ['get', 'is_deleted'], true],
-        1,
-        ['==', ['get', 'is_before'], true],
-        1,
-        0.5,
-      ],
+      'circle-opacity': 0.5,
       'circle-color': [
         'case',
         ['==', ['get', 'is_created'], true],
