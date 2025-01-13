@@ -39,6 +39,9 @@
     "preview": "vite preview",
     "test": "vitest"
   },
+  "peerDependencies": {
+    "maplibre-gl": "^4.7.1"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^3.12.0",
     "@commitlint/cli": "^19.6.1",
@@ -57,6 +60,9 @@
     "vitest": "^2.1.8",
     "vue": "^3.5.13",
     "vue-tsc": "^2.1.10"
+  },
+  "resolutions": {
+    "@microsoft/api-extractor/typescript": "^5.6.2"
   },
   "simple-git-hooks": {
     "commit-msg": "yarn dlx commitlint --edit $1",

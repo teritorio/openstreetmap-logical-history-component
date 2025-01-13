@@ -2,7 +2,7 @@ import type { ApiLink, ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
 import type { AddLayerObject, ExpressionSpecification, GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
-import { LngLatBounds, Map, NavigationControl, Popup } from 'maplibre-gl'
+import maplibre from 'maplibre-gl'
 import { onMounted, ref, shallowRef, watch } from 'vue'
 
 /**
@@ -141,7 +141,7 @@ let emit: MapEmits
  * with the map, add layers, and listen for map events.
  * @constant {ShallowRef<Map>} map
  */
-const map = shallowRef<Map>()
+const map = shallowRef<maplibre.Map>()
 
 /**
  * A reactive reference to the map data source of type `GeoJSONSource`. This holds the map's data source,
@@ -174,14 +174,14 @@ export function useMap(): IMap {
   function init(emits: MapEmits): void {
     emit = emits
 
-    map.value = new Map({
+    map.value = new maplibre.Map({
       hash: true,
       container: 'map',
       center: [0, 0],
       style: MAP_STYLE_URL,
     })
 
-    map.value.addControl(new NavigationControl())
+    map.value.addControl(new maplibre.NavigationControl())
 
     map.value.on('load', () => {
       _setEventListeners()
@@ -195,7 +195,7 @@ export function useMap(): IMap {
       })
 
       if (loCha.value?.bbox) {
-        map.value?.fitBounds(new LngLatBounds(loCha.value.bbox as [number, number, number, number]), { padding: 20 })
+        map.value?.fitBounds(new maplibre.LngLatBounds(loCha.value.bbox as [number, number, number, number]), { padding: 20 })
       }
 
       source.value = map.value?.getSource(SOURCE_ID)
@@ -220,7 +220,7 @@ export function useMap(): IMap {
     source.value.setData(data)
 
     if (featureCount.value && data.bbox) {
-      map.value.fitBounds(new LngLatBounds(data.bbox as [number, number, number, number]), { padding: 20 })
+      map.value.fitBounds(new maplibre.LngLatBounds(data.bbox as [number, number, number, number]), { padding: 20 })
     }
     else {
       map.value.setCenter([0, 0])
@@ -338,7 +338,7 @@ export function useMap(): IMap {
     if (!features.length)
       return
 
-    new Popup()
+    new maplibre.Popup()
       .setLngLat(e.lngLat)
       .setHTML(`${features[0].properties.objtype}-${features[0].properties.id}-v${features[0].properties.version}`)
       .addTo(map.value)

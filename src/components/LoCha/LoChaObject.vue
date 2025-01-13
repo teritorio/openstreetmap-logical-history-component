@@ -53,7 +53,7 @@ function handleClick(id?: string) {
 </script>
 
 <template>
-  <article @click="handleClick(feature.id?.toString())">
+  <article class="locha-object" @click="handleClick(feature.id?.toString())">
     <h3>{{ title }}</h3>
   </article>
 </template>

@@ -30,10 +30,11 @@ export default defineConfig(({ command, mode }) => {
     return {
       build: {
         lib: {
-          entry: './src/main.ts',
+          entry: './src/index.ts',
           name: 'OSMLoChaComponent',
           fileName: 'index',
         },
+        copyPublicDir: false,
         sourcemap: true,
         rollupOptions: {
           external: ['maplibre-gl', 'vue'],

@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div>
+  <div class="locha-list">
     <h2>{{ title }}</h2>
     <ul class="locha-list">
       <li
