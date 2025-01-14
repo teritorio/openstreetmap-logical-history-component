@@ -73,6 +73,7 @@ const LAYERS = {
         loChaColors.updateBefore,
         loChaColors.updateAfter,
       ],
+      'fill-outline-color': '#000000',
     },
     filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
   },
@@ -81,7 +82,12 @@ const LAYERS = {
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 4,
+      'line-width': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        6,
+        4,
+      ],
       'line-opacity': [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
@@ -106,7 +112,12 @@ const LAYERS = {
     type: 'circle',
     source: SOURCE_ID,
     paint: {
-      'circle-radius': 12,
+      'circle-radius': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        14,
+        12,
+      ],
       'circle-stroke-color': '#000000',
       'circle-stroke-width': 2,
       'circle-opacity': [
@@ -178,8 +189,6 @@ export function useMap(): IMap {
     map.value.addControl(new maplibre.NavigationControl())
 
     map.value.on('load', () => {
-      _setEventListeners()
-
       map.value?.addSource(SOURCE_ID, {
         type: 'geojson',
         data: loCha.value || {
@@ -196,6 +205,7 @@ export function useMap(): IMap {
       source.value = map.value?.getSource(SOURCE_ID)
 
       _setupMapLayers()
+      _setEventListeners()
     })
   }
 
@@ -238,30 +248,33 @@ export function useMap(): IMap {
 
     Object.values(LAYERS).forEach((layer) => {
       map.value!.on('mousemove', layer.id, (e) => {
-        if (!e.features)
+        if (!e.features || e.features.length === 0)
           return
 
-        if (e.features.length > 0) {
-          if (hoveredStateId.value) {
-            map.value!.setFeatureState(
-              {
-                source: SOURCE_ID,
-                id: hoveredStateId.value,
-              },
-              { hover: false },
-            )
-          }
+        const featureId = e.features[0].id?.toString()
 
-          hoveredStateId.value = e.features[0].id?.toString()
+        if (!featureId)
+          throw new Error('Feature ID not found.')
 
+        if (hoveredStateId.value) {
           map.value!.setFeatureState(
             {
               source: SOURCE_ID,
               id: hoveredStateId.value,
             },
-            { hover: true },
+            { hover: false },
           )
         }
+
+        hoveredStateId.value = featureId
+
+        map.value!.setFeatureState(
+          {
+            source: SOURCE_ID,
+            id: hoveredStateId.value,
+          },
+          { hover: true },
+        )
       })
 
       map.value?.on('mouseenter', layer.id, () => {
@@ -285,9 +298,8 @@ export function useMap(): IMap {
             },
             { hover: false },
           )
+          hoveredStateId.value = undefined
         }
-
-        hoveredStateId.value = undefined
       })
     })
   }
