@@ -7,8 +7,8 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 
 const emit = defineEmits<MapEmits>()
 
-const { loCha, selectedLink } = useLoCha()
-const { init, handleMapDataUpdate, applyFilter } = useMap()
+const { loCha } = useLoCha()
+const { init, handleMapDataUpdate } = useMap()
 
 onMounted(() => init(emit))
 
@@ -17,11 +17,6 @@ watch(loCha, (newValue) => {
     handleMapDataUpdate(newValue)
   }
 }, { deep: true })
-
-watch(selectedLink, (newValue) => {
-  if (newValue)
-    applyFilter(newValue)
-})
 </script>
 
 <template>
