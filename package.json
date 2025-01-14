@@ -40,7 +40,11 @@
     "test": "vitest"
   },
   "peerDependencies": {
-    "maplibre-gl": "^4.7.1"
+    "maplibre-gl": "^4.7.1",
+    "vue": "^3.5.13"
+  },
+  "dependencies": {
+    "@turf/area": "^7.2.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^3.12.0",

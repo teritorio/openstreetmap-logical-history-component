@@ -1,5 +1,6 @@
 import type { Error } from '@/types'
 import type { Reactive, Ref } from 'vue'
+import { area } from '@turf/area'
 import { reactive, ref } from 'vue'
 
 /**
@@ -206,7 +207,7 @@ export function useApiConfig(): ApiComposable {
       }
 
       return feature
-    })
+    }).sort((a, b) => area(b) - area(a))
   }
 
   function setError(err: Error): void {
