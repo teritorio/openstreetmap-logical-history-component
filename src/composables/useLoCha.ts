@@ -58,6 +58,7 @@ export interface LoCha {
   selectedLink: Ref<ApiLink | undefined>
   selectedFeatures: ComputedRef<GeoJSON.Feature[] | undefined>
   setLoCha: (loCha: ApiResponse) => void
+  resetLink: () => void
 }
 
 // Internal state variables
@@ -117,6 +118,10 @@ export function useLoCha(): LoCha {
       throw new Error(`Link for ${id} and ${status} status not found.`)
 
     selectedLink.value = link
+  }
+
+  function resetLink(): void {
+    selectedLink.value = undefined
   }
 
   function _getFeature(id: string): GeoJSON.Feature | undefined {
@@ -193,5 +198,6 @@ export function useLoCha(): LoCha {
     selectedLink,
     selectedFeatures,
     setLoCha,
+    resetLink,
   }
 }

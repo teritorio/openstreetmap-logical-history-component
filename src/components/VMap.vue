@@ -7,10 +7,28 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 
 const emit = defineEmits<MapEmits>()
 
-const { loCha } = useLoCha()
-const { init, handleMapDataUpdate } = useMap()
+const { loCha, selectedFeatures } = useLoCha()
+const { init, handleMapDataUpdate, setFeatureHighlight } = useMap()
 
 onMounted(() => init(emit))
+
+function updateFeatureHighlight(features: GeoJSON.Feature[] | undefined, state: boolean) {
+  if (!features)
+    return
+
+  features.forEach((f) => {
+    if (!f.id || !f.properties)
+      return
+
+    // TODO: use f.id once API returns a numeric int
+    setFeatureHighlight(f.properties.id.toString(), state)
+  })
+}
+
+watch(selectedFeatures, (newValue, oldValue) => {
+  updateFeatureHighlight(newValue, true)
+  updateFeatureHighlight(oldValue, false)
+})
 
 watch(loCha, (newValue) => {
   if (newValue) {

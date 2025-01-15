@@ -6,6 +6,9 @@ const props = defineProps<{
   feature: GeoJSON.Feature
 }>()
 
+if (!props.feature.id)
+  throw new Error(`Feature ID is missing.`)
+
 if (!props.feature.properties)
   throw new Error(`Feature ${props.feature.id} has no properties.`)
 
@@ -41,19 +44,13 @@ const title = computed(() => {
 })
 
 const color = computed(() => loChaColors[status.value])
-const { showLink, selectedLink } = useLoCha()
+const { showLink, selectedLink, resetLink } = useLoCha()
 const style = computed(() => {
   if (!selectedLink.value)
     return
 
-  if ([selectedLink.value.after, selectedLink.value.before].includes(props.feature.id?.toString())) {
-    return {
-      opacity: 1,
-    }
-  }
-
   return {
-    opacity: 0.3,
+    opacity: selectedLink.value.id.includes(props.feature.id!.toString()) ? 1 : 0.3,
   }
 })
 
@@ -61,7 +58,9 @@ function handleClick(id?: string) {
   if (!id)
     throw new Error('Object not found')
 
-  showLink(id, status.value)
+  selectedLink.value?.id.includes(id)
+    ? resetLink()
+    : showLink(id, status.value)
 }
 </script>
 

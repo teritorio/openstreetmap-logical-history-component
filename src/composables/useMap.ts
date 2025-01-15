@@ -20,6 +20,8 @@ export interface IMap {
    * @param data - The data to update the map with.
    */
   handleMapDataUpdate: (data: ApiResponse) => void
+
+  setFeatureHighlight: (id: string, state: boolean) => void
 }
 
 /**
@@ -275,25 +277,12 @@ export function useMap(): IMap {
         if (hoveredStateId.value) {
           _removePopup()
 
-          map.value!.setFeatureState(
-            {
-              source: SOURCE_ID,
-              id: hoveredStateId.value,
-            },
-            { hover: false },
-          )
+          setFeatureHighlight(hoveredStateId.value, false)
         }
 
         hoveredStateId.value = feature.id.toString()
 
-        map.value!.setFeatureState(
-          {
-            source: SOURCE_ID,
-            id: hoveredStateId.value,
-          },
-          { hover: true },
-        )
-
+        setFeatureHighlight(hoveredStateId.value, true)
         _openPopup(e.lngLat, feature)
       })
 
@@ -311,13 +300,7 @@ export function useMap(): IMap {
         map.value.getCanvas().style.cursor = ''
 
         if (hoveredStateId.value) {
-          map.value!.setFeatureState(
-            {
-              source: SOURCE_ID,
-              id: hoveredStateId.value,
-            },
-            { hover: false },
-          )
+          setFeatureHighlight(hoveredStateId.value, false)
           hoveredStateId.value = undefined
         }
 
@@ -326,10 +309,24 @@ export function useMap(): IMap {
     })
   }
 
+  function setFeatureHighlight(id: string, state: boolean): void {
+    if (!map.value)
+      throw new Error('Call useMap.init() function first.')
+
+    map.value!.setFeatureState(
+      {
+        source: SOURCE_ID,
+        id,
+      },
+      { hover: state },
+    )
+  }
+
   /**
    * Opens a popup when a feature is clicked on the map.
    * It displays the feature's ID at the coordinates of the feature.
-   * @param e - The MapMouseEvent triggered by the click.
+   * @param coords - Popup coordinates.
+   * @param feature - Selected feature information for Popup display
    */
   function _openPopup(coords: LngLatLike, feature: MapGeoJSONFeature): void {
     if (!map.value)
@@ -381,5 +378,6 @@ export function useMap(): IMap {
   return {
     init,
     handleMapDataUpdate,
+    setFeatureHighlight,
   }
 }
