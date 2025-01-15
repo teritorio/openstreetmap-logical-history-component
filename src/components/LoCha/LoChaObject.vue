@@ -44,7 +44,8 @@ const title = computed(() => {
 })
 
 const color = computed(() => loChaColors[status.value])
-const { showLink, selectedLink, resetLink } = useLoCha()
+
+const { selectedLink } = useLoCha()
 const style = computed(() => {
   if (!selectedLink.value)
     return
@@ -54,6 +55,7 @@ const style = computed(() => {
   }
 })
 
+const { showLink, resetLink } = useLoCha()
 function handleClick(id?: string) {
   if (!id)
     throw new Error('Object not found')

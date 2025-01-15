@@ -21,7 +21,7 @@ export interface IMap {
    */
   handleMapDataUpdate: (data: ApiResponse) => void
 
-  setFeatureHighlight: (id: string, state: boolean) => void
+  setFeatureHighlight: (id: string, state: boolean, storeState?: boolean) => void
 }
 
 /**
@@ -169,6 +169,7 @@ const source = ref<GeoJSONSource>()
 
 const hoveredStateId = ref<string>()
 const popup = ref<maplibre.Popup>()
+const highlightedFeatures = ref<Set<string>>(new Set())
 
 /**
  * Provides methods to initialize and manage the map.
@@ -309,17 +310,25 @@ export function useMap(): IMap {
     })
   }
 
-  function setFeatureHighlight(id: string, state: boolean): void {
+  function setFeatureHighlight(id: string, state: boolean, storeState: boolean = false): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 
-    map.value!.setFeatureState(
-      {
-        source: SOURCE_ID,
-        id,
-      },
-      { hover: state },
-    )
+    if (storeState)
+      highlightedFeatures.value.clear()
+
+    if (!highlightedFeatures.value.has(id)) {
+      map.value!.setFeatureState(
+        {
+          source: SOURCE_ID,
+          id,
+        },
+        { hover: state },
+      )
+    }
+
+    if (storeState && state)
+      highlightedFeatures.value.add(id)
   }
 
   /**

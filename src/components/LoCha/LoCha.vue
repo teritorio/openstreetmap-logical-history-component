@@ -5,7 +5,8 @@ import type { MapGeoJSONFeature } from 'maplibre-gl'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { watchEffect } from 'vue'
+import { useMap } from '@/composables/useMap'
+import { watch, watchEffect } from 'vue'
 
 const props = defineProps<{
   data?: ApiResponse
@@ -21,8 +22,11 @@ const {
   beforeFeatures,
   featureCount,
   linkCount,
+  selectedFeatures,
   selectedLink,
   setLoCha,
+  showLink,
+  getStatus,
 } = useLoCha()
 
 watchEffect(() => {
@@ -31,11 +35,33 @@ watchEffect(() => {
   }
 })
 
+const { setFeatureHighlight } = useMap()
+
+watch(selectedFeatures, (newValue, oldValue) => {
+  if (oldValue) {
+    oldValue.forEach((feature) => {
+      // TODO: use feature.id once API returns a numeric int
+      setFeatureHighlight(feature.properties?.id.toString(), false, true)
+    })
+  }
+
+  if (newValue) {
+    newValue.forEach((feature) => {
+      // TODO: use feature.id once API returns a numeric int
+      setFeatureHighlight(feature.properties?.id.toString(), true, true)
+    })
+  }
+})
+
 function handleMapClick(feature: MapGeoJSONFeature) {
   if (!feature.id)
     throw new Error('Feature ID not found.')
 
-  // TODO...
+  const status = getStatus(feature)
+  // TODO: use feature.id once API returns a numeric int
+  const id = `${feature.properties.objtype[0]}${feature.properties.id}_${feature.properties.version}`
+
+  showLink(id, status)
 }
 </script>
 

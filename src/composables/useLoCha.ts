@@ -59,6 +59,7 @@ export interface LoCha {
   selectedFeatures: ComputedRef<GeoJSON.Feature[] | undefined>
   setLoCha: (loCha: ApiResponse) => void
   resetLink: () => void
+  getStatus: (feature: GeoJSON.Feature) => Status
 }
 
 // Internal state variables
@@ -122,6 +123,25 @@ export function useLoCha(): LoCha {
 
   function resetLink(): void {
     selectedLink.value = undefined
+  }
+
+  function getStatus(feature: GeoJSON.Feature): Status {
+    if (!feature.properties)
+      throw new Error(`Feature ${feature.id} has no properties.`)
+
+    if (feature.properties.is_created) {
+      return loChaStatus.create
+    }
+
+    if (feature.properties.is_deleted) {
+      return loChaStatus.delete
+    }
+
+    if (feature.properties.is_before) {
+      return loChaStatus.updateBefore
+    }
+
+    return loChaStatus.updateAfter
   }
 
   function _getFeature(id: string): GeoJSON.Feature | undefined {
@@ -199,5 +219,6 @@ export function useLoCha(): LoCha {
     selectedFeatures,
     setLoCha,
     resetLink,
+    getStatus,
   }
 }
