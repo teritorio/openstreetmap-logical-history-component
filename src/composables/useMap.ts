@@ -1,6 +1,6 @@
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
-import type { AddLayerObject, GeoJSONSource, MapMouseEvent } from 'maplibre-gl'
+import type { AddLayerObject, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapMouseEvent } from 'maplibre-gl'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import maplibre from 'maplibre-gl'
 import { ref, shallowRef } from 'vue'
@@ -27,6 +27,7 @@ export interface IMap {
  * This is used to emit various map-related events.
  */
 export interface MapEmits {
+  (e: 'click', feature: MapGeoJSONFeature): void
   (e: 'error', payload: Error): void
   (e: 'update-bbox', bbox: string): void
 }
@@ -244,7 +245,20 @@ export function useMap(): IMap {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 
-    map.value.on('click', _openPopup)
+    map.value.on('click', (e: MapMouseEvent) => {
+      if (!map.value)
+        throw new Error('Call useMap.init() function first.')
+
+      const features = map.value.queryRenderedFeatures(e.point, {
+        layers: Object.values(LAYERS).map(l => l.id),
+      })
+
+      if (!features.length)
+        return
+
+      emit('click', features[0])
+      _openPopup(e.lngLat, features[0])
+    })
 
     map.value.on('moveend', _updateBoundingBox)
 
@@ -253,9 +267,9 @@ export function useMap(): IMap {
         if (!e.features || e.features.length === 0)
           return
 
-        const featureId = e.features[0].id?.toString()
+        const feature = e.features[0]
 
-        if (!featureId)
+        if (!feature.id)
           throw new Error('Feature ID not found.')
 
         if (hoveredStateId.value) {
@@ -270,7 +284,7 @@ export function useMap(): IMap {
           )
         }
 
-        hoveredStateId.value = featureId
+        hoveredStateId.value = feature.id.toString()
 
         map.value!.setFeatureState(
           {
@@ -280,7 +294,7 @@ export function useMap(): IMap {
           { hover: true },
         )
 
-        _openPopup(e)
+        _openPopup(e.lngLat, feature)
       })
 
       map.value?.on('mouseenter', layer.id, () => {
@@ -317,20 +331,13 @@ export function useMap(): IMap {
    * It displays the feature's ID at the coordinates of the feature.
    * @param e - The MapMouseEvent triggered by the click.
    */
-  function _openPopup(e: MapMouseEvent): void {
+  function _openPopup(coords: LngLatLike, feature: MapGeoJSONFeature): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 
-    const features = map.value.queryRenderedFeatures(e.point, {
-      layers: Object.values(LAYERS).map(l => l.id),
-    })
-
-    if (!features.length)
-      return
-
     popup.value = new maplibre.Popup()
-      .setLngLat(e.lngLat)
-      .setHTML(`${features[0].properties.objtype}-${features[0].properties.id}-v${features[0].properties.version}`)
+      .setLngLat(coords)
+      .setHTML(`${feature.properties.objtype}-${feature.properties.id}-v${feature.properties.version}`)
       .addTo(map.value)
   }
 

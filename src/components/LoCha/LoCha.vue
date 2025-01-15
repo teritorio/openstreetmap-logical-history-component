@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
+import type { MapGeoJSONFeature } from 'maplibre-gl'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
@@ -32,6 +33,13 @@ watchEffect(() => {
     setLoCha(props.data)
   }
 })
+
+function handleMapClick(feature: MapGeoJSONFeature) {
+  if (!feature.id)
+    throw new Error('Feature ID not found.')
+
+  // TODO...
+}
 </script>
 
 <template>
@@ -50,6 +58,7 @@ watchEffect(() => {
       <LoChaList v-show="!selectedLink || (selectedLink && afterFeaturesFilter?.length) || !afterFeaturesFilter" :features="afterFeaturesFilter || afterFeatures" title="After" />
     </div>
     <VMap
+      @click="handleMapClick"
       @error="emit('error', $event)"
       @update-bbox="emit('updateBbox', $event)"
     />
