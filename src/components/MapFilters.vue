@@ -53,41 +53,12 @@ function resetForm() {
   Object.assign(formValues, { dateStart: '', dateEnd: '', bbox: '' })
 }
 
-function handleSubmit() {
-  if (!validateDateRange()) {
-    return
-  }
-
-  emit('submit', formValues)
-}
-
-// Validate the date range
-function validateDateRange(): boolean {
-  const dateStart = new Date(formValues.dateStart)
-  const dateEnd = new Date(formValues.dateEnd)
-
-  if (!dateStart || !dateEnd)
-    return true
-
-  const maxDateEnd = new Date(dateStart)
-  maxDateEnd.setMonth(maxDateEnd.getMonth() + 12)
-
-  if (dateEnd > maxDateEnd) {
-    emit('error', { message: 'Date range must not exceed 12 months.', type: 'error' })
-    resetForm()
-
-    return false
-  }
-
-  return true
-}
-
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
 
   Object.assign(formValues, preset)
 
-  handleSubmit()
+  emit('submit', formValues)
 }
 </script>
 
@@ -96,8 +67,8 @@ function setPreset(index: number) {
     <button class="toggle-button" @click="emit('toggleMenu')">
       {{ isOpen ? '⬅️' : '➡️' }}
     </button>
-    <form ref="formRef" @submit.prevent="handleSubmit">
-      <h2>Data</h2>
+    <form ref="formRef" @submit.prevent="emit('submit', formValues)">
+      <h2>Filter by:</h2>
       <div>
         <label for="date_start">From:</label>
         <input v-model="formValues.dateStart" type="date" required>
