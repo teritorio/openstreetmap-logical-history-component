@@ -51,6 +51,7 @@ const MAP_STYLE_URL = 'https://vecto-dev.teritorio.xyz/styles/positron/style.jso
  * @property {string} Line - The layer ID for rendering lines.
  * @property {string} Point - The layer ID for rendering points.
  */
+type LayerKey = 'Polygon' | 'Point' | 'LineString'
 const LAYERS = {
   Polygon: {
     id: 'feature-polygons',
@@ -140,7 +141,7 @@ const LAYERS = {
     },
     filter: ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]],
   },
-} satisfies Record<string, AddLayerObject>
+} satisfies Partial<Record<LayerKey, AddLayerObject>>
 
 /**
  * A variable that holds the `MapEmits` function, which is used to emit custom events in the map component.
@@ -164,6 +165,7 @@ const map = shallowRef<maplibre.Map>()
 const source = ref<GeoJSONSource>()
 
 const hoveredStateId = ref<string>()
+const popup = ref<maplibre.Popup>()
 
 /**
  * Provides methods to initialize and manage the map.
@@ -257,6 +259,8 @@ export function useMap(): IMap {
           throw new Error('Feature ID not found.')
 
         if (hoveredStateId.value) {
+          _removePopup()
+
           map.value!.setFeatureState(
             {
               source: SOURCE_ID,
@@ -275,6 +279,8 @@ export function useMap(): IMap {
           },
           { hover: true },
         )
+
+        _openPopup(e)
       })
 
       map.value?.on('mouseenter', layer.id, () => {
@@ -300,6 +306,8 @@ export function useMap(): IMap {
           )
           hoveredStateId.value = undefined
         }
+
+        _removePopup()
       })
     })
   }
@@ -320,10 +328,15 @@ export function useMap(): IMap {
     if (!features.length)
       return
 
-    new maplibre.Popup()
+    popup.value = new maplibre.Popup()
       .setLngLat(e.lngLat)
       .setHTML(`${features[0].properties.objtype}-${features[0].properties.id}-v${features[0].properties.version}`)
       .addTo(map.value)
+  }
+
+  function _removePopup(): void {
+    popup.value?.remove()
+    popup.value = undefined
   }
 
   /**
