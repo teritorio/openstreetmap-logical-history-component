@@ -50,25 +50,20 @@ export const loChaStatus = Object.fromEntries(
  */
 export interface LoCha {
   afterFeatures: Ref<GeoJSON.Feature[]>
-  afterFeaturesFilter: Ref<GeoJSON.Feature[] | undefined>
   beforeFeatures: Ref<GeoJSON.Feature[]>
-  beforeFeaturesFilter: Ref<GeoJSON.Feature[] | undefined>
   featureCount: ComputedRef<number | undefined>
   showLink: (id: string, status: Status) => void
   linkCount: ComputedRef<number | undefined>
   loCha: Ref<ApiResponse | undefined>
-  resetFilters: () => void
   selectedLink: Ref<ApiLink | undefined>
-  selectedLinkFeatures: ComputedRef<GeoJSON.Feature[] | undefined>
+  selectedFeatures: ComputedRef<GeoJSON.Feature[] | undefined>
   setLoCha: (loCha: ApiResponse) => void
 }
 
 // Internal state variables
 const loCha = ref<ApiResponse>()
 const afterFeatures = ref<GeoJSON.Feature[]>([])
-const afterFeaturesFilter = ref<GeoJSON.Feature[]>()
 const beforeFeatures = ref<GeoJSON.Feature[]>([])
-const beforeFeaturesFilter = ref<GeoJSON.Feature[]>()
 const selectedLink = ref<ApiLink>()
 
 /**
@@ -89,7 +84,7 @@ export function useLoCha(): LoCha {
    */
   const linkCount = computed(() => loCha.value?.metadata.links.length)
 
-  const selectedLinkFeatures = computed(() => {
+  const selectedFeatures = computed(() => {
     if (!selectedLink.value)
       return
 
@@ -122,30 +117,6 @@ export function useLoCha(): LoCha {
       throw new Error(`Link for ${id} and ${status} status not found.`)
 
     selectedLink.value = link
-
-    switch (status) {
-      case 'create':
-        afterFeaturesFilter.value = afterFeatures.value.filter(feature => feature.id?.toString() === link.after)
-        beforeFeaturesFilter.value = []
-        break
-      case 'delete':
-        afterFeaturesFilter.value = []
-        beforeFeaturesFilter.value = beforeFeatures.value.filter(feature => feature.id?.toString() === link.before)
-        break
-      case 'updateAfter':
-      case 'updateBefore':
-        afterFeaturesFilter.value = afterFeatures.value.filter(feature => feature.id?.toString() === link.after)
-        beforeFeaturesFilter.value = beforeFeatures.value.filter(feature => feature.id?.toString() === link.before)
-        break
-      default:
-        throw new Error('Status not found.')
-    }
-  }
-
-  function resetFilters(): void {
-    afterFeaturesFilter.value = undefined
-    beforeFeaturesFilter.value = undefined
-    selectedLink.value = undefined
   }
 
   function _getFeature(id: string): GeoJSON.Feature | undefined {
@@ -210,21 +181,17 @@ export function useLoCha(): LoCha {
     loCha.value = undefined
     afterFeatures.value = []
     beforeFeatures.value = []
-    resetFilters()
   }
 
   return {
     afterFeatures,
-    afterFeaturesFilter,
     beforeFeatures,
-    beforeFeaturesFilter,
     featureCount,
     showLink,
     linkCount,
     loCha,
-    resetFilters,
     selectedLink,
-    selectedLinkFeatures,
+    selectedFeatures,
     setLoCha,
   }
 }

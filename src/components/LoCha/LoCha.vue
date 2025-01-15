@@ -18,12 +18,9 @@ const emit = defineEmits<{
 
 const {
   afterFeatures,
-  afterFeaturesFilter,
   beforeFeatures,
-  beforeFeaturesFilter,
   featureCount,
   linkCount,
-  resetFilters,
   selectedLink,
   setLoCha,
 } = useLoCha()
@@ -48,14 +45,11 @@ function handleMapClick(feature: MapGeoJSONFeature) {
       ⚠️ No data
     </p>
     <div v-else class="locha-content">
-      <button v-show="afterFeaturesFilter || beforeFeaturesFilter" id="filter-reset" @click="resetFilters">
-        🔄 Reset selection
-      </button>
-      <LoChaList v-show="!selectedLink || (selectedLink && beforeFeaturesFilter?.length) || !beforeFeaturesFilter" :features=" beforeFeaturesFilter || beforeFeatures" title="Before" />
+      <LoChaList :features="beforeFeatures" title="Before" />
       <div v-show="selectedLink">
         Diff
       </div>
-      <LoChaList v-show="!selectedLink || (selectedLink && afterFeaturesFilter?.length) || !afterFeaturesFilter" :features="afterFeaturesFilter || afterFeatures" title="After" />
+      <LoChaList :features="afterFeatures" title="After" />
     </div>
     <VMap
       @click="handleMapClick"
@@ -82,11 +76,6 @@ function handleMapClick(feature: MapGeoJSONFeature) {
   gap: 1em;
   overflow: hidden;
   padding: 1em;
-}
-
-#filter-reset {
-  grid-column-start: 3;
-  place-self: flex-end;
 }
 
 #map {

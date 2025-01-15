@@ -41,8 +41,21 @@ const title = computed(() => {
 })
 
 const color = computed(() => loChaColors[status.value])
+const { showLink, selectedLink } = useLoCha()
+const style = computed(() => {
+  if (!selectedLink.value)
+    return
 
-const { showLink } = useLoCha()
+  if ([selectedLink.value.after, selectedLink.value.before].includes(props.feature.id?.toString())) {
+    return {
+      opacity: 1,
+    }
+  }
+
+  return {
+    opacity: 0.3,
+  }
+})
 
 function handleClick(id?: string) {
   if (!id)
@@ -53,7 +66,7 @@ function handleClick(id?: string) {
 </script>
 
 <template>
-  <article class="locha-object" @click="handleClick(feature.id?.toString())">
+  <article :style="style" class="locha-object" @click="handleClick(feature.id?.toString())">
     <h3>{{ title }}</h3>
   </article>
 </template>
