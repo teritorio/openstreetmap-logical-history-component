@@ -28,8 +28,8 @@ const status = computed(() => {
   return loChaStatus.updateAfter
 })
 
-const title = computed(() => {
-  const content = `${props.feature.properties!.objtype}-${props.feature.properties!.id}-v${props.feature.properties!.version}`
+const name = computed(() => {
+  const content = props.feature.properties!.tags.name || ''
 
   switch (status.value) {
     case 'create':
@@ -68,12 +68,15 @@ function handleClick(id?: string) {
 
 <template>
   <article :style="style" class="locha-object" @click="handleClick(feature.id?.toString())">
-    <h3>{{ title }}</h3>
+    <header>
+      <h3>{{ name }}</h3>
+      <a>{{ feature.id }}</a>
+    </header>
   </article>
 </template>
 
 <style lang="css" scoped>
-h3 {
+header {
   border: 2px solid v-bind(color);
   background-color: color-mix(in srgb, v-bind(color) 20%, white 80%);
 }

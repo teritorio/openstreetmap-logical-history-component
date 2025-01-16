@@ -2,6 +2,7 @@
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
 import type { MapGeoJSONFeature } from 'maplibre-gl'
+import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
@@ -72,9 +73,7 @@ function handleMapClick(feature: MapGeoJSONFeature) {
     </p>
     <div v-else class="locha-content">
       <LoChaList :features="beforeFeatures" title="Before" />
-      <div v-show="selectedLink">
-        Diff
-      </div>
+      <LoChaDiff v-show="selectedLink" />
       <LoChaList :features="afterFeatures" title="After" />
     </div>
     <VMap
