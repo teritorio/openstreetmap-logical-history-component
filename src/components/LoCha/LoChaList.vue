@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { ref, watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 
 const props = defineProps<{
   features: GeoJSON.Feature[]
@@ -13,7 +13,7 @@ const { selectedFeatures } = useLoCha()
 
 watch(selectedFeatures, (newValue) => {
   if (newValue)
-    scrollToFeature()
+    nextTick(() => scrollToFeature())
 })
 
 function scrollToFeature() {
@@ -44,6 +44,7 @@ function scrollToFeature() {
         <LoChaObject :feature="feature" />
       </li>
     </ul>
+    <iframe name="hidden_josm_target" style="display: none" />
   </div>
 </template>
 

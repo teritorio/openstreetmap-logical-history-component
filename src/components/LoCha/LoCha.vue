@@ -88,7 +88,6 @@ function handleMapClick(feature: MapGeoJSONFeature) {
 .locha {
   display: flex;
   flex-direction: column;
-  gap: 1em;
   background-color: #f4f4f4;
   height: inherit;
 }
@@ -98,17 +97,17 @@ function handleMapClick(feature: MapGeoJSONFeature) {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: auto 1fr;
   flex: 70%;
-  gap: 1em;
+  gap: 0 1em;
   overflow: hidden;
   padding: 1em;
 }
 
 #map {
   flex: 50%;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .locha-content > div {
-  flex: 1;
   overflow: hidden;
   display: flex;
   flex-direction: column;

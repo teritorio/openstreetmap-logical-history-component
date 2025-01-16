@@ -5,7 +5,7 @@ import { computed } from 'vue'
 const { selectedFeatures } = useLoCha()
 
 const diffTags = computed(() => {
-  if (!selectedFeatures.value)
+  if (!selectedFeatures.value || !selectedFeatures.value.length)
     return
 
   let before, after
@@ -56,9 +56,9 @@ const diffTags = computed(() => {
 </script>
 
 <template>
-  <div>
+  <div class="locha-diff">
     <h2>Diff</h2>
-    <table>
+    <table v-if="diffTags?.length">
       <thead>
         <tr>
           <th>Tag</th>
@@ -86,15 +86,13 @@ const diffTags = computed(() => {
         </tr>
       </tbody>
     </table>
+    <p v-else>
+      No tags diff
+    </p>
   </div>
 </template>
 
 <style lang="css" scoped>
-div {
-  display: flex;
-  flex-direction: column;
-}
-
 table {
   border-collapse: collapse;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -160,7 +158,5 @@ tbody td :is(span:first-of-type, span:last-of-type) {
   font-size: 0.85em;
   font-weight: 600;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-transform: capitalize;
-  white-space: nowrap;
 }
 </style>

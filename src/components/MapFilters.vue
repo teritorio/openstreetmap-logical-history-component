@@ -109,7 +109,6 @@ aside {
   gap: 0.5em;
   border-right: 1px solid #ddd;
   padding: 1em;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
   position: relative;
   height: inherit;
 }

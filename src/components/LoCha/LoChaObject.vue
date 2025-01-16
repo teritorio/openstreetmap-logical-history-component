@@ -29,7 +29,7 @@ const status = computed(() => {
 })
 
 const name = computed(() => {
-  const content = props.feature.properties!.tags.name || ''
+  const content = props.feature.properties!.tags.name || '-'
 
   switch (status.value) {
     case 'create':
@@ -70,18 +70,82 @@ function handleClick(id?: string) {
   <article :style="style" class="locha-object" @click="handleClick(feature.id?.toString())">
     <header>
       <h3>{{ name }}</h3>
-      <a>{{ feature.id }}</a>
+      <span>👤{{ feature.properties?.username }}</span>
     </header>
+    <div v-show="selectedLink && ([selectedLink.before, selectedLink.after].includes(feature.id?.toString()))" class="actions">
+      <a
+        type="button"
+        title="Edit in OSM iD"
+        :href="`https://www.openstreetmap.org/${feature.properties?.objtype}/${feature.properties?.id}/history`"
+        target="_blank"
+        @click.stop
+      >
+        OSM iD
+      </a>
+      <a
+        type="button"
+        title="Edit in JOSM"
+        :href="`http://127.0.0.1:8111/load_object?objects=${feature.properties?.objtype[0]}${feature.properties?.id}`"
+        target="hidden_josm_target"
+        @click.stop
+      >
+        JOSM
+      </a>
+      <a
+        type="button"
+        title="OSM Deep History"
+        :href="`https://osmlab.github.io/osm-deep-history/#/${feature.properties?.objtype}/${feature.properties?.id}`"
+        target="_blank"
+        @click.stop
+      >
+        Deep H
+      </a>
+      <a
+        type="button"
+        title="OSM History Viewer"
+        :href="`https://pewu.github.io/osm-history/#/${feature.properties?.objtype}/${feature.properties?.id}`"
+        target="_blank"
+        @click.stop
+      >
+        OSM H
+      </a>
+    </div>
   </article>
 </template>
 
 <style lang="css" scoped>
-header {
+article {
   border: 2px solid v-bind(color);
   background-color: color-mix(in srgb, v-bind(color) 20%, white 80%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 article:hover {
   cursor: pointer;
+}
+
+h3 {
+  font-weight: 400;
+}
+
+span {
+  font-size: 0.75em;
+  color: #333333;
+}
+
+.actions {
+  display: flex;
+}
+
+[type='button'] {
+  flex-grow: 1;
+  color: #000000;
+  padding: 0.5em 1em;
+  font-size: 0.75em;
+  border: 1px solid #dcdfe6;
+  background-color: #ffffff;
+  text-align: center;
 }
 </style>

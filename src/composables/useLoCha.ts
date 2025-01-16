@@ -206,6 +206,7 @@ export function useLoCha(): LoCha {
     loCha.value = undefined
     afterFeatures.value = []
     beforeFeatures.value = []
+    resetLink()
   }
 
   return {
