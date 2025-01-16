@@ -59,32 +59,25 @@ const diffTags = computed(() => {
   <div class="locha-diff">
     <h2>Diff</h2>
     <table v-if="diffTags?.length">
-      <thead>
-        <tr>
-          <th>Tag</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="row in diffTags" :key="row.tag" :class="{
-            created: row.status === loChaStatus.create,
-            deleted: row.status === loChaStatus.delete,
-            updated: row.status === 'updated',
-          }"
-        >
-          <td>{{ row.tag }}</td>
-          <td>
-            <span v-if="row.beforeValue">
-              {{ row.beforeValue }}
-            </span>
-            <span v-if="![loChaStatus.create.toString(), loChaStatus.delete.toString()].includes(row.status)"> / </span>
-            <span v-if="row.afterValue">
-              {{ row.afterValue }}
-            </span>
-          </td>
-        </tr>
-      </tbody>
+      <tr
+        v-for="row in diffTags" :key="row.tag" :class="{
+          created: row.status === loChaStatus.create,
+          deleted: row.status === loChaStatus.delete,
+          updated: row.status === 'updated',
+        }"
+      >
+        <td />
+        <td>{{ row.tag }}</td>
+        <td>
+          <span v-if="row.beforeValue">
+            {{ row.beforeValue }}
+          </span>
+          <span v-if="![loChaStatus.create.toString(), loChaStatus.delete.toString()].includes(row.status)"> / </span>
+          <span v-if="row.afterValue">
+            {{ row.afterValue }}
+          </span>
+        </td>
+      </tr>
     </table>
     <p v-else>
       No tags diff
@@ -93,70 +86,27 @@ const diffTags = computed(() => {
 </template>
 
 <style lang="css" scoped>
-table {
-  border-collapse: collapse;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-th,
-td {
-  text-align: left;
-  padding: 10px 15px;
-}
-
-th {
-  background-color: #082e4e;
-  color: #ffffff;
-  text-transform: uppercase;
-  font-size: 14px;
-  letter-spacing: 0.03em;
-}
-
-tbody tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-tbody tr:nth-child(odd) {
-  background-color: #ffffff;
-}
-
-tbody tr:hover {
-  background-color: #f1f1f1;
-  cursor: default;
-}
-
-td {
-  border-bottom: 1px solid #ddd;
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
 .created {
-  --color: v-bind('loChaColors.create');
+  background-color: v-bind('loChaColors.create');
 }
 
 .deleted {
-  --color: v-bind('loChaColors.delete');
+  background-color: v-bind('loChaColors.delete');
+}
+
+.updated {
+  background-color: color-mix(in srgb, v-bind('loChaColors.updateAfter') 20%, white 80%);
 }
 
 .updated span:first-of-type {
-  --color: v-bind('loChaColors.updateBefore');
+  --color: v-bind('loChaColors.delete');
 }
 
 .updated span:last-of-type {
-  --color: v-bind('loChaColors.updateAfter');
+  --color: v-bind('loChaColors.create');
 }
 
-tbody td :is(span:first-of-type, span:last-of-type) {
-  display: inline-block;
-  border: 1px solid var(--color);
-  border-radius: 16px;
-  background-color: color-mix(in srgb, var(--color) 20%, white 80%);
-  padding: 4px 8px;
-  font-size: 0.85em;
-  font-weight: 600;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+td :is(span:first-of-type, span:last-of-type) {
+  color: var(--color);
 }
 </style>
