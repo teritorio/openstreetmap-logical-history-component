@@ -69,7 +69,17 @@ function handleClick(id?: string) {
 <template>
   <article :style="style" class="locha-object" @click="handleClick(feature.id?.toString())">
     <header>
-      <h3>{{ name }}</h3>
+      <h3>
+        {{ name }}
+        <a
+          title="OSM History"
+          :href="`https://www.openstreetmap.org/${feature.properties?.objtype}/${feature.properties?.id}/history`"
+          target="_blank"
+          @click.stop
+        >
+          {{ `${feature.properties?.objtype[0]}${feature.properties?.id}` }}
+        </a>
+      </h3>
       <span>👤{{ feature.properties?.username }}</span>
     </header>
     <div v-show="selectedLink && ([selectedLink.before, selectedLink.after].includes(feature.id?.toString()))" class="actions">
