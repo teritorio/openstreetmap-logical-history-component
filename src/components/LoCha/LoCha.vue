@@ -38,31 +38,47 @@ watchEffect(() => {
 
 const { setFeatureHighlight } = useMap()
 
+// TODO: Move it to useMap composable
 watch(selectedFeatures, (newValue, oldValue) => {
   if (oldValue) {
     oldValue.forEach((feature) => {
-      // TODO: use feature.id once API returns a numeric int
-      setFeatureHighlight(feature.properties?.id.toString(), false, true)
+      // TODO: once moved to composable, DRY it
+      if (!feature.id)
+        throw new Error('Feature ID not found.')
+
+      if (typeof feature.id !== 'number')
+        throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
+
+      setFeatureHighlight(feature.id, false, true)
     })
   }
 
   if (newValue) {
     newValue.forEach((feature) => {
-      // TODO: use feature.id once API returns a numeric int
-      setFeatureHighlight(feature.properties?.id.toString(), true, true)
+      // TODO: once moved to composable, DRY it
+      if (!feature.id)
+        throw new Error('Feature ID not found.')
+
+      if (typeof feature.id !== 'number')
+        throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
+
+      setFeatureHighlight(feature.id, true, true)
     })
   }
 })
 
+// TODO: Move it to useMap composable
 function handleMapClick(feature: MapGeoJSONFeature) {
+  // TODO: Once moved to composable, DRY it
   if (!feature.id)
     throw new Error('Feature ID not found.')
 
-  const status = getStatus(feature)
-  // TODO: use feature.id once API returns a numeric int
-  const id = `${feature.properties.objtype[0]}${feature.properties.id}_${feature.properties.version}`
+  if (typeof feature.id !== 'number')
+    throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
 
-  showLink(id, status)
+  const status = getStatus(feature)
+
+  showLink(feature.id, status)
 }
 </script>
 

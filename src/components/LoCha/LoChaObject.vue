@@ -46,47 +46,49 @@ const name = computed(() => {
 const color = computed(() => loChaColors[status.value])
 
 const { selectedLink } = useLoCha()
-const style = computed(() => {
+const isSelected = computed(() => {
   if (!selectedLink.value)
-    return
+    return false
 
-  return {
-    opacity: selectedLink.value.id.includes(props.feature.id!.toString()) ? 1 : 0.3,
-  }
+  return selectedLink.value.id.includes(props.feature.id!.toString())
 })
 
-const { showLink, resetLink } = useLoCha()
-function handleClick(id?: string) {
-  if (!id)
-    throw new Error('Object not found')
+const style = computed(() => ({
+  opacity: isSelected.value ? 1 : 0.3,
+}))
 
-  selectedLink.value?.id.includes(id)
+const { showLink, resetLink } = useLoCha()
+function handleClick(id: string | number) {
+  if (typeof id !== 'number')
+    throw new Error(`Feature ${id} ID has wrong type: ${typeof id}. Should be a number.`)
+
+  isSelected.value
     ? resetLink()
     : showLink(id, status.value)
 }
 </script>
 
 <template>
-  <article :style="style" class="locha-object" @click="handleClick(feature.id?.toString())">
+  <article :style="style" class="locha-object" @click="handleClick(feature.id!)">
     <header>
       <h3>
         {{ name }}
         <a
           title="OSM History"
-          :href="`https://www.openstreetmap.org/${feature.properties?.objtype}/${feature.properties?.id}/history`"
+          :href="`https://www.openstreetmap.org/${feature.properties!.objtype}/${feature.properties!.id}/history`"
           target="_blank"
           @click.stop
         >
-          {{ `${feature.properties?.objtype[0]}${feature.properties?.id}` }}
+          {{ `${feature.properties!.objtype[0]}${feature.properties!.id}` }}
         </a>
       </h3>
-      <span>👤{{ feature.properties?.username }}</span>
+      <span>👤{{ feature.properties!.username }}</span>
     </header>
-    <div v-show="selectedLink && ([selectedLink.before, selectedLink.after].includes(feature.id?.toString()))" class="actions">
+    <div v-show="isSelected" class="actions">
       <a
         type="button"
         title="Edit in OSM iD"
-        :href="`https://www.openstreetmap.org/${feature.properties?.objtype}/${feature.properties?.id}/history`"
+        :href="`https://www.openstreetmap.org/${feature.properties!.objtype}/${feature.properties!.id}/history`"
         target="_blank"
         @click.stop
       >
@@ -95,7 +97,7 @@ function handleClick(id?: string) {
       <a
         type="button"
         title="Edit in JOSM"
-        :href="`http://127.0.0.1:8111/load_object?objects=${feature.properties?.objtype[0]}${feature.properties?.id}`"
+        :href="`http://127.0.0.1:8111/load_object?objects=${feature.properties!.objtype[0]}${feature.properties!.id}`"
         target="hidden_josm_target"
         @click.stop
       >
@@ -104,7 +106,7 @@ function handleClick(id?: string) {
       <a
         type="button"
         title="OSM Deep History"
-        :href="`https://osmlab.github.io/osm-deep-history/#/${feature.properties?.objtype}/${feature.properties?.id}`"
+        :href="`https://osmlab.github.io/osm-deep-history/#/${feature.properties!.objtype}/${feature.properties!.id}`"
         target="_blank"
         @click.stop
       >
@@ -113,7 +115,7 @@ function handleClick(id?: string) {
       <a
         type="button"
         title="OSM History Viewer"
-        :href="`https://pewu.github.io/osm-history/#/${feature.properties?.objtype}/${feature.properties?.id}`"
+        :href="`https://pewu.github.io/osm-history/#/${feature.properties!.objtype}/${feature.properties!.id}`"
         target="_blank"
         @click.stop
       >

@@ -23,6 +23,7 @@ const initialFormValues = {
   bbox: '',
 } satisfies FormData
 
+// TODO: move presets to another file.
 const presets = [{
   title: 'Parking - (Points / Lines)',
   dateStart: new Date('2023-01-01').toISOString().split('T')[0],

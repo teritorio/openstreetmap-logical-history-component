@@ -11,14 +11,17 @@ const props = defineProps<{
 const lochaListRef = ref<HTMLUListElement | null>(null)
 const { selectedFeatures } = useLoCha()
 
+// TODO: Remove once n+n compatibility is handled
 watch(selectedFeatures, (newValue) => {
   if (newValue)
     nextTick(() => scrollToFeature())
 })
 
+// TODO: Remove this feature
+// We better reorganize list items for a better n+n compatibility
 function scrollToFeature() {
   selectedFeatures.value?.forEach((selectedF) => {
-    const index = props.features.findIndex(f => f.id?.toString() === selectedF.id?.toString())
+    const index = props.features.findIndex(f => f.id === selectedF.id)
 
     if (index > -1 && lochaListRef.value) {
       const targetItem = lochaListRef.value.children[index]

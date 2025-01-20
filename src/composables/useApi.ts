@@ -37,14 +37,40 @@ interface ApiComposable {
   setError: (err: Error) => void
 }
 
+type ActionType = 'accept' | 'reject'
+
+type Action = ['diff' | ActionType | string | null]
+
+type Actions = Record<string, Action[]>
+
+interface Changeset {
+  id: number
+  created_at: string
+  closed_at: string
+  open: boolean
+  user: string
+  uid: number
+  minlat: number
+  minlon: number
+  maxlat: number
+  maxlon: number
+  comments_count: number
+  changes_count: number
+  tags: Record<string, string>
+}
+
 /**
  * Interface representing a link in the API metadata.
  * A link typically points to a feature.
  */
 export interface ApiLink {
+  action: ActionType
+  // INFO: Internal use, check if still needed ?
   id: string
-  before?: string
-  after?: string
+  before?: number
+  after?: number
+  diff_attribs?: Actions
+  diff_tags?: Actions
 }
 
 /**
@@ -54,6 +80,7 @@ export interface ApiLink {
 export interface ApiResponse extends GeoJSON.FeatureCollection {
   metadata: {
     links: ApiLink[]
+    changesets: Changeset[]
   }
 }
 
@@ -139,6 +166,7 @@ export function useApiConfig(): ApiComposable {
    */
   function transformMetadata(metadata: ApiResponse['metadata']): ApiResponse['metadata'] {
     return {
+      ...metadata,
       links: metadata.links.map(link => ({
         ...link,
         id: `${link.before ?? ''}-${link.after ?? ''}`,
@@ -153,14 +181,14 @@ export function useApiConfig(): ApiComposable {
    * @returns The transformed features with additional properties.
    * @throws If a feature is missing a link in the metadata.
    */
-  function transformFeatures(data: ApiResponse): Array<GeoJSON.Feature> {
+  function transformFeatures(data: ApiResponse): ApiResponse['features'] {
     return data.features.map((feature) => {
       if (!feature.id)
         return feature
 
       // TODO: As of today it find only the first occurence of the feature ID
       // Need to find them all because we have a many-to-many relation with links
-      const link = data.metadata.links.find(({ before, after }) => before === feature.id!.toString() || after === feature.id!.toString())
+      const link = data.metadata.links.find(({ before, after }) => before === feature.id || after === feature.id)
 
       if (!link)
         throw new Error(`Feature ${feature.id} has no link.`)

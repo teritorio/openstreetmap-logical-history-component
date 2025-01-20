@@ -21,7 +21,7 @@ export interface IMap {
    */
   handleMapDataUpdate: (data: ApiResponse) => void
 
-  setFeatureHighlight: (id: string, state: boolean, storeState?: boolean) => void
+  setFeatureHighlight: (id: number, state: boolean, storeState?: boolean) => void
 }
 
 /**
@@ -167,9 +167,9 @@ const map = shallowRef<maplibre.Map>()
  */
 const source = ref<GeoJSONSource>()
 
-const hoveredStateId = ref<string>()
+const hoveredStateId = ref<number>()
 const popup = ref<maplibre.Popup>()
-const highlightedFeatures = ref<Set<string>>(new Set())
+const highlightedFeatures = ref<Set<number>>(new Set())
 
 /**
  * Provides methods to initialize and manage the map.
@@ -275,13 +275,16 @@ export function useMap(): IMap {
         if (!feature.id)
           throw new Error('Feature ID not found.')
 
+        if (typeof feature.id !== 'number')
+          throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
+
         if (hoveredStateId.value) {
           _removePopup()
 
           setFeatureHighlight(hoveredStateId.value, false)
         }
 
-        hoveredStateId.value = feature.id.toString()
+        hoveredStateId.value = feature.id
 
         setFeatureHighlight(hoveredStateId.value, true)
         _openPopup(e.lngLat, feature)
@@ -310,7 +313,7 @@ export function useMap(): IMap {
     })
   }
 
-  function setFeatureHighlight(id: string, state: boolean, storeState: boolean = false): void {
+  function setFeatureHighlight(id: number, state: boolean, storeState: boolean = false): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 

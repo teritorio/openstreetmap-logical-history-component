@@ -52,7 +52,7 @@ export interface LoCha {
   afterFeatures: Ref<GeoJSON.Feature[]>
   beforeFeatures: Ref<GeoJSON.Feature[]>
   featureCount: ComputedRef<number | undefined>
-  showLink: (id: string, status: Status) => void
+  showLink: (id: number, status: Status) => void
   linkCount: ComputedRef<number | undefined>
   loCha: Ref<ApiResponse | undefined>
   selectedLink: Ref<ApiLink | undefined>
@@ -112,7 +112,7 @@ export function useLoCha(): LoCha {
     _populateBeforeAfterFeatures()
   }
 
-  function showLink(id: string, status: Status): void {
+  function showLink(id: number, status: Status): void {
     const link = _getLink(id, status)
 
     if (!link)
@@ -144,8 +144,8 @@ export function useLoCha(): LoCha {
     return loChaStatus.updateAfter
   }
 
-  function _getFeature(id: string): GeoJSON.Feature | undefined {
-    return loCha.value?.features.find(feature => feature.id?.toString() === id)
+  function _getFeature(id: number): GeoJSON.Feature | undefined {
+    return loCha.value?.features.find(feature => feature.id === id)
   }
 
   /**
@@ -180,7 +180,7 @@ export function useLoCha(): LoCha {
     })
   }
 
-  function _getLink(id: string, status: Status): ApiLink | undefined {
+  function _getLink(id: number, status: Status): ApiLink | undefined {
     if (!loCha.value)
       throw new Error('LoCha not initialized, call setLoCha() first.')
 

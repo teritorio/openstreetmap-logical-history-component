@@ -12,6 +12,7 @@ const { init, handleMapDataUpdate } = useMap()
 
 onMounted(() => init(emit))
 
+// TODO: Move to useMap composable
 watch(loCha, (newValue) => {
   if (newValue) {
     handleMapDataUpdate(newValue)
