@@ -3,7 +3,7 @@ import type { Error } from '@/types'
 import type { AddLayerObject, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapMouseEvent } from 'maplibre-gl'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import maplibre from 'maplibre-gl'
-import { ref, shallowRef } from 'vue'
+import { ref, shallowRef, watch } from 'vue'
 
 /**
  * Interface defining the map functionality.
@@ -14,14 +14,6 @@ export interface IMap {
    * @param emits - The emits object for emitting events.
    */
   init: (emits: MapEmits) => void
-
-  /**
-   * Handles the update of map data and adjusts the map view accordingly.
-   * @param data - The data to update the map with.
-   */
-  handleMapDataUpdate: (data: ApiResponse) => void
-
-  setFeatureHighlight: (id: number, state: boolean, storeState?: boolean) => void
 }
 
 /**
@@ -29,7 +21,6 @@ export interface IMap {
  * This is used to emit various map-related events.
  */
 export interface MapEmits {
-  (e: 'click', feature: MapGeoJSONFeature): void
   (e: 'error', payload: Error): void
   (e: 'update-bbox', bbox: string): void
 }
@@ -173,10 +164,50 @@ const highlightedFeatures = ref<Set<number>>(new Set())
 
 /**
  * Provides methods to initialize and manage the map.
- * @returns The map-related functions such as `init` and `handleMapDataUpdate`.
+ * @returns The map-related functions such as `init`.
  */
 export function useMap(): IMap {
-  const { featureCount, loCha } = useLoCha()
+  const {
+    featureCount,
+    loCha,
+    selectedFeatures,
+    getStatus,
+    showLink,
+  } = useLoCha()
+
+  watch(selectedFeatures, (newValue, oldValue) => {
+    if (oldValue) {
+      oldValue.forEach((feature) => {
+        // TODO: once moved to composable, DRY it
+        if (!feature.id)
+          throw new Error('Feature ID not found.')
+
+        if (typeof feature.id !== 'number')
+          throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
+
+        _setFeatureHighlight(feature.id, false, true)
+      })
+    }
+
+    if (newValue) {
+      newValue.forEach((feature) => {
+        // TODO: once moved to composable, DRY it
+        if (!feature.id)
+          throw new Error('Feature ID not found.')
+
+        if (typeof feature.id !== 'number')
+          throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
+
+        _setFeatureHighlight(feature.id, true, true)
+      })
+    }
+  })
+
+  watch(loCha, (newValue) => {
+    if (newValue) {
+      _handleMapDataUpdate(newValue)
+    }
+  }, { deep: true })
 
   /**
    * Initializes the map, sets up the event listeners, and configures layers and sources.
@@ -201,7 +232,6 @@ export function useMap(): IMap {
           type: 'FeatureCollection',
           features: [],
         },
-        promoteId: 'id',
       })
 
       if (loCha.value?.bbox) {
@@ -221,7 +251,7 @@ export function useMap(): IMap {
    * Otherwise, it will reset the map to the initial view.
    * @param data - The map data to be set.
    */
-  function handleMapDataUpdate(data: ApiResponse): void {
+  function _handleMapDataUpdate(data: ApiResponse): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 
@@ -238,6 +268,40 @@ export function useMap(): IMap {
       map.value.setZoom(0)
       emit('error', { message: '0 changes have been found!', type: 'warning' })
     }
+  }
+
+  function _handleMapClick(feature: MapGeoJSONFeature): void {
+    // TODO: Once moved to composable, DRY it
+    if (!feature.id)
+      throw new Error('Feature ID not found.')
+
+    if (typeof feature.id !== 'number')
+      throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
+
+    const status = getStatus(feature)
+
+    showLink(feature.id, status)
+  }
+
+  function _setFeatureHighlight(id: number, state: boolean, storeState: boolean = false): void {
+    if (!map.value)
+      throw new Error('Call useMap.init() function first.')
+
+    if (storeState)
+      highlightedFeatures.value.clear()
+
+    if (!highlightedFeatures.value.has(id)) {
+      map.value!.setFeatureState(
+        {
+          source: SOURCE_ID,
+          id,
+        },
+        { hover: state },
+      )
+    }
+
+    if (storeState && state)
+      highlightedFeatures.value.add(id)
   }
 
   /**
@@ -259,7 +323,7 @@ export function useMap(): IMap {
       if (!features.length)
         return
 
-      emit('click', features[0])
+      _handleMapClick(features[0])
       _openPopup(e.lngLat, features[0])
     })
 
@@ -281,12 +345,12 @@ export function useMap(): IMap {
         if (hoveredStateId.value) {
           _removePopup()
 
-          setFeatureHighlight(hoveredStateId.value, false)
+          _setFeatureHighlight(hoveredStateId.value, false)
         }
 
         hoveredStateId.value = feature.id
 
-        setFeatureHighlight(hoveredStateId.value, true)
+        _setFeatureHighlight(hoveredStateId.value, true)
         _openPopup(e.lngLat, feature)
       })
 
@@ -304,34 +368,13 @@ export function useMap(): IMap {
         map.value.getCanvas().style.cursor = ''
 
         if (hoveredStateId.value) {
-          setFeatureHighlight(hoveredStateId.value, false)
+          _setFeatureHighlight(hoveredStateId.value, false)
           hoveredStateId.value = undefined
         }
 
         _removePopup()
       })
     })
-  }
-
-  function setFeatureHighlight(id: number, state: boolean, storeState: boolean = false): void {
-    if (!map.value)
-      throw new Error('Call useMap.init() function first.')
-
-    if (storeState)
-      highlightedFeatures.value.clear()
-
-    if (!highlightedFeatures.value.has(id)) {
-      map.value!.setFeatureState(
-        {
-          source: SOURCE_ID,
-          id,
-        },
-        { hover: state },
-      )
-    }
-
-    if (storeState && state)
-      highlightedFeatures.value.add(id)
   }
 
   /**
@@ -387,9 +430,5 @@ export function useMap(): IMap {
     emit('update-bbox', [[swLat, swLng], [neLat, neLng]].toString())
   }
 
-  return {
-    init,
-    handleMapDataUpdate,
-    setFeatureHighlight,
-  }
+  return { init }
 }

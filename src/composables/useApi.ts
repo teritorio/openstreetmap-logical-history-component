@@ -145,7 +145,6 @@ export function useApiConfig(): ApiComposable {
       .then(data => ({
         ...data,
         features: transformFeatures(data),
-        metadata: transformMetadata(data.metadata),
       }))
       .catch((err) => {
         setError({
@@ -156,22 +155,6 @@ export function useApiConfig(): ApiComposable {
         return undefined
       })
       .finally(() => loading.value = false)
-  }
-
-  /**
-   * Transforms the metadata of an API response by adding a unique `id` field to each link.
-   *
-   * @param metadata - The metadata object containing links to be transformed.
-   * @returns The transformed metadata with an `id` field added to each link.
-   */
-  function transformMetadata(metadata: ApiResponse['metadata']): ApiResponse['metadata'] {
-    return {
-      ...metadata,
-      links: metadata.links.map(link => ({
-        ...link,
-        id: `${link.before ?? ''}-${link.after ?? ''}`,
-      })),
-    }
   }
 
   /**

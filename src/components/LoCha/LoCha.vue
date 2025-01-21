@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
-import type { MapGeoJSONFeature } from 'maplibre-gl'
 import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { useMap } from '@/composables/useMap'
-import { watch, watchEffect } from 'vue'
+import { watchEffect } from 'vue'
 
 const props = defineProps<{
   data?: ApiResponse
@@ -23,11 +21,8 @@ const {
   beforeFeatures,
   featureCount,
   linkCount,
-  selectedFeatures,
   selectedLink,
   setLoCha,
-  showLink,
-  getStatus,
 } = useLoCha()
 
 watchEffect(() => {
@@ -35,51 +30,6 @@ watchEffect(() => {
     setLoCha(props.data)
   }
 })
-
-const { setFeatureHighlight } = useMap()
-
-// TODO: Move it to useMap composable
-watch(selectedFeatures, (newValue, oldValue) => {
-  if (oldValue) {
-    oldValue.forEach((feature) => {
-      // TODO: once moved to composable, DRY it
-      if (!feature.id)
-        throw new Error('Feature ID not found.')
-
-      if (typeof feature.id !== 'number')
-        throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
-
-      setFeatureHighlight(feature.id, false, true)
-    })
-  }
-
-  if (newValue) {
-    newValue.forEach((feature) => {
-      // TODO: once moved to composable, DRY it
-      if (!feature.id)
-        throw new Error('Feature ID not found.')
-
-      if (typeof feature.id !== 'number')
-        throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
-
-      setFeatureHighlight(feature.id, true, true)
-    })
-  }
-})
-
-// TODO: Move it to useMap composable
-function handleMapClick(feature: MapGeoJSONFeature) {
-  // TODO: Once moved to composable, DRY it
-  if (!feature.id)
-    throw new Error('Feature ID not found.')
-
-  if (typeof feature.id !== 'number')
-    throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
-
-  const status = getStatus(feature)
-
-  showLink(feature.id, status)
-}
 </script>
 
 <template>
@@ -93,7 +43,6 @@ function handleMapClick(feature: MapGeoJSONFeature) {
       <LoChaList :features="afterFeatures" title="After" />
     </div>
     <VMap
-      @click="handleMapClick"
       @error="emit('error', $event)"
       @update-bbox="emit('updateBbox', $event)"
     />

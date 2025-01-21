@@ -6,6 +6,7 @@ const props = defineProps<{
   feature: GeoJSON.Feature
 }>()
 
+// TODO: move as much as possible into useLoCha composable
 if (!props.feature.id)
   throw new Error(`Feature ID is missing.`)
 
@@ -50,7 +51,10 @@ const isSelected = computed(() => {
   if (!selectedLink.value)
     return false
 
-  return selectedLink.value.id.includes(props.feature.id!.toString())
+  if (typeof props.feature.id !== 'number')
+    throw new Error(`Feature ${props.feature.id} ID has wrong type: ${typeof props.feature.id}. Should be a number.`)
+
+  return [selectedLink.value.before, selectedLink.value.after].includes(props.feature.id)
 })
 
 const style = computed(() => ({
@@ -58,6 +62,7 @@ const style = computed(() => ({
 }))
 
 const { showLink, resetLink } = useLoCha()
+// TODO: Move to useLoCha composable
 function handleClick(id: string | number) {
   if (typeof id !== 'number')
     throw new Error(`Feature ${id} ID has wrong type: ${typeof id}. Should be a number.`)
