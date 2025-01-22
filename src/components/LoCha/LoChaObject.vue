@@ -7,7 +7,7 @@ const props = defineProps<{
 }>()
 
 // TODO: move as much as possible into useLoCha composable
-if (!props.feature.id)
+if (props.feature.id === undefined)
   throw new Error(`Feature ID is missing.`)
 
 if (!props.feature.properties)

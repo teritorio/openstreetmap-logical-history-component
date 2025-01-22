@@ -166,8 +166,11 @@ export function useApiConfig(): ApiComposable {
    */
   function transformFeatures(data: ApiResponse): ApiResponse['features'] {
     return data.features.map((feature) => {
-      if (!feature.id)
-        return feature
+      if (feature.id === undefined)
+        throw new Error(`Feature ID is missing.`)
+
+      if (typeof feature.id !== 'number')
+        throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
 
       // TODO: As of today it find only the first occurence of the feature ID
       // Need to find them all because we have a many-to-many relation with links

@@ -179,7 +179,7 @@ export function useMap(): IMap {
     if (oldValue) {
       oldValue.forEach((feature) => {
         // TODO: once moved to composable, DRY it
-        if (!feature.id)
+        if (feature.id === undefined)
           throw new Error('Feature ID not found.')
 
         if (typeof feature.id !== 'number')
@@ -192,7 +192,7 @@ export function useMap(): IMap {
     if (newValue) {
       newValue.forEach((feature) => {
         // TODO: once moved to composable, DRY it
-        if (!feature.id)
+        if (feature.id === undefined)
           throw new Error('Feature ID not found.')
 
         if (typeof feature.id !== 'number')
@@ -272,7 +272,7 @@ export function useMap(): IMap {
 
   function _handleMapClick(feature: MapGeoJSONFeature): void {
     // TODO: Once moved to composable, DRY it
-    if (!feature.id)
+    if (feature.id === undefined)
       throw new Error('Feature ID not found.')
 
     if (typeof feature.id !== 'number')
@@ -336,13 +336,13 @@ export function useMap(): IMap {
 
         const feature = e.features[0]
 
-        if (!feature.id)
+        if (feature.id === undefined)
           throw new Error('Feature ID not found.')
 
         if (typeof feature.id !== 'number')
           throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
 
-        if (hoveredStateId.value) {
+        if (hoveredStateId.value !== undefined) {
           _removePopup()
 
           _setFeatureHighlight(hoveredStateId.value, false)
@@ -367,7 +367,7 @@ export function useMap(): IMap {
 
         map.value.getCanvas().style.cursor = ''
 
-        if (hoveredStateId.value) {
+        if (hoveredStateId.value !== undefined) {
           _setFeatureHighlight(hoveredStateId.value, false)
           hoveredStateId.value = undefined
         }
