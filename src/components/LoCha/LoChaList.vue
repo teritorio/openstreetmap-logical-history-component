@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import type { IFeature } from '@/composables/useApi'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 
 defineProps<{
-  features: GeoJSON.Feature[]
+  features: IFeature[]
   title: string
 }>()
 </script>

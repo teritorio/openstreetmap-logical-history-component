@@ -1,4 +1,4 @@
-import type { ApiLink, ApiResponse } from '@/composables/useApi'
+import type { ApiLink, ApiResponse, IFeature } from '@/composables/useApi'
 import type { ComputedRef, Ref } from 'vue'
 import { computed, ref } from 'vue'
 
@@ -49,23 +49,23 @@ export const loChaStatus = Object.fromEntries(
  * which includes various references and computed values to track the features and metadata.
  */
 export interface LoCha {
-  afterFeatures: Ref<GeoJSON.Feature[]>
-  beforeFeatures: Ref<GeoJSON.Feature[]>
+  afterFeatures: Ref<IFeature[]>
+  beforeFeatures: Ref<IFeature[]>
   featureCount: ComputedRef<number | undefined>
   showLink: (id: number, status: Status) => void
   linkCount: ComputedRef<number | undefined>
   loCha: Ref<ApiResponse | undefined>
   selectedLink: Ref<ApiLink | undefined>
-  selectedFeatures: ComputedRef<GeoJSON.Feature[] | undefined>
+  selectedFeatures: ComputedRef<IFeature[] | undefined>
   setLoCha: (loCha: ApiResponse) => void
   resetLink: () => void
-  getStatus: (feature: GeoJSON.Feature) => Status
+  getStatus: (feature: IFeature) => Status
 }
 
 // Internal state variables
 const loCha = ref<ApiResponse>()
-const afterFeatures = ref<GeoJSON.Feature[]>([])
-const beforeFeatures = ref<GeoJSON.Feature[]>([])
+const afterFeatures = ref<IFeature[]>([])
+const beforeFeatures = ref<IFeature[]>([])
 const selectedLink = ref<ApiLink>()
 
 /**
@@ -90,8 +90,8 @@ export function useLoCha(): LoCha {
     if (!selectedLink.value)
       return
 
-    let after: GeoJSON.Feature | undefined
-    let before: GeoJSON.Feature | undefined
+    let after: IFeature | undefined
+    let before: IFeature | undefined
 
     if (selectedLink.value.after)
       after = _getFeature(selectedLink.value.after)
@@ -125,10 +125,7 @@ export function useLoCha(): LoCha {
     selectedLink.value = undefined
   }
 
-  function getStatus(feature: GeoJSON.Feature): Status {
-    if (!feature.properties)
-      throw new Error(`Feature ${feature.id} has no properties.`)
-
+  function getStatus(feature: IFeature): Status {
     if (feature.properties.is_created) {
       return loChaStatus.create
     }
@@ -144,7 +141,7 @@ export function useLoCha(): LoCha {
     return loChaStatus.updateAfter
   }
 
-  function _getFeature(id: number): GeoJSON.Feature | undefined {
+  function _getFeature(id: number): IFeature | undefined {
     return loCha.value?.features.find(feature => feature.id === id)
   }
 
@@ -162,22 +159,38 @@ export function useLoCha(): LoCha {
     if (!featureCount.value)
       return
 
-    loCha.value.features.forEach((feature) => {
-      if (!feature.properties)
-        return
+    const sortByObjType = (feature: IFeature): number => {
+      switch (feature.properties.objtype) {
+        case 'node': return 1
+        case 'way': return 2
+        case 'relation': return 3
+        default: return 4
+      }
+    }
 
-      if (feature.properties.is_before)
-        beforeFeatures.value.push(feature)
+    const sortByActionType = (feature: IFeature): number => {
+      const { is_before, is_after, is_created, is_deleted } = feature.properties
+      if (is_before || is_after)
+        return 1
+      if (is_created)
+        return 2
+      if (is_deleted)
+        return 3
+      return 4
+    }
 
-      if (feature.properties.is_deleted)
-        beforeFeatures.value.push(feature)
+    loCha.value.features
+      .sort((a, b) => sortByObjType(a) - sortByObjType(b))
+      .sort((a, b) => sortByActionType(a) - sortByActionType(b))
+      .forEach((feature) => {
+        const { is_before, is_after, is_created, is_deleted } = feature.properties
 
-      if (feature.properties.is_after)
-        afterFeatures.value.push(feature)
+        if (is_before || is_deleted)
+          beforeFeatures.value.push(feature)
 
-      if (feature.properties.is_created)
-        afterFeatures.value.push(feature)
-    })
+        if (is_after || is_created)
+          afterFeatures.value.push(feature)
+      })
   }
 
   function _getLink(id: number, status: Status): ApiLink | undefined {

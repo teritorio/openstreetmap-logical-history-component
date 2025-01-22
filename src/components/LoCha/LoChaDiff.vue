@@ -9,10 +9,10 @@ const diffTags = computed(() => {
     return
 
   let before, after
-  if (selectedFeatures.value[0].properties?.is_created) {
+  if (selectedFeatures.value[0].properties.is_created) {
     after = selectedFeatures.value[0]
   }
-  else if (selectedFeatures.value[0].properties?.is_deleted) {
+  else if (selectedFeatures.value[0].properties.is_deleted) {
     before = selectedFeatures.value[0]
   }
   else {
@@ -21,11 +21,11 @@ const diffTags = computed(() => {
   }
 
   const diff = []
-  const allKeys = new Set([...Object.keys(before?.properties?.tags || {}), ...Object.keys(after?.properties?.tags || {})])
+  const allKeys = new Set([...Object.keys(before?.properties.tags || {}), ...Object.keys(after?.properties.tags || {})])
 
   for (const key of allKeys) {
-    const beforeValue = before?.properties?.tags[key] || null
-    const afterValue = after?.properties?.tags[key] || null
+    const beforeValue = before?.properties.tags[key] || null
+    const afterValue = after?.properties.tags[key] || null
 
     let status = ''
     if (beforeValue === afterValue) {

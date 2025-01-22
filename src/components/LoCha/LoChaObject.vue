@@ -1,28 +1,23 @@
 <script setup lang="ts">
+import type { IFeature } from '@/composables/useApi'
 import { loChaColors, loChaStatus, useLoCha } from '@/composables/useLoCha'
 import { computed } from 'vue'
 
 const props = defineProps<{
-  feature: GeoJSON.Feature
+  feature: IFeature
 }>()
 
 // TODO: move as much as possible into useLoCha composable
-if (props.feature.id === undefined)
-  throw new Error(`Feature ID is missing.`)
-
-if (!props.feature.properties)
-  throw new Error(`Feature ${props.feature.id} has no properties.`)
-
 const status = computed(() => {
-  if (props.feature.properties!.is_created) {
+  if (props.feature.properties.is_created) {
     return loChaStatus.create
   }
 
-  if (props.feature.properties!.is_deleted) {
+  if (props.feature.properties.is_deleted) {
     return loChaStatus.delete
   }
 
-  if (props.feature.properties!.is_before) {
+  if (props.feature.properties.is_before) {
     return loChaStatus.updateBefore
   }
 
@@ -30,7 +25,7 @@ const status = computed(() => {
 })
 
 const name = computed(() => {
-  const content = props.feature.properties!.tags.name || '-'
+  const content = props.feature.properties.tags.name || '-'
 
   switch (status.value) {
     case 'create':
@@ -51,9 +46,6 @@ const isSelected = computed(() => {
   if (!selectedLink.value)
     return false
 
-  if (typeof props.feature.id !== 'number')
-    throw new Error(`Feature ${props.feature.id} ID has wrong type: ${typeof props.feature.id}. Should be a number.`)
-
   return [selectedLink.value.before, selectedLink.value.after].includes(props.feature.id)
 })
 
@@ -63,10 +55,7 @@ const style = computed(() => ({
 
 const { showLink, resetLink } = useLoCha()
 // TODO: Move to useLoCha composable
-function handleClick(id: string | number) {
-  if (typeof id !== 'number')
-    throw new Error(`Feature ${id} ID has wrong type: ${typeof id}. Should be a number.`)
-
+function handleClick(id: number) {
   isSelected.value
     ? resetLink()
     : showLink(id, status.value)
@@ -74,53 +63,60 @@ function handleClick(id: string | number) {
 </script>
 
 <template>
-  <article :style="style" class="locha-object" @click="handleClick(feature.id!)">
+  <article :style="style" class="locha-object" @click="handleClick(feature.id)">
     <header>
       <h3>
         {{ name }}
         <a
+          :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"
           title="OSM History"
-          :href="`https://www.openstreetmap.org/${feature.properties!.objtype}/${feature.properties!.id}/history`"
           target="_blank"
           @click.stop
         >
-          {{ `${feature.properties!.objtype[0]}${feature.properties!.id}` }}
+          {{ `${feature.properties.objtype[0]}${feature.properties.id}` }}
         </a>
       </h3>
-      <span>👤{{ feature.properties!.username }}</span>
+      <a
+        :href="`https://www.openstreetmap.org/user/${feature.properties.username}`"
+        :title="`View ${feature.properties.username} OSM profile`"
+        target="_blank"
+        @click.stop
+      >
+        👤{{ feature.properties.username }}
+      </a>
     </header>
     <div v-show="isSelected" class="actions">
       <a
+        :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"
         type="button"
         title="Edit in OSM iD"
-        :href="`https://www.openstreetmap.org/${feature.properties!.objtype}/${feature.properties!.id}/history`"
         target="_blank"
         @click.stop
       >
         OSM iD
       </a>
       <a
+        :href="`http://127.0.0.1:8111/load_object?objects=${feature.properties.objtype[0]}${feature.properties.id}`"
         type="button"
         title="Edit in JOSM"
-        :href="`http://127.0.0.1:8111/load_object?objects=${feature.properties!.objtype[0]}${feature.properties!.id}`"
         target="hidden_josm_target"
         @click.stop
       >
         JOSM
       </a>
       <a
+        :href="`https://osmlab.github.io/osm-deep-history/#/${feature.properties.objtype}/${feature.properties.id}`"
         type="button"
         title="OSM Deep History"
-        :href="`https://osmlab.github.io/osm-deep-history/#/${feature.properties!.objtype}/${feature.properties!.id}`"
         target="_blank"
         @click.stop
       >
         Deep H
       </a>
       <a
+        :href="`https://pewu.github.io/osm-history/#/${feature.properties.objtype}/${feature.properties.id}`"
         type="button"
         title="OSM History Viewer"
-        :href="`https://pewu.github.io/osm-history/#/${feature.properties!.objtype}/${feature.properties!.id}`"
         target="_blank"
         @click.stop
       >
@@ -147,7 +143,7 @@ h3 {
   font-weight: 400;
 }
 
-span {
+h3 + a {
   font-size: 0.75em;
   color: #333333;
 }

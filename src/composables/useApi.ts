@@ -37,6 +37,8 @@ interface ApiComposable {
   setError: (err: Error) => void
 }
 
+type ObjectType = 'node' | 'way' | 'relation'
+
 type ActionType = 'accept' | 'reject'
 
 type Action = ['diff' | ActionType | string | null]
@@ -73,11 +75,30 @@ export interface ApiLink {
   diff_tags?: Actions
 }
 
+export interface IFeature extends GeoJSON.Feature {
+  id: number
+  properties: {
+    objtype: ObjectType
+    id: number
+    geom_distance: number
+    deleted: boolean
+    version: number
+    username: string
+    created: string
+    tags: Record<string, string>
+    is_before?: boolean
+    is_after?: boolean
+    is_created?: boolean
+    is_deleted?: boolean
+  }
+}
+
 /**
  * Interface representing the API response.
  * Extends `GeoJSON.FeatureCollection` to represent geographic data and includes additional metadata.
  */
 export interface ApiResponse extends GeoJSON.FeatureCollection {
+  features: IFeature[]
   metadata: {
     links: ApiLink[]
     changesets: Changeset[]
@@ -166,12 +187,6 @@ export function useApiConfig(): ApiComposable {
    */
   function transformFeatures(data: ApiResponse): ApiResponse['features'] {
     return data.features.map((feature) => {
-      if (feature.id === undefined)
-        throw new Error(`Feature ID is missing.`)
-
-      if (typeof feature.id !== 'number')
-        throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
-
       // TODO: As of today it find only the first occurence of the feature ID
       // Need to find them all because we have a many-to-many relation with links
       const link = data.metadata.links.find(({ before, after }) => before === feature.id || after === feature.id)
@@ -221,7 +236,8 @@ export function useApiConfig(): ApiComposable {
       }
 
       return feature
-    }).sort((a, b) => area(b) - area(a))
+    })
+      .sort((a, b) => area(b) - area(a)) // Sort by area surface in order to have bigger geometries before smaller ones.
   }
 
   function setError(err: Error): void {

@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/composables/useApi'
+import type { ApiResponse, IFeature } from '@/composables/useApi'
 import type { Error } from '@/types'
 import type { AddLayerObject, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapMouseEvent } from 'maplibre-gl'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
@@ -179,12 +179,6 @@ export function useMap(): IMap {
     if (oldValue) {
       oldValue.forEach((feature) => {
         // TODO: once moved to composable, DRY it
-        if (feature.id === undefined)
-          throw new Error('Feature ID not found.')
-
-        if (typeof feature.id !== 'number')
-          throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
-
         _setFeatureHighlight(feature.id, false, true)
       })
     }
@@ -192,12 +186,6 @@ export function useMap(): IMap {
     if (newValue) {
       newValue.forEach((feature) => {
         // TODO: once moved to composable, DRY it
-        if (feature.id === undefined)
-          throw new Error('Feature ID not found.')
-
-        if (typeof feature.id !== 'number')
-          throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
-
         _setFeatureHighlight(feature.id, true, true)
       })
     }
@@ -271,16 +259,35 @@ export function useMap(): IMap {
   }
 
   function _handleMapClick(feature: MapGeoJSONFeature): void {
-    // TODO: Once moved to composable, DRY it
-    if (feature.id === undefined)
-      throw new Error('Feature ID not found.')
+    const iFeature = mapToIFeature(feature)
+    const status = getStatus(iFeature)
 
+    showLink(iFeature.id, status)
+  }
+
+  function mapToIFeature(feature: MapGeoJSONFeature): IFeature {
     if (typeof feature.id !== 'number')
-      throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
+      throw new TypeError(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
 
-    const status = getStatus(feature)
-
-    showLink(feature.id, status)
+    return {
+      ...feature,
+      geometry: feature.geometry,
+      id: feature.id,
+      properties: {
+        objtype: feature.properties.objtype,
+        id: feature.properties.id,
+        geom_distance: feature.properties.geom_distance,
+        deleted: feature.properties.deleted,
+        version: feature.properties.version,
+        username: feature.properties.username,
+        created: feature.properties.created,
+        tags: feature.properties.tags,
+        is_before: feature.properties.is_before,
+        is_after: feature.properties.is_after,
+        is_created: feature.properties.is_created,
+        is_deleted: feature.properties.is_deleted,
+      },
+    } satisfies IFeature
   }
 
   function _setFeatureHighlight(id: number, state: boolean, storeState: boolean = false): void {
