@@ -194,7 +194,7 @@ export function useApiConfig(): ApiComposable {
       if (!link)
         throw new Error(`Feature ${feature.id} has no link.`)
 
-      if (link.before && !link.after) {
+      if (link.before !== undefined && link.after === undefined) {
         return {
           ...feature,
           properties: {
@@ -204,7 +204,7 @@ export function useApiConfig(): ApiComposable {
         }
       }
 
-      if (!link.before && link.after) {
+      if (link.before === undefined && link.after !== undefined) {
         return {
           ...feature,
           properties: {

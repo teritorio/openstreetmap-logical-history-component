@@ -66,7 +66,6 @@ function handleClick(id: number) {
   <article :style="style" class="locha-object" @click="handleClick(feature.id)">
     <header>
       <h3>
-        {{ name }}
         <a
           :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"
           title="OSM History"
@@ -75,6 +74,7 @@ function handleClick(id: number) {
         >
           {{ `${feature.properties.objtype[0]}${feature.properties.id}` }}
         </a>
+        {{ name }}
       </h3>
       <a
         :href="`https://www.openstreetmap.org/user/${feature.properties.username}`"

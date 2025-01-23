@@ -93,10 +93,10 @@ export function useLoCha(): LoCha {
     let after: IFeature | undefined
     let before: IFeature | undefined
 
-    if (selectedLink.value.after)
+    if (selectedLink.value.after !== undefined)
       after = _getFeature(selectedLink.value.after)
 
-    if (selectedLink.value.before)
+    if (selectedLink.value.before !== undefined)
       before = _getFeature(selectedLink.value.before)
 
     return [after, before].filter(t => t !== undefined)
