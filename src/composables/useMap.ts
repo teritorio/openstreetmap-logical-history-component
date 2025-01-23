@@ -158,7 +158,7 @@ const map = shallowRef<maplibre.Map>()
  */
 const source = ref<GeoJSONSource>()
 
-const hoveredStateId = ref<number>()
+const hoveredStateFeature = ref<IFeature>()
 const popup = ref<maplibre.Popup>()
 const highlightedFeatures = ref<Set<number>>(new Set())
 
@@ -177,17 +177,11 @@ export function useMap(): IMap {
 
   watch(selectedFeatures, (newValue, oldValue) => {
     if (oldValue) {
-      oldValue.forEach((feature) => {
-        // TODO: once moved to composable, DRY it
-        _setFeatureHighlight(feature.id, false, true)
-      })
+      _setFeatureHighlight(oldValue, false, true)
     }
 
     if (newValue) {
-      newValue.forEach((feature) => {
-        // TODO: once moved to composable, DRY it
-        _setFeatureHighlight(feature.id, true, true)
-      })
+      _setFeatureHighlight(newValue, true, true)
     }
   })
 
@@ -216,15 +210,11 @@ export function useMap(): IMap {
     map.value.on('load', () => {
       map.value?.addSource(SOURCE_ID, {
         type: 'geojson',
-        data: loCha.value || {
+        data: {
           type: 'FeatureCollection',
           features: [],
         },
       })
-
-      if (loCha.value?.bbox) {
-        map.value?.fitBounds(new maplibre.LngLatBounds(loCha.value.bbox as [number, number, number, number]), { padding: 20 })
-      }
 
       source.value = map.value?.getSource(SOURCE_ID)
 
@@ -258,11 +248,10 @@ export function useMap(): IMap {
     }
   }
 
-  function _handleMapClick(feature: MapGeoJSONFeature): void {
-    const iFeature = mapToIFeature(feature)
-    const status = getStatus(iFeature)
+  function _handleMapClick(feature: IFeature): void {
+    const status = getStatus(feature)
 
-    showLink(iFeature.id, status)
+    showLink(feature.id, status)
   }
 
   function mapToIFeature(feature: MapGeoJSONFeature): IFeature {
@@ -290,25 +279,27 @@ export function useMap(): IMap {
     } satisfies IFeature
   }
 
-  function _setFeatureHighlight(id: number, state: boolean, storeState: boolean = false): void {
+  function _setFeatureHighlight(features: IFeature[], state: boolean, storeState: boolean = false): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 
     if (storeState)
       highlightedFeatures.value.clear()
 
-    if (!highlightedFeatures.value.has(id)) {
-      map.value!.setFeatureState(
-        {
-          source: SOURCE_ID,
-          id,
-        },
-        { hover: state },
-      )
-    }
+    features.forEach((feature) => {
+      if (!highlightedFeatures.value.has(feature.id)) {
+        map.value!.setFeatureState(
+          {
+            source: SOURCE_ID,
+            id: feature.id,
+          },
+          { hover: state },
+        )
+      }
 
-    if (storeState && state)
-      highlightedFeatures.value.add(id)
+      if (storeState && state)
+        highlightedFeatures.value.add(feature.id)
+    })
   }
 
   /**
@@ -330,8 +321,10 @@ export function useMap(): IMap {
       if (!features.length)
         return
 
-      _handleMapClick(features[0])
-      _openPopup(e.lngLat, features[0])
+      const feature = mapToIFeature(features[0])
+
+      _handleMapClick(feature)
+      _openPopup(e.lngLat, feature)
     })
 
     map.value.on('moveend', _updateBoundingBox)
@@ -341,23 +334,17 @@ export function useMap(): IMap {
         if (!e.features || e.features.length === 0)
           return
 
-        const feature = e.features[0]
+        const feature = mapToIFeature(e.features[0])
 
-        if (feature.id === undefined)
-          throw new Error('Feature ID not found.')
-
-        if (typeof feature.id !== 'number')
-          throw new Error(`Feature ${feature.id} ID has wrong type: ${typeof feature.id}. Should be a number.`)
-
-        if (hoveredStateId.value !== undefined) {
+        if (hoveredStateFeature.value !== undefined) {
           _removePopup()
 
-          _setFeatureHighlight(hoveredStateId.value, false)
+          _setFeatureHighlight([hoveredStateFeature.value], false)
         }
 
-        hoveredStateId.value = feature.id
+        hoveredStateFeature.value = feature
 
-        _setFeatureHighlight(hoveredStateId.value, true)
+        _setFeatureHighlight([hoveredStateFeature.value], true)
         _openPopup(e.lngLat, feature)
       })
 
@@ -374,9 +361,9 @@ export function useMap(): IMap {
 
         map.value.getCanvas().style.cursor = ''
 
-        if (hoveredStateId.value !== undefined) {
-          _setFeatureHighlight(hoveredStateId.value, false)
-          hoveredStateId.value = undefined
+        if (hoveredStateFeature.value !== undefined) {
+          _setFeatureHighlight([hoveredStateFeature.value], false)
+          hoveredStateFeature.value = undefined
         }
 
         _removePopup()
@@ -390,7 +377,7 @@ export function useMap(): IMap {
    * @param coords - Popup coordinates.
    * @param feature - Selected feature information for Popup display
    */
-  function _openPopup(coords: LngLatLike, feature: MapGeoJSONFeature): void {
+  function _openPopup(coords: LngLatLike, feature: IFeature): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 

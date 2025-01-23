@@ -50,7 +50,7 @@ const isSelected = computed(() => {
 })
 
 const style = computed(() => ({
-  opacity: isSelected.value ? 1 : 0.3,
+  opacity: !selectedLink.value || isSelected.value ? 1 : 0.3,
 }))
 
 const { showLink, resetLink } = useLoCha()
