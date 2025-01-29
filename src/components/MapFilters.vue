@@ -40,6 +40,11 @@ const presets = [{
   dateStart: new Date('2024-12-10').toISOString().split('T')[0],
   dateEnd: new Date('2024-12-15').toISOString().split('T')[0],
   bbox: '42.685107065011486,-1.6537454710167148,42.68686379572838,-1.6509720668953156',
+}, {
+  title: 'n+n relation',
+  dateStart: new Date('2023-01-01').toISOString().split('T')[0],
+  dateEnd: new Date('2023-12-01').toISOString().split('T')[0],
+  bbox: '43.55969828696391,-1.4598269945865354,43.565655969760684,-1.4323757210520682',
 }] satisfies Preset[]
 
 const formRef = ref<InstanceType<typeof HTMLFormElement>>()

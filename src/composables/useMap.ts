@@ -279,7 +279,7 @@ export function useMap(): IMap {
     } satisfies IFeature
   }
 
-  function _setFeatureHighlight(features: IFeature[], state: boolean, storeState: boolean = false): void {
+  function _setFeatureHighlight(features: Set<IFeature>, state: boolean, storeState: boolean = false): void {
     if (!map.value)
       throw new Error('Call useMap.init() function first.')
 
@@ -338,13 +338,12 @@ export function useMap(): IMap {
 
         if (hoveredStateFeature.value !== undefined) {
           _removePopup()
-
-          _setFeatureHighlight([hoveredStateFeature.value], false)
+          _setFeatureHighlight(new Set([hoveredStateFeature.value]), false)
         }
 
         hoveredStateFeature.value = feature
 
-        _setFeatureHighlight([hoveredStateFeature.value], true)
+        _setFeatureHighlight(new Set([hoveredStateFeature.value]), true)
         _openPopup(e.lngLat, feature)
       })
 
@@ -362,7 +361,7 @@ export function useMap(): IMap {
         map.value.getCanvas().style.cursor = ''
 
         if (hoveredStateFeature.value !== undefined) {
-          _setFeatureHighlight([hoveredStateFeature.value], false)
+          _setFeatureHighlight(new Set([hoveredStateFeature.value]), false)
           hoveredStateFeature.value = undefined
         }
 

@@ -1,17 +1,36 @@
 <script setup lang="ts">
 import type { IFeature } from '@/composables/useApi'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
+import { useLoCha } from '@/composables/useLoCha'
+import { ref, watch } from 'vue'
 
 defineProps<{
   features: IFeature[]
   title: string
 }>()
+
+const { selectedFeatures } = useLoCha()
+
+watch(selectedFeatures, (newValue) => {
+  if (newValue.size)
+    scrollToTop()
+})
+
+const lochaListRef = ref<HTMLUListElement | null>(null)
+function scrollToTop() {
+  if (lochaListRef.value) {
+    lochaListRef.value.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    })
+  }
+}
 </script>
 
 <template>
   <div class="locha-list">
     <h2>{{ title }}</h2>
-    <ul class="locha-list">
+    <ul ref="lochaListRef" class="locha-list">
       <li
         v-for="feature in features"
         :key="feature.id"

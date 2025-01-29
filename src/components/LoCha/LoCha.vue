@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
-import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { watchEffect } from 'vue'
+import { watch } from 'vue'
 
 const props = defineProps<{
   data?: ApiResponse
@@ -21,13 +20,12 @@ const {
   beforeFeatures,
   featureCount,
   linkCount,
-  selectedLink,
   setLoCha,
 } = useLoCha()
 
-watchEffect(() => {
-  if (props.data) {
-    setLoCha(props.data)
+watch(() => props.data, (newValue) => {
+  if (newValue) {
+    setLoCha(newValue)
   }
 })
 </script>
@@ -39,7 +37,6 @@ watchEffect(() => {
     </p>
     <div v-else class="locha-content">
       <LoChaList :features="beforeFeatures" title="Before" />
-      <LoChaDiff v-show="selectedLink" />
       <LoChaList :features="afterFeatures" title="After" />
     </div>
     <VMap

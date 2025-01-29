@@ -41,16 +41,11 @@ const name = computed(() => {
 
 const color = computed(() => loChaColors[status.value])
 
-const { selectedLink } = useLoCha()
-const isSelected = computed(() => {
-  if (!selectedLink.value)
-    return false
-
-  return [selectedLink.value.before, selectedLink.value.after].includes(props.feature.id)
-})
+const { selectedLinks } = useLoCha()
+const isSelected = computed(() => !!(selectedLinks.value.length && selectedLinks.value.find(link => [link.before, link.after].includes(props.feature.id))))
 
 const style = computed(() => ({
-  opacity: !selectedLink.value || isSelected.value ? 1 : 0.3,
+  opacity: !selectedLinks.value || isSelected.value ? 1 : 0.3,
 }))
 
 const { showLink, resetLink } = useLoCha()

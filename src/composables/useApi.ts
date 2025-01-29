@@ -67,8 +67,6 @@ interface Changeset {
  */
 export interface ApiLink {
   action: ActionType
-  // INFO: Internal use, check if still needed ?
-  id: string
   before?: number
   after?: number
   diff_attribs?: Actions
