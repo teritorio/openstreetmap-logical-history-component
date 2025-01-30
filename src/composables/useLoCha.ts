@@ -139,7 +139,7 @@ export function useLoCha(): LoCha {
     // Search indirect links containing clicked link before id
     if (status === 'updateAfter') {
       selectedLinks.value.forEach((link) => {
-        if (!link.before)
+        if (link.before === undefined)
           return
 
         const additionalLinks = loCha.value!.metadata.links.filter(l => l.after !== id && [l.before, l.after].includes(link.before))

@@ -39,9 +39,9 @@ interface ApiComposable {
 
 type ObjectType = 'node' | 'way' | 'relation'
 
-type ActionType = 'accept' | 'reject'
+export type ActionType = 'accept' | 'reject'
 
-type Action = ['diff' | ActionType | string | null]
+export type Action = ['diff' | ActionType | string | null]
 
 type Actions = Record<string, Action[]>
 

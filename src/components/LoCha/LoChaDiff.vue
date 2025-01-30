@@ -1,87 +1,70 @@
 <script setup lang="ts">
-import { loChaColors, loChaStatus, useLoCha } from '@/composables/useLoCha'
-import { computed } from 'vue'
+import { loChaColors, useLoCha } from '@/composables/useLoCha'
 
-const { selectedFeatures } = useLoCha()
+const { selectedLinks } = useLoCha()
 
-const diffTags = computed(() => {
-  if (!selectedFeatures.value || !selectedFeatures.value.length)
-    return
+function actionIcon(key: string, linkIndex: number): string {
+  const link = selectedLinks.value[linkIndex]
 
-  let before, after
-  if (selectedFeatures.value[0].properties.is_created) {
-    after = selectedFeatures.value[0]
-  }
-  else if (selectedFeatures.value[0].properties.is_deleted) {
-    before = selectedFeatures.value[0]
-  }
-  else {
-    before = selectedFeatures.value[0]
-    after = selectedFeatures.value[1]
-  }
+  return (
+    link.diff_tags![key] && link.before === undefined
+      ? '➕'
+      : link.after === undefined
+        ? '✖'
+        : '~')
+}
 
-  const diff = []
-  const allKeys = new Set([...Object.keys(before?.properties.tags || {}), ...Object.keys(after?.properties.tags || {})])
+// TODO: groupBy selectedLinks.value[link].diff_tags[key][index][0] (ex: 'tags_changes_significant', 'tags_changes_non_significant')
+// const groupedKeys = computed((): string[][] {
+//   const keys: string[] = _.sortBy(
+//     _.uniq([...Object.keys(this.src || {}), ...Object.keys(this.dst)]),
+//     (key) => (this.diff[key] ? -maxActionPriority(this.diff[key]) : 0),
+//   )
 
-  for (const key of allKeys) {
-    const beforeValue = before?.properties.tags[key] || null
-    const afterValue = after?.properties.tags[key] || null
+//   return Object.values(
+//     _.groupBy(keys, (key) =>
+//       this.diff[key]?.map((diff) => `${diff}`)?.join('||')),
+//   )
+// })
 
-    let status = ''
-    if (beforeValue === afterValue) {
-      status = 'unchanged'
-    }
-    else if (!beforeValue) {
-      status = loChaStatus.create
-    }
-    else if (!afterValue) {
-      status = loChaStatus.delete
-    }
-    else {
-      status = 'updated'
-    }
+// const beforeFeatures = createFeatureComputed(f => !!(f.properties.is_before || f.properties.is_deleted))
 
-    if (status !== 'unchanged') {
-      diff.push({
-        tag: key,
-        beforeValue,
-        afterValue,
-        status,
-      })
-    }
-  }
+// const afterFeatures = createFeatureComputed(f => !!(f.properties.is_after || f.properties.is_created))
 
-  return diff
-})
+// function createFeatureComputed(predicate: (f: IFeature) => boolean) {
+//   return computed(() => new Set([...selectedFeatures.value].filter(predicate)))
+// }
 </script>
 
 <template>
   <div class="locha-diff">
     <h2>Diff</h2>
-    <table v-if="diffTags?.length">
-      <tr
-        v-for="row in diffTags" :key="row.tag" :class="{
-          created: row.status === loChaStatus.create,
-          deleted: row.status === loChaStatus.delete,
-          updated: row.status === 'updated',
-        }"
-      >
-        <td />
-        <td>{{ row.tag }}</td>
-        <td>
-          <span v-if="row.beforeValue">
-            {{ row.beforeValue }}
-          </span>
-          <span v-if="![loChaStatus.create.toString(), loChaStatus.delete.toString()].includes(row.status)"> / </span>
-          <span v-if="row.afterValue">
-            {{ row.afterValue }}
-          </span>
-        </td>
-      </tr>
+    <table v-for="(link, index) in selectedLinks" :key="`${link.before?.toString() || '-'}_${link.after?.toString() || '-'}`">
+      <thead>
+        <tr>{{ `${link.before?.toString() || '-'}_${link.after?.toString() || '-'}` }}</tr>
+      </thead>
+      <tbody v-if="link.diff_tags">
+        <template v-for="([tag, action]) in Object.entries(link.diff_tags)" :key="tag">
+          <tr
+            :class="{
+              created: action[0].includes('accept'),
+              deleted: action[0].includes('reject'),
+            }"
+          >
+            <td>
+              {{ actionIcon(tag, index) }}
+            </td>
+            <td>{{ tag }}</td>
+            <td>
+              {{ action[2] }}
+            </td>
+          </tr>
+        </template>
+      </tbody>
+      <p v-else>
+        0 tags changes
+      </p>
     </table>
-    <p v-else>
-      No tags diff
-    </p>
   </div>
 </template>
 

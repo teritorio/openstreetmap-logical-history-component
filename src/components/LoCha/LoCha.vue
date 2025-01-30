@@ -5,6 +5,7 @@ import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
 import { watch } from 'vue'
+import LoChaDiff from './LoChaDiff.vue'
 
 const props = defineProps<{
   data?: ApiResponse
@@ -37,6 +38,7 @@ watch(() => props.data, (newValue) => {
     </p>
     <div v-else class="locha-content">
       <LoChaList :features="beforeFeatures" title="Before" />
+      <LoChaDiff />
       <LoChaList :features="afterFeatures" title="After" />
     </div>
     <VMap
