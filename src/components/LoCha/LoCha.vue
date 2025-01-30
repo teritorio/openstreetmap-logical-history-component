@@ -4,7 +4,7 @@ import type { Error } from '@/types'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { watch } from 'vue'
+import { ref, watch } from 'vue'
 import LoChaDiff from './LoChaDiff.vue'
 
 const props = defineProps<{
@@ -24,11 +24,25 @@ const {
   setLoCha,
 } = useLoCha()
 
+const beforeListRef = ref<InstanceType<typeof LoChaList> | null>(null)
+const afterListRef = ref<InstanceType<typeof LoChaList> | null>(null)
+
 watch(() => props.data, (newValue) => {
   if (newValue) {
     setLoCha(newValue)
   }
 })
+
+function handleItemClick(clickedListName: 'before' | 'after'): void {
+  if (!beforeListRef.value || !afterListRef.value)
+    return
+
+  if (clickedListName === 'before')
+    afterListRef.value.scrollToTop()
+
+  if (clickedListName === 'after')
+    beforeListRef.value.scrollToTop()
+}
 </script>
 
 <template>
@@ -37,9 +51,9 @@ watch(() => props.data, (newValue) => {
       ⚠️ No data
     </p>
     <div v-else class="locha-content">
-      <LoChaList :features="beforeFeatures" title="Before" />
+      <LoChaList ref="beforeListRef" :features="beforeFeatures" title="Before" @click="handleItemClick('before')" />
       <LoChaDiff />
-      <LoChaList :features="afterFeatures" title="After" />
+      <LoChaList ref="afterListRef" :features="afterFeatures" title="After" @click="handleItemClick('after')" />
     </div>
     <VMap
       @error="emit('error', $event)"

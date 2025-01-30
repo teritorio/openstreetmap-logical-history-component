@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import type { IFeature } from '@/composables/useApi'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
-import { useLoCha } from '@/composables/useLoCha'
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 defineProps<{
   features: IFeature[]
   title: string
 }>()
 
-const { selectedFeatures } = useLoCha()
-
-watch(selectedFeatures, (newValue) => {
-  if (newValue.size)
-    scrollToTop()
-})
+const emit = defineEmits<{
+  (e: 'click'): void
+}>()
 
 const lochaListRef = ref<HTMLUListElement | null>(null)
 function scrollToTop() {
@@ -25,6 +21,8 @@ function scrollToTop() {
     })
   }
 }
+
+defineExpose({ scrollToTop })
 </script>
 
 <template>
@@ -35,7 +33,7 @@ function scrollToTop() {
         v-for="feature in features"
         :key="feature.id"
       >
-        <LoChaObject :feature="feature" />
+        <LoChaObject :feature="feature" @click="emit('click')" />
       </li>
     </ul>
     <iframe name="hidden_josm_target" style="display: none" />

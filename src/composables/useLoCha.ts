@@ -65,6 +65,7 @@ export interface LoCha {
 // Internal state variables
 const loCha = ref<ApiResponse>()
 const selectedLinks = ref<ApiLink[]>([])
+const clickedId = ref<number>()
 
 /**
  * The `useLoCha` composable provides reactive state and functions for managing and manipulating LoCha data.
@@ -105,18 +106,24 @@ export function useLoCha(): LoCha {
     if (!loCha.value)
       throw new Error('LoCha not initialized, call setLoCha() first.')
 
-    return loCha.value.features
-      .filter(feature => feature.properties.is_after || feature.properties.is_created)
-      .sort(_bringSelectedFeaturesOnTop)
+    const features = loCha.value.features.filter(feature => feature.properties.is_after || feature.properties.is_created)
+
+    if (!features.find(f => f.id === clickedId.value))
+      features.sort(_bringSelectedFeaturesOnTop)
+
+    return features
   })
 
   const beforeFeatures = computed(() => {
     if (!loCha.value)
       throw new Error('LoCha not initialized, call setLoCha() first.')
 
-    return loCha.value.features
-      .filter(feature => feature.properties.is_before || feature.properties.is_deleted)
-      .sort(_bringSelectedFeaturesOnTop)
+    const features = loCha.value.features.filter(feature => feature.properties.is_before || feature.properties.is_deleted)
+
+    if (!features.find(f => f.id === clickedId.value))
+      features.sort(_bringSelectedFeaturesOnTop)
+
+    return features
   })
 
   /**
@@ -132,6 +139,8 @@ export function useLoCha(): LoCha {
   function showLink(id: number, status: Status): void {
     if (!loCha.value)
       throw new Error('LoCha not initialized, call setLoCha() first.')
+
+    clickedId.value = id
 
     // Search direct links containing clicked link id
     selectedLinks.value = loCha.value.metadata.links.filter(link => [link.before, link.after].includes(id))
@@ -175,8 +184,10 @@ export function useLoCha(): LoCha {
 
     if (aSelected && !bSelected)
       return -1
+
     if (!aSelected && bSelected)
       return 1
+
     return 0
   }
 
