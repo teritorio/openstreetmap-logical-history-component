@@ -49,22 +49,27 @@ export const loChaStatus = Object.fromEntries(
  * which includes various references and computed values to track the features and metadata.
  */
 export interface LoCha {
-  afterFeatures: ComputedRef<IFeature[]>
-  beforeFeatures: ComputedRef<IFeature[]>
+  afterFeatures: Ref<IFeature[]>
+  beforeFeatures: Ref<IFeature[]>
+  errorFeatures: Ref<IFeature[]>
   featureCount: ComputedRef<number | undefined>
-  showLink: (id: number, status: Status) => void
   linkCount: ComputedRef<number | undefined>
   loCha: Ref<ApiResponse | undefined>
   selectedLinks: Ref<ApiLink[]>
   selectedFeatures: ComputedRef<Set<IFeature>>
+  showLink: (id: number) => void
   setLoCha: (loCha: ApiResponse) => void
-  resetLink: () => void
   getStatus: (feature: IFeature) => Status
+  isSelectedLink: (id: number) => boolean
 }
 
 // Internal state variables
+const adjacency = ref<Map<number, number[]>>(new Map())
 const loCha = ref<ApiResponse>()
 const selectedLinks = ref<ApiLink[]>([])
+const beforeFeatures = ref<IFeature[]>([])
+const afterFeatures = ref<IFeature[]>([])
+const errorFeatures = ref<IFeature[]>([])
 const clickedId = ref<number>()
 
 /**
@@ -102,64 +107,119 @@ export function useLoCha(): LoCha {
     return features
   })
 
-  const afterFeatures = computed(() => {
-    if (!loCha.value)
-      throw new Error('LoCha not initialized, call setLoCha() first.')
-
-    const features = loCha.value.features.filter(feature => feature.properties.is_after || feature.properties.is_created)
-
-    if (!features.find(f => f.id === clickedId.value))
-      features.sort(_bringSelectedFeaturesOnTop)
-
-    return features
-  })
-
-  const beforeFeatures = computed(() => {
-    if (!loCha.value)
-      throw new Error('LoCha not initialized, call setLoCha() first.')
-
-    const features = loCha.value.features.filter(feature => feature.properties.is_before || feature.properties.is_deleted)
-
-    if (!features.find(f => f.id === clickedId.value))
-      features.sort(_bringSelectedFeaturesOnTop)
-
-    return features
-  })
-
   /**
    * Sets the LoCha data and populates the before and after features.
    * @param data - The LoCha API response data to set.
    */
   function setLoCha(data: ApiResponse): void {
-    _resetLoCha()
+    _resetState()
     loCha.value = data
-    _populateBeforeAfterFeatures()
-  }
 
-  function showLink(id: number, status: Status): void {
     if (!loCha.value)
-      throw new Error('LoCha not initialized, call setLoCha() first.')
+      return
 
-    clickedId.value = id
+    loCha.value.features
+      .sort((a, b) => _sortByObjType(a) - _sortByObjType(b))
+      .sort((a, b) => _sortByActionType(a) - _sortByActionType(b))
 
-    // Search direct links containing clicked link id
-    selectedLinks.value = loCha.value.metadata.links.filter(link => [link.before, link.after].includes(id))
+    errorFeatures.value = loCha.value.features.filter(feature => feature.properties.is_after && feature.properties.is_before)
 
-    // Search indirect links containing clicked link before id
-    if (status === 'updateAfter') {
-      selectedLinks.value.forEach((link) => {
-        if (link.before === undefined)
-          return
+    // Map all features by their ID for quick access
+    const idToFeature = new Map<number, IFeature>()
+    for (const feature of loCha.value.features) {
+      idToFeature.set(feature.id, feature)
+    }
 
-        const additionalLinks = loCha.value!.metadata.links.filter(l => l.after !== id && [l.before, l.after].includes(link.before))
+    for (const link of loCha.value.metadata.links) {
+      if (link.before !== undefined && link.after !== undefined) {
+        // Skip erroneous links
+        if (link.before === link.after)
+          continue
 
-        selectedLinks.value = [...selectedLinks.value, ...additionalLinks]
-      })
+        if (!adjacency.value.has(link.before)) {
+          adjacency.value.set(link.before, [])
+        }
+        adjacency.value.get(link.before)!.push(link.after)
+
+        if (!adjacency.value.has(link.after)) {
+          adjacency.value.set(link.after, [])
+        }
+        adjacency.value.get(link.after)!.push(link.before)
+      }
+      else {
+        if (link.before !== undefined)
+          adjacency.value.set(link.before, [])
+
+        if (link.after !== undefined)
+          adjacency.value.set(link.after, [])
+      }
+    }
+
+    for (const feature of loCha.value.features) {
+      const startId = feature.id
+      const visited = new Set<number>()
+      const stack: number[] = [startId]
+      visited.add(startId)
+
+      while (stack.length > 0) {
+        const currentId = stack.pop()!
+        const neighbors = adjacency.value.get(currentId) || []
+
+        if (!neighbors.length) {
+          if (feature.properties.is_deleted)
+            beforeFeatures.value.push(feature)
+
+          if (feature.properties.is_created)
+            afterFeatures.value.push(feature)
+        }
+        else {
+          for (const neighborId of neighbors) {
+            if (!visited.has(neighborId)) {
+              visited.add(neighborId)
+              stack.push(neighborId)
+
+              const neighborFeature = idToFeature.get(neighborId)
+              if (neighborFeature) {
+                if (neighborFeature.properties.is_before && !beforeFeatures.value.find(f => f.id === neighborFeature.id))
+                  beforeFeatures.value.push(neighborFeature)
+
+                if (neighborFeature.properties.is_after && !afterFeatures.value.find(f => f.id === neighborFeature.id))
+                  afterFeatures.value.push(neighborFeature)
+              }
+            }
+          }
+        }
+      }
     }
   }
 
-  function resetLink(): void {
-    selectedLinks.value = [] satisfies ApiLink[]
+  function showLink(id: number): void {
+    if (!loCha.value || !adjacency.value)
+      throw new Error('LoCha not initialized, call setLoCha() first.')
+
+    if (!adjacency.value.get(id))
+      throw new Error(`Clicked ${id} not found.`)
+
+    const neighborsIds = Object.values(adjacency.value.get(id)!)
+    const isSameLink = selectedLinks.value.find(link => [link.before, link.after].includes(id))
+
+    _resetLink()
+
+    if (isSameLink || clickedId.value === id) {
+      clickedId.value = undefined
+      return
+    }
+
+    selectedLinks.value = loCha.value.metadata.links.filter((link) => {
+      return (link.before !== undefined && (neighborsIds.includes(link.before) || link.before === id))
+        || (link.after !== undefined && (neighborsIds.includes(link.after) || link.after === id))
+    })
+
+    clickedId.value = id
+  }
+
+  function isSelectedLink(id: number): boolean {
+    return !!selectedLinks.value.find(link => [link.before, link.after].includes(id))
   }
 
   function getStatus(feature: IFeature): Status {
@@ -176,19 +236,6 @@ export function useLoCha(): LoCha {
     }
 
     return loChaStatus.updateAfter
-  }
-
-  function _bringSelectedFeaturesOnTop(a: IFeature, b: IFeature): number {
-    const aSelected = selectedFeatures.value.has(a)
-    const bSelected = selectedFeatures.value.has(b)
-
-    if (aSelected && !bSelected)
-      return -1
-
-    if (!aSelected && bSelected)
-      return 1
-
-    return 0
   }
 
   function _getFeature(id: number): IFeature {
@@ -223,29 +270,27 @@ export function useLoCha(): LoCha {
     return 4
   }
 
-  function _populateBeforeAfterFeatures(): void {
-    if (!loCha.value)
-      throw new Error('LoCha not initialized, call setLoCha() first.')
-
-    if (!featureCount.value)
-      return
-
-    loCha.value.features
-      .sort((a, b) => _sortByObjType(a) - _sortByObjType(b))
-      .sort((a, b) => _sortByActionType(a) - _sortByActionType(b))
-  }
-
   /**
    * Resets the LoCha state by clearing the LoCha data and resetting the feature arrays.
    */
-  function _resetLoCha(): void {
+  function _resetState(): void {
+    adjacency.value = new Map() satisfies Map<number, number[]>
     loCha.value = undefined
-    resetLink()
+    beforeFeatures.value = [] satisfies IFeature[]
+    afterFeatures.value = [] satisfies IFeature[]
+    errorFeatures.value = [] satisfies IFeature[]
+    clickedId.value = undefined
+    _resetLink()
+  }
+
+  function _resetLink(): void {
+    selectedLinks.value = [] satisfies ApiLink[]
   }
 
   return {
     afterFeatures,
     beforeFeatures,
+    errorFeatures,
     featureCount,
     showLink,
     linkCount,
@@ -253,7 +298,7 @@ export function useLoCha(): LoCha {
     selectedLinks,
     selectedFeatures,
     setLoCha,
-    resetLink,
     getStatus,
+    isSelectedLink,
   }
 }

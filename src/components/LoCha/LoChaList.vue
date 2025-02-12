@@ -1,46 +1,73 @@
 <script setup lang="ts">
-import type { IFeature } from '@/composables/useApi'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
-import { ref } from 'vue'
-
-defineProps<{
-  features: IFeature[]
-  title: string
-}>()
+import { useLoCha } from '@/composables/useLoCha'
 
 const emit = defineEmits<{
   (e: 'click'): void
 }>()
 
-const lochaListRef = ref<HTMLUListElement | null>(null)
-function scrollToTop() {
-  if (lochaListRef.value) {
-    lochaListRef.value.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    })
-  }
-}
-
-defineExpose({ scrollToTop })
+const { beforeFeatures, afterFeatures, errorFeatures } = useLoCha()
 </script>
 
 <template>
   <div class="locha-list">
-    <h2>{{ title }}</h2>
-    <ul ref="lochaListRef" class="locha-list">
-      <li
-        v-for="feature in features"
-        :key="feature.id"
-      >
-        <LoChaObject :feature="feature" @click="emit('click')" />
-      </li>
-    </ul>
+    <div class="before-list">
+      <h2>Before</h2>
+      <ul>
+        <li
+          v-for="feature in beforeFeatures"
+          :key="feature.id"
+        >
+          <LoChaObject :feature="feature" @click="emit('click')" />
+        </li>
+      </ul>
+    </div>
+    <div class="after-list">
+      <h2>After</h2>
+      <ul>
+        <li
+          v-for="feature in afterFeatures"
+          :key="feature.id"
+        >
+          <LoChaObject :feature="feature" @click="emit('click')" />
+        </li>
+      </ul>
+    </div>
+    <div class="error-list">
+      <h2>Errors</h2>
+      <ul>
+        <li
+          v-for="feature in errorFeatures"
+          :key="feature.id"
+        >
+          <LoChaObject :feature="feature" />
+        </li>
+      </ul>
+    </div>
     <iframe name="hidden_josm_target" style="display: none" />
   </div>
 </template>
 
 <style lang="css" scoped>
+.locha-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.before-list {
+  grid-column-start: 1;
+}
+
+.after-list {
+  grid-column-start: 2;
+}
+
+.error-list {
+  border-top: 2px solid #000000;
+  grid-column: 1 / -1;
+}
+
 ul {
   list-style: none;
   display: flex;

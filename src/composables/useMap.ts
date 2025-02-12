@@ -171,7 +171,6 @@ export function useMap(): IMap {
     featureCount,
     loCha,
     selectedFeatures,
-    getStatus,
     showLink,
   } = useLoCha()
 
@@ -249,9 +248,7 @@ export function useMap(): IMap {
   }
 
   function _handleMapClick(feature: IFeature): void {
-    const status = getStatus(feature)
-
-    showLink(feature.id, status)
+    showLink(feature.id)
   }
 
   function mapToIFeature(feature: MapGeoJSONFeature): IFeature {

@@ -4,7 +4,7 @@ import type { Error } from '@/types'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
 import LoChaDiff from './LoChaDiff.vue'
 
 const props = defineProps<{
@@ -17,32 +17,16 @@ const emit = defineEmits<{
 }>()
 
 const {
-  afterFeatures,
-  beforeFeatures,
   featureCount,
   linkCount,
   setLoCha,
 } = useLoCha()
-
-const beforeListRef = ref<InstanceType<typeof LoChaList> | null>(null)
-const afterListRef = ref<InstanceType<typeof LoChaList> | null>(null)
 
 watch(() => props.data, (newValue) => {
   if (newValue) {
     setLoCha(newValue)
   }
 })
-
-function handleItemClick(clickedListName: 'before' | 'after'): void {
-  if (!beforeListRef.value || !afterListRef.value)
-    return
-
-  if (clickedListName === 'before')
-    afterListRef.value.scrollToTop()
-
-  if (clickedListName === 'after')
-    beforeListRef.value.scrollToTop()
-}
 </script>
 
 <template>
@@ -51,9 +35,8 @@ function handleItemClick(clickedListName: 'before' | 'after'): void {
       ⚠️ No data
     </p>
     <div v-else class="locha-content">
-      <LoChaList ref="beforeListRef" :features="beforeFeatures" title="Before" @click="handleItemClick('before')" />
+      <LoChaList />
       <LoChaDiff />
-      <LoChaList ref="afterListRef" :features="afterFeatures" title="After" @click="handleItemClick('after')" />
     </div>
     <VMap
       @error="emit('error', $event)"
@@ -71,40 +54,24 @@ function handleItemClick(clickedListName: 'before' | 'after'): void {
 }
 
 .locha-content {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto 1fr;
+  display: flex;
   flex: 70%;
-  gap: 0 1em;
+  gap: 0 1rem;
   overflow: hidden;
-  padding: 1em;
+  padding: 1rem;
+}
+
+.locha-content > div {
+  flex: 50%;
 }
 
 #map {
-  flex: 50%;
+  flex: 30%;
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .locha-content > div {
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.locha-content > div:first-of-type {
-  grid-column-start: 1;
-}
-
-.locha-content > div:nth-of-type(2) {
-  grid-column-start: 2;
-}
-
-.locha-content > div:last-of-type {
-  grid-column-start: 3;
-}
-
-.locha-content > div:deep(ul) {
-  overflow-y: auto;
+  overflow-y: scroll;
 }
 
 .user-feedback {

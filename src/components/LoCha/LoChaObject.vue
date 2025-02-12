@@ -1,28 +1,16 @@
 <script setup lang="ts">
 import type { IFeature } from '@/composables/useApi'
-import { loChaColors, loChaStatus, useLoCha } from '@/composables/useLoCha'
+import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { computed } from 'vue'
 
 const props = defineProps<{
   feature: IFeature
 }>()
 
-// TODO: move as much as possible into useLoCha composable
-const status = computed(() => {
-  if (props.feature.properties.is_created) {
-    return loChaStatus.create
-  }
+const { selectedLinks, showLink, isSelectedLink, getStatus } = useLoCha()
 
-  if (props.feature.properties.is_deleted) {
-    return loChaStatus.delete
-  }
-
-  if (props.feature.properties.is_before) {
-    return loChaStatus.updateBefore
-  }
-
-  return loChaStatus.updateAfter
-})
+const status = computed(() => getStatus(props.feature))
+const isSelected = computed(() => isSelectedLink(props.feature.id))
 
 const name = computed(() => {
   const content = props.feature.properties.tags.name || '-'
@@ -41,24 +29,13 @@ const name = computed(() => {
 
 const color = computed(() => loChaColors[status.value])
 
-const { selectedLinks, showLink, resetLink } = useLoCha()
-
-const isSelected = computed(() => !!(selectedLinks.value.length && selectedLinks.value.find(link => [link.before, link.after].includes(props.feature.id))))
-
 const style = computed(() => ({
-  opacity: !selectedLinks.value || isSelected.value ? 1 : 0.3,
+  opacity: !selectedLinks.value || isSelected.value ? 1 : 0.5,
 }))
-
-// TODO: Move to useLoCha composable
-function handleClick(id: number) {
-  isSelected.value
-    ? resetLink()
-    : showLink(id, status.value)
-}
 </script>
 
 <template>
-  <article :style="style" class="locha-object" @click="handleClick(feature.id)">
+  <article :style="style" class="locha-object" @click="showLink(feature.id)">
     <header>
       <h3>
         <a
