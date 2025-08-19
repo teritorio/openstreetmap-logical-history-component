@@ -2,7 +2,7 @@
   "name": "@teritorio/openstreetmap-logical-history-component",
   "type": "module",
   "version": "0.0.0",
-  "packageManager": "yarn@4.5.3",
+  "packageManager": "yarn@4.9.2",
   "description": "An OpenStreetMap logical history (LoCha) UI component.",
   "author": "Teritorio",
   "license": "MIT",
