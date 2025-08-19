@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
+import { watch } from 'vue'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { watch } from 'vue'
 import LoChaDiff from './LoChaDiff.vue'
 
 const props = defineProps<{

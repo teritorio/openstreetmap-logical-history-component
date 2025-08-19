@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { IFeature } from '@/composables/useApi'
-import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { computed } from 'vue'
+import { loChaColors, useLoCha } from '@/composables/useLoCha'
 
 const props = defineProps<{
   feature: IFeature

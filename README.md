@@ -1,12 +1,15 @@
 # OpenStreetMap logical history (LoCha) UI component
 
 ## Run project locally
+
 Install dependencies
+
 ```bash
 yarn install
 ```
 
 Serve the demo page
+
 ```bash
 yarn dev
 ```

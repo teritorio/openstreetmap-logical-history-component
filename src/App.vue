@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error, FormData } from '@/types'
+import { ref } from 'vue'
 import LoCha from '@/components/LoCha/LoCha.vue'
 import MapFilters from '@/components/MapFilters.vue'
 import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
-import { ref } from 'vue'
 
 const $api = useApiConfig()
 const { error, loading, setError } = $api

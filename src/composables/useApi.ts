@@ -1,5 +1,5 @@
-import type { Error } from '@/types'
 import type { Reactive, Ref } from 'vue'
+import type { Error } from '@/types'
 import { area } from '@turf/area'
 import { reactive, ref } from 'vue'
 

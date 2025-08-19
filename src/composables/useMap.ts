@@ -1,9 +1,9 @@
+import type { AddLayerObject, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapMouseEvent } from 'maplibre-gl'
 import type { ApiResponse, IFeature } from '@/composables/useApi'
 import type { Error } from '@/types'
-import type { AddLayerObject, GeoJSONSource, LngLatLike, MapGeoJSONFeature, MapMouseEvent } from 'maplibre-gl'
-import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import maplibre from 'maplibre-gl'
 import { ref, shallowRef, watch } from 'vue'
+import { loChaColors, useLoCha } from '@/composables/useLoCha'
 
 /**
  * Interface defining the map functionality.
