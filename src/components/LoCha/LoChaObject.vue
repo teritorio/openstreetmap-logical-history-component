@@ -3,14 +3,16 @@ import type { IFeature } from '@/composables/useApi'
 import { computed } from 'vue'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   feature: IFeature
-}>()
+  isSelected?: boolean
+}>(), {
+  isSelected: false,
+})
 
-const { selectedLinks, showLink, isSelectedLink, getStatus } = useLoCha()
+const { highlightGroup, getStatus } = useLoCha()
 
 const status = computed(() => getStatus(props.feature))
-const isSelected = computed(() => isSelectedLink(props.feature.id))
 
 const name = computed(() => {
   const content = props.feature.properties.tags.name || '-'
@@ -28,14 +30,10 @@ const name = computed(() => {
 })
 
 const color = computed(() => loChaColors[status.value])
-
-const style = computed(() => ({
-  opacity: !selectedLinks.value || isSelected.value ? 1 : 0.5,
-}))
 </script>
 
 <template>
-  <article :style="style" class="locha-object" @click="showLink(feature.id)">
+  <article class="locha-object" @click="highlightGroup(feature)">
     <header>
       <h3>
         <a
@@ -105,6 +103,7 @@ article {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  padding: 0.25rem;
 }
 
 article:hover {

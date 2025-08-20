@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { ApiLink, ApiResponse, IFeature } from '@/composables/useApi'
+import type { ApiResponse, IFeature } from '@/composables/useApi'
 import { computed, ref } from 'vue'
 
 /**
@@ -26,6 +26,8 @@ export type Color = {
         : '#F2BE00'
 }
 
+export type LoChaGroup = IFeature[]
+
 /**
  * A predefined object that maps status types to corresponding color codes.
  */
@@ -49,28 +51,22 @@ export const loChaStatus = Object.fromEntries(
  * which includes various references and computed values to track the features and metadata.
  */
 export interface LoCha {
-  afterFeatures: Ref<IFeature[]>
-  beforeFeatures: Ref<IFeature[]>
-  errorFeatures: Ref<IFeature[]>
   featureCount: ComputedRef<number | undefined>
-  linkCount: ComputedRef<number | undefined>
+  groups: Ref<LoChaGroup[]>
   loCha: Ref<ApiResponse | undefined>
-  selectedLinks: Ref<ApiLink[]>
-  selectedFeatures: ComputedRef<Set<IFeature>>
-  showLink: (id: number) => void
+  selectedGroup: Ref<LoChaGroup | undefined>
+  selectedGroupId: Ref<number | undefined>
+  highlightGroup: (feature: IFeature) => void
   setLoCha: (loCha: ApiResponse) => void
   getStatus: (feature: IFeature) => Status
-  isSelectedLink: (id: number) => boolean
 }
 
 // Internal state variables
-const adjacency = ref<Map<number, number[]>>(new Map())
 const loCha = ref<ApiResponse>()
-const selectedLinks = ref<ApiLink[]>([])
-const beforeFeatures = ref<IFeature[]>([])
-const afterFeatures = ref<IFeature[]>([])
-const errorFeatures = ref<IFeature[]>([])
-const clickedId = ref<number>()
+const selectedGroup = ref<LoChaGroup>()
+const selectedFeatureId = ref<number>()
+const selectedGroupId = ref<number>()
+const groups = ref<LoChaGroup[]>([])
 
 /**
  * The `useLoCha` composable provides reactive state and functions for managing and manipulating LoCha data.
@@ -84,28 +80,16 @@ export function useLoCha(): LoCha {
    */
   const featureCount = computed(() => loCha.value?.features.length)
 
-  /**
-   * A computed reference to count the number of links in the LoCha metadata.
-   * @returns The number of links in the metadata, or undefined if no data is available.
-   */
-  const linkCount = computed(() => loCha.value?.metadata.links.length)
-
-  const selectedFeatures = computed(() => {
-    const features = new Set<IFeature>()
-
-    if (!selectedLinks.value.length)
-      return features
-
-    selectedLinks.value.forEach((link) => {
-      if (link.before !== undefined)
-        features.add(_getFeature(link.before))
-
-      if (link.after !== undefined)
-        features.add(_getFeature(link.after))
-    })
-
-    return features
-  })
+  function groupFeaturesByLinks(features: IFeature[]): LoChaGroup[] {
+    return features.reduce((groups, feature) => {
+      const linkId = feature.properties.links
+      if (!groups[linkId]) {
+        groups[linkId] = []
+      }
+      groups[linkId].push(feature)
+      return groups
+    }, [] as LoChaGroup[])
+  }
 
   /**
    * Sets the LoCha data and populates the before and after features.
@@ -113,113 +97,25 @@ export function useLoCha(): LoCha {
    */
   function setLoCha(data: ApiResponse): void {
     _resetState()
+
     loCha.value = data
-
-    if (!loCha.value)
-      return
-
-    loCha.value.features
-      .sort((a, b) => _sortByObjType(a) - _sortByObjType(b))
-      .sort((a, b) => _sortByActionType(a) - _sortByActionType(b))
-
-    errorFeatures.value = loCha.value.features.filter(feature => feature.properties.is_after && feature.properties.is_before)
-
-    // Map all features by their ID for quick access
-    const idToFeature = new Map<number, IFeature>()
-    for (const feature of loCha.value.features) {
-      idToFeature.set(feature.id, feature)
-    }
-
-    for (const link of loCha.value.metadata.links) {
-      if (link.before !== undefined && link.after !== undefined) {
-        // Skip erroneous links
-        if (link.before === link.after)
-          continue
-
-        if (!adjacency.value.has(link.before)) {
-          adjacency.value.set(link.before, [])
-        }
-        adjacency.value.get(link.before)!.push(link.after)
-
-        if (!adjacency.value.has(link.after)) {
-          adjacency.value.set(link.after, [])
-        }
-        adjacency.value.get(link.after)!.push(link.before)
-      }
-      else {
-        if (link.before !== undefined)
-          adjacency.value.set(link.before, [])
-
-        if (link.after !== undefined)
-          adjacency.value.set(link.after, [])
-      }
-    }
-
-    for (const feature of loCha.value.features) {
-      const startId = feature.id
-      const visited = new Set<number>()
-      const stack: number[] = [startId]
-      visited.add(startId)
-
-      while (stack.length > 0) {
-        const currentId = stack.pop()!
-        const neighbors = adjacency.value.get(currentId) || []
-
-        if (!neighbors.length) {
-          if (feature.properties.is_deleted)
-            beforeFeatures.value.push(feature)
-
-          if (feature.properties.is_created)
-            afterFeatures.value.push(feature)
-        }
-        else {
-          for (const neighborId of neighbors) {
-            if (!visited.has(neighborId)) {
-              visited.add(neighborId)
-              stack.push(neighborId)
-
-              const neighborFeature = idToFeature.get(neighborId)
-              if (neighborFeature) {
-                if (neighborFeature.properties.is_before && !beforeFeatures.value.find(f => f.id === neighborFeature.id))
-                  beforeFeatures.value.push(neighborFeature)
-
-                if (neighborFeature.properties.is_after && !afterFeatures.value.find(f => f.id === neighborFeature.id))
-                  afterFeatures.value.push(neighborFeature)
-              }
-            }
-          }
-        }
-      }
-    }
+    groups.value = groupFeaturesByLinks(data.features)
   }
 
-  function showLink(id: number): void {
-    if (!loCha.value || !adjacency.value)
-      throw new Error('LoCha not initialized, call setLoCha() first.')
+  function highlightGroup(feature: IFeature): void {
+    if (selectedFeatureId.value === feature.id)
+      return
 
-    if (!adjacency.value.get(id))
-      throw new Error(`Clicked ${id} not found.`)
-
-    const neighborsIds = Object.values(adjacency.value.get(id)!)
-    const isSameLink = selectedLinks.value.find(link => [link.before, link.after].includes(id))
-
-    _resetLink()
-
-    if (isSameLink || clickedId.value === id) {
-      clickedId.value = undefined
+    if (selectedGroupId.value === feature.properties.links) {
+      selectedFeatureId.value = feature.id
       return
     }
 
-    selectedLinks.value = loCha.value.metadata.links.filter((link) => {
-      return (link.before !== undefined && (neighborsIds.includes(link.before) || link.before === id))
-        || (link.after !== undefined && (neighborsIds.includes(link.after) || link.after === id))
-    })
+    _resetGroup()
 
-    clickedId.value = id
-  }
-
-  function isSelectedLink(id: number): boolean {
-    return !!selectedLinks.value.find(link => [link.before, link.after].includes(id))
+    selectedFeatureId.value = feature.id
+    selectedGroupId.value = feature.properties.links
+    selectedGroup.value = groups.value[selectedGroupId.value]
   }
 
   function getStatus(feature: IFeature): Status {
@@ -274,31 +170,24 @@ export function useLoCha(): LoCha {
    * Resets the LoCha state by clearing the LoCha data and resetting the feature arrays.
    */
   function _resetState(): void {
-    adjacency.value = new Map() satisfies Map<number, number[]>
     loCha.value = undefined
-    beforeFeatures.value = [] satisfies IFeature[]
-    afterFeatures.value = [] satisfies IFeature[]
-    errorFeatures.value = [] satisfies IFeature[]
-    clickedId.value = undefined
-    _resetLink()
+    _resetGroup()
   }
 
-  function _resetLink(): void {
-    selectedLinks.value = [] satisfies ApiLink[]
+  function _resetGroup(): void {
+    selectedFeatureId.value = undefined
+    selectedGroupId.value = undefined
+    selectedGroup.value = undefined
   }
 
   return {
-    afterFeatures,
-    beforeFeatures,
-    errorFeatures,
     featureCount,
-    showLink,
-    linkCount,
+    highlightGroup,
     loCha,
-    selectedLinks,
-    selectedFeatures,
+    groups,
+    selectedGroup,
+    selectedGroupId,
     setLoCha,
     getStatus,
-    isSelectedLink,
   }
 }

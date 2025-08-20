@@ -5,7 +5,6 @@ import { watch } from 'vue'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import LoChaDiff from './LoChaDiff.vue'
 
 const props = defineProps<{
   data?: ApiResponse
@@ -18,7 +17,6 @@ const emit = defineEmits<{
 
 const {
   featureCount,
-  linkCount,
   setLoCha,
 } = useLoCha()
 
@@ -31,13 +29,10 @@ watch(() => props.data, (newValue) => {
 
 <template>
   <section class="locha">
-    <p v-if="!featureCount || !linkCount" class="user-feedback">
+    <p v-if="!featureCount" class="user-feedback">
       ⚠️ No data
     </p>
-    <div v-else class="locha-content">
-      <LoChaList />
-      <LoChaDiff />
-    </div>
+    <LoChaList v-else />
     <VMap
       @error="emit('error', $event)"
       @update-bbox="emit('updateBbox', $event)"
@@ -53,16 +48,9 @@ watch(() => props.data, (newValue) => {
   height: inherit;
 }
 
-.locha-content {
-  display: flex;
+.locha-list {
   flex: 70%;
-  gap: 0 1rem;
-  overflow: hidden;
-  padding: 1rem;
-}
-
-.locha-content > div {
-  flex: 50%;
+  overflow-y: hidden;
 }
 
 #map {
@@ -70,13 +58,9 @@ watch(() => props.data, (newValue) => {
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-.locha-content > div {
-  overflow-y: scroll;
-}
-
 .user-feedback {
   display: grid;
   place-content: center;
-  height: 100%;
+  flex: 70%;
 }
 </style>

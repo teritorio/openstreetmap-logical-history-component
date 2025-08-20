@@ -61,6 +61,8 @@ interface Changeset {
   tags: Record<string, string>
 }
 
+export type ApiLinkGroups = Record<number, ApiLink[]>
+
 /**
  * Interface representing a link in the API metadata.
  * A link typically points to a feature.
@@ -78,8 +80,10 @@ export interface IFeature extends GeoJSON.Feature {
   properties: {
     objtype: ObjectType
     id: number
-    geom_distance: number
+    geom_distance: number | null
     deleted: boolean
+    links: number
+    members?: null
     version: number
     username: string
     created: string
@@ -98,7 +102,7 @@ export interface IFeature extends GeoJSON.Feature {
 export interface ApiResponse extends GeoJSON.FeatureCollection {
   features: IFeature[]
   metadata: {
-    links: ApiLink[]
+    links: ApiLinkGroups
     changesets: Changeset[]
   }
 }
@@ -185,9 +189,12 @@ export function useApiConfig(): ApiComposable {
    */
   function transformFeatures(data: ApiResponse): ApiResponse['features'] {
     return data.features.map((feature) => {
-      // TODO: As of today it find only the first occurence of the feature ID
-      // Need to find them all because we have a many-to-many relation with links
-      const link = data.metadata.links.find(({ before, after }) => before === feature.id || after === feature.id)
+      const group = data.metadata.links[feature.properties.links]
+
+      if (!group)
+        throw new Error(`Feature ${feature.id} has no group.`)
+
+      const link = group.find(link => link.before === feature.id || link.after === feature.id)
 
       if (!link)
         throw new Error(`Feature ${feature.id} has no link.`)

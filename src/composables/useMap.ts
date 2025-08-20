@@ -170,19 +170,19 @@ export function useMap(): IMap {
   const {
     featureCount,
     loCha,
-    selectedFeatures,
-    showLink,
+    // selectedFeatures,
+    highlightGroup,
   } = useLoCha()
 
-  watch(selectedFeatures, (newValue, oldValue) => {
-    if (oldValue) {
-      _setFeatureHighlight(oldValue, false, true)
-    }
+  // watch(selectedFeatures, (newValue, oldValue) => {
+  //   if (oldValue) {
+  //     _setFeatureHighlight(oldValue, false, true)
+  //   }
 
-    if (newValue) {
-      _setFeatureHighlight(newValue, true, true)
-    }
-  })
+  //   if (newValue) {
+  //     _setFeatureHighlight(newValue, true, true)
+  //   }
+  // })
 
   watch(loCha, (newValue) => {
     if (newValue) {
@@ -207,15 +207,17 @@ export function useMap(): IMap {
     map.value.addControl(new maplibre.NavigationControl())
 
     map.value.on('load', () => {
-      map.value?.addSource(SOURCE_ID, {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: [],
-        },
-      })
+      if (!map.value!.getSource(SOURCE_ID)) {
+        map.value!.addSource(SOURCE_ID, {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [],
+          },
+        })
+      }
 
-      source.value = map.value?.getSource(SOURCE_ID)
+      source.value = map.value!.getSource(SOURCE_ID)
 
       _setupMapLayers()
       _setEventListeners()
@@ -248,7 +250,7 @@ export function useMap(): IMap {
   }
 
   function _handleMapClick(feature: IFeature): void {
-    showLink(feature.id)
+    highlightGroup(feature)
   }
 
   function mapToIFeature(feature: MapGeoJSONFeature): IFeature {
@@ -264,6 +266,7 @@ export function useMap(): IMap {
         id: feature.properties.id,
         geom_distance: feature.properties.geom_distance,
         deleted: feature.properties.deleted,
+        links: feature.properties.links,
         version: feature.properties.version,
         username: feature.properties.username,
         created: feature.properties.created,
@@ -397,13 +400,19 @@ export function useMap(): IMap {
       throw new Error('Call useMap.init() function first.')
 
     // Polygon layer configuration
-    map.value.addLayer(LAYERS.Polygon)
+    if (!map.value.getLayer(LAYERS.Polygon.id)) {
+      map.value.addLayer(LAYERS.Polygon)
+    }
 
     // LineString layer configuration
-    map.value.addLayer(LAYERS.LineString)
+    if (!map.value.getLayer(LAYERS.LineString.id)) {
+      map.value.addLayer(LAYERS.LineString)
+    }
 
     // Point layer configuration
-    map.value.addLayer(LAYERS.Point)
+    if (!map.value.getLayer(LAYERS.Point.id)) {
+      map.value.addLayer(LAYERS.Point)
+    }
   }
 
   /**

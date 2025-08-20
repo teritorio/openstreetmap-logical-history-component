@@ -1,17 +1,18 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 
-const { selectedLinks } = useLoCha()
+const { selectedGroup } = useLoCha()
 
 function actionIcon(key: string, linkIndex: number): string {
-  const link = selectedLinks.value[linkIndex]
+  // return ''
+  // const link = selectedGroup.value[linkIndex]
 
-  return (
-    link.diff_tags![key] && link.before === undefined
-      ? '➕'
-      : link.after === undefined
-        ? '✖'
-        : '~')
+  // return (
+  //   link.diff_tags![key] && link.before === undefined
+  //     ? '➕'
+  //     : link.after === undefined
+  //       ? '✖'
+  //       : '~')
 }
 
 // TODO: groupBy selectedLinks.value[link].diff_tags[key][index][0] (ex: 'tags_changes_significant', 'tags_changes_non_significant')
@@ -26,10 +27,6 @@ function actionIcon(key: string, linkIndex: number): string {
 //       this.diff[key]?.map((diff) => `${diff}`)?.join('||')),
 //   )
 // })
-
-// const beforeFeatures = createFeatureComputed(f => !!(f.properties.is_before || f.properties.is_deleted))
-
-// const afterFeatures = createFeatureComputed(f => !!(f.properties.is_after || f.properties.is_created))
 
 // function createFeatureComputed(predicate: (f: IFeature) => boolean) {
 //   return computed(() => new Set([...selectedFeatures.value].filter(predicate)))
@@ -92,4 +89,4 @@ function actionIcon(key: string, linkIndex: number): string {
 td :is(span:first-of-type, span:last-of-type) {
   color: var(--color);
 }
-</style>
+</style> -->
