@@ -3,14 +3,13 @@ import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
 import { watch } from 'vue'
 import LoChaList from '@/components/LoCha/LoChaList.vue'
-import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
 
 const props = defineProps<{
   data?: ApiResponse
 }>()
 
-const emit = defineEmits<{
+defineEmits<{
   (e: 'error', payload: Error): void
   (e: 'updateBbox', bbox: string): void
 }>()
@@ -33,10 +32,6 @@ watch(() => props.data, (newValue) => {
       ⚠️ No data
     </p>
     <LoChaList v-else />
-    <VMap
-      @error="emit('error', $event)"
-      @update-bbox="emit('updateBbox', $event)"
-    />
   </section>
 </template>
 
@@ -49,13 +44,7 @@ watch(() => props.data, (newValue) => {
 }
 
 .locha-list {
-  flex: 70%;
   overflow-y: hidden;
-}
-
-#map {
-  flex: 30%;
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .user-feedback {

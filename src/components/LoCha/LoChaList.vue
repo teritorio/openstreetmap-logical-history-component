@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { IFeature } from '@/composables/useApi'
-// import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
+import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
 
 const { groups, selectedGroupId } = useLoCha()
@@ -22,7 +22,7 @@ function getAfterFeatures(features: IFeature[]) {
       <h2>After</h2>
     </header>
     <ul>
-      <li v-for="(group, index) in groups" :key="index" :class="{ selected: selectedGroupId === index }">
+      <li v-for="(group, index) in groups" :key="index">
         <div class="before-list">
           <ul>
             <li
@@ -43,7 +43,7 @@ function getAfterFeatures(features: IFeature[]) {
             </li>
           </ul>
         </div>
-        <!-- <LoChaDiff /> -->
+        <VMap :id="index" :features="group" />
       </li>
     </ul>
     <iframe name="hidden_josm_target" style="display: none" />
@@ -52,36 +52,37 @@ function getAfterFeatures(features: IFeature[]) {
 
 <style lang="css" scoped>
 .locha-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto 1fr;
   gap: 1rem;
   padding: 1rem;
 }
 
+.locha-list header {
+  grid-row: 1;
+  grid-column: 1 / 3;
+  display: flex;
+  gap: 1rem;
+}
+
 .locha-list > ul {
+  grid-row: 2;
+  grid-column: 1 / 4;
   overflow-y: scroll;
+  scrollbar-width: none;
 }
 
 .locha-list > ul > li {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   border: 2px solid #cecece;
-  padding: 8px;
   background-color: #ffffff;
-  opacity: 0.5;
-}
-
-.locha-list > ul > li.selected {
-  opacity: 1;
 }
 
 .locha-list > ul > li > div {
-  place-content: center;
-}
-
-.locha-list header {
-  display: flex;
+  padding: 8px;
 }
 
 .locha-list header h2 {
