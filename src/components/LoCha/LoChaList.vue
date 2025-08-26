@@ -4,7 +4,7 @@ import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
 
-const { groups, selectedGroupId } = useLoCha()
+const { groups, selectedGroupId, loCha } = useLoCha()
 
 function getBeforeFeatures(features: IFeature[]) {
   return features.filter(feature => feature.properties.is_deleted || feature.properties.is_before)
@@ -43,7 +43,7 @@ function getAfterFeatures(features: IFeature[]) {
             </li>
           </ul>
         </div>
-        <VMap :id="index" :features="group" />
+        <VMap :id="index" :features="group" :bbox="loCha?.bbox" />
       </li>
     </ul>
     <iframe name="hidden_josm_target" style="display: none" />

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { AddLayerObject, LngLatLike, MapMouseEvent } from 'maplibre-gl'
+import type { AddLayerObject, GeoJSONSource, LngLatLike, MapMouseEvent } from 'maplibre-gl'
 import type { LoChaGroup } from '@/composables/useLoCha'
-import turfBbox from '@turf/bbox'
 import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
 import { shallowRef, watch } from 'vue'
@@ -11,17 +10,28 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 const props = defineProps<{
   id: number
   features: LoChaGroup
+  bbox?: GeoJSON.BBox
 }>()
 
-type LayerKey = 'Polygon' | 'Point' | 'LineString'
+type LayerKey = 'Polygon' | 'Point' | 'LineString' | 'Bbox'
 
 type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
 }
 
+const BBOX_SOURCE_ID = 'bbox'
 const SOURCE_ID = 'lochas'
 const MAP_STYLE_URL = 'https://vecto-dev.teritorio.xyz/styles/positron/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
 const LAYERS = {
+  Bbox: {
+    id: 'bbox-layer',
+    type: 'fill',
+    source: BBOX_SOURCE_ID,
+    paint: {
+      'fill-color': '#ff0000',
+      'fill-opacity': 0.1,
+    },
+  },
   Polygon: {
     id: 'feature-polygons',
     type: 'fill',
@@ -112,18 +122,36 @@ const LAYERS = {
   },
 } satisfies Partial<Record<LayerKey, AddLayerObject>>
 
+const paddingOptions = {
+  top: 20,
+  left: 20,
+  right: 20,
+  bottom: 60,
+}
+
 const map = shallowRef<maplibre.Map>()
 const isVisible = shallowRef(false)
 const popup = shallowRef<maplibre.Popup>()
 const hoveredStateFeature = shallowRef<maplibre.MapGeoJSONFeature>()
+const source = shallowRef<GeoJSONSource>()
 
 watch(isVisible, (newState) => {
   if (newState) {
     initMap()
   }
   else {
-    removeEventListeners()
+    if (map.value)
+      map.value.remove()
+
     map.value = undefined
+  }
+})
+
+watch(() => props.features, (newValue) => {
+  if (map.value && isVisible.value && newValue) {
+    map.value.remove()
+    map.value = undefined
+    initMap()
   }
 })
 
@@ -132,19 +160,15 @@ function initMap() {
     map.value = new maplibre.Map({
       hash: false,
       container: `map-${props.id}`,
-      bounds: new maplibre.LngLatBounds(
-        turfBbox({
-          type: 'FeatureCollection',
-          features: props.features,
-        }) as [number, number, number, number],
-      ),
+      bounds: props.bbox && [
+        props.bbox[0],
+        props.bbox[1],
+        props.bbox[2],
+        props.bbox[3],
+      ],
+      maxZoom: 17,
       fitBoundsOptions: {
-        padding: {
-          top: 20,
-          left: 20,
-          right: 20,
-          bottom: 60,
-        },
+        padding: paddingOptions,
       },
       style: MAP_STYLE_URL,
     })
@@ -155,9 +179,39 @@ function initMap() {
   }
 }
 
+function displayBbox(): void {
+  if (!map.value)
+    throw new Error('Call initMap() function first.')
+
+  if (!props.bbox)
+    return
+
+  map.value.addSource(BBOX_SOURCE_ID, {
+    type: 'geojson',
+    data: {
+      type: 'Feature',
+      geometry: {
+        type: 'Polygon',
+        coordinates: [[
+          [props.bbox[0], props.bbox[1]],
+          [props.bbox[2], props.bbox[1]],
+          [props.bbox[2], props.bbox[3]],
+          [props.bbox[0], props.bbox[3]],
+          [props.bbox[0], props.bbox[1]],
+        ]],
+      },
+      properties: {},
+    },
+  })
+
+  map.value.addLayer(LAYERS.Bbox)
+}
+
 function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
+
+  displayBbox()
 
   map.value!.addSource(SOURCE_ID, {
     type: 'geojson',
@@ -166,6 +220,8 @@ function handleMapOnLoad(): void {
       features: props.features,
     },
   })
+
+  source.value = map.value.getSource(SOURCE_ID)
 
   setupMapLayers()
   setEventListeners()
@@ -220,21 +276,14 @@ function setEventListeners(): void {
     throw new Error('Call initMap() function first.')
 
   Object.values(LAYERS).forEach((layer) => {
+    if (layer.id === 'bbox-layer')
+      return
+
     map.value!.on('mousemove', layer.id, handleMouseMove)
 
     map.value!.on('mouseenter', layer.id, handleMouseEnter)
 
     map.value!.on('mouseleave', layer.id, handleMouseLeave)
-  })
-}
-
-function removeEventListeners(): void {
-  map.value!.off('load', handleMapOnLoad)
-
-  Object.values(LAYERS).forEach((layer) => {
-    map.value!.off('mousemove', layer.id, handleMouseMove)
-    map.value!.off('mouseenter', layer.id, handleMouseEnter)
-    map.value!.off('mouseleave', layer.id, handleMouseLeave)
   })
 }
 

@@ -1320,7 +1320,6 @@ __metadata:
     "@commitlint/cli": "npm:^19.8.1"
     "@commitlint/config-conventional": "npm:^19.8.1"
     "@turf/area": "npm:^7.2.0"
-    "@turf/bbox": "npm:^7.2.0"
     "@types/underscore": "npm:^1.13.0"
     "@vitejs/plugin-vue": "npm:^6.0.1"
     "@vitest/coverage-v8": "npm:^3.2.4"
@@ -1354,18 +1353,6 @@ __metadata:
     "@types/geojson": "npm:^7946.0.10"
     tslib: "npm:^2.8.1"
   checksum: 10c0/4a7dc2ff92e84bf9b46de349eb227056c53506530021358d1a03ca622e6ba6685f592ce59a9a770ec564d99a7c4156179e9e733e5ebce4e35f5151fd959b1c57
-  languageName: node
-  linkType: hard
-
-"@turf/bbox@npm:^7.2.0":
-  version: 7.2.0
-  resolution: "@turf/bbox@npm:7.2.0"
-  dependencies:
-    "@turf/helpers": "npm:^7.2.0"
-    "@turf/meta": "npm:^7.2.0"
-    "@types/geojson": "npm:^7946.0.10"
-    tslib: "npm:^2.8.1"
-  checksum: 10c0/766d59d5f75c272481e971cd4004e139962607e8f34391b2abfb15bb34f9544a0479ceb14772565e005e4a12fdd82adf0d440ab1c9e0decbde6de50a5706db43
   languageName: node
   linkType: hard
 
