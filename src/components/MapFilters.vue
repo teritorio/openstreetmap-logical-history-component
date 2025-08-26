@@ -70,6 +70,7 @@ function setPreset(index: number) {
 
 <template>
   <aside :class="{ minimized: !isOpen }">
+    <!-- Move button in header -->
     <button class="toggle-button" @click="emit('toggleMenu')">
       {{ isOpen ? '⬅️' : '➡️' }}
     </button>

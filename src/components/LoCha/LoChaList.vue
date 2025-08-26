@@ -69,8 +69,20 @@ function getAfterFeatures(features: IFeature[]) {
 .locha-list > ul {
   grid-row: 2;
   grid-column: 1 / 4;
-  overflow-y: scroll;
-  scrollbar-width: none;
+  overflow-y: auto;
+  margin-right: -12px;
+}
+
+.locha-list > ul::-webkit-scrollbar {
+  width: 12px;
+  background: transparent;
+}
+
+.locha-list > ul::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
 .locha-list > ul > li {

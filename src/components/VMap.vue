@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AddLayerObject, GeoJSONSource, LngLatLike, MapMouseEvent } from 'maplibre-gl'
 import type { LoChaGroup } from '@/composables/useLoCha'
+import turfBbox from '@turf/bbox'
 import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
 import { shallowRef, watch } from 'vue'
@@ -21,15 +22,14 @@ type MapMouseEventWithFeatures = MapMouseEvent & {
 
 const BBOX_SOURCE_ID = 'bbox'
 const SOURCE_ID = 'lochas'
-const MAP_STYLE_URL = 'https://vecto-dev.teritorio.xyz/styles/positron/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
+const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/positron/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
 const LAYERS = {
   Bbox: {
     id: 'bbox-layer',
-    type: 'fill',
+    type: 'line',
     source: BBOX_SOURCE_ID,
     paint: {
-      'fill-color': '#ff0000',
-      'fill-opacity': 0.1,
+      'line-color': '#000000',
     },
   },
   Polygon: {
@@ -166,9 +166,9 @@ function initMap() {
         props.bbox[2],
         props.bbox[3],
       ],
-      maxZoom: 17,
       fitBoundsOptions: {
         padding: paddingOptions,
+        animate: false,
       },
       style: MAP_STYLE_URL,
     })
@@ -212,6 +212,17 @@ function handleMapOnLoad(): void {
     throw new Error('Call initMap() function first.')
 
   displayBbox()
+
+  map.value.fitBounds(new maplibre.LngLatBounds(
+    turfBbox({
+      type: 'FeatureCollection',
+      features: props.features,
+    }) as [number, number, number, number],
+  ), {
+    padding: paddingOptions,
+    animate: false,
+    maxZoom: 17,
+  })
 
   map.value!.addSource(SOURCE_ID, {
     type: 'geojson',
