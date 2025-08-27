@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { ApiLink } from '@/composables/useApi'
+import type { ApiLink, IFeature } from '@/composables/useApi'
 import { loChaColors } from '@/composables/useLoCha'
 
 const props = defineProps<{
   link: ApiLink
+  beforeFeature?: IFeature
 }>()
 
 function actionIcon(key: string): string {
@@ -20,13 +21,18 @@ function actionIcon(key: string): string {
   <div class="locha-diff">
     <table>
       <thead>
-        <tr
-          :class="{
-            created: link.action === 'accept',
-            deleted: link.action === 'reject',
-          }"
-        >
-          {{ link.action }}
+        <tr>
+          <td v-if="beforeFeature">
+            {{ `🔗 ${beforeFeature.properties.objtype[0]}${beforeFeature.properties.id} - ` }}
+          </td>
+          <td
+            :class="{
+              created: link.action === 'accept',
+              deleted: link.action === 'reject',
+            }"
+          >
+            {{ link.action }}
+          </td>
         </tr>
       </thead>
       <tbody v-if="link.diff_tags">
@@ -53,6 +59,9 @@ function actionIcon(key: string): string {
 .locha-diff {
   display: flex;
   gap: 1rem;
+  border: 2px solid #cecece;
+  padding: 0.25rem;
+  width: fit-content;
 }
 
 .created {

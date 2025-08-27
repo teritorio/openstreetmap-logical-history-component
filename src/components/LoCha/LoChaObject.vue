@@ -6,6 +6,7 @@ import { loChaColors, useLoCha } from '@/composables/useLoCha'
 
 const props = defineProps<{
   feature: IFeature
+  beforeFeature?: IFeature
   link?: ApiLink
 }>()
 
@@ -54,7 +55,7 @@ const color = computed(() => loChaColors[status.value])
         👤{{ feature.properties.username }}
       </a>
     </header>
-    <LoChaDiff v-if="link" :link="link" />
+    <LoChaDiff v-if="link" :link="link" :before-feature="beforeFeature" />
     <div class="actions">
       <a
         :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"

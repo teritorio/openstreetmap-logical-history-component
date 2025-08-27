@@ -21,7 +21,16 @@ function getLink(feature: IFeature, index: number, position: 'before' | 'after')
   if (feature.properties.is_before)
     return undefined
 
-  return loCha.value?.metadata.links[index].find(link => link[position] === feature.id)
+  return loCha.value!.metadata.links[index].find(link => link[position] === feature.id)
+}
+
+function getBeforeFeature(id: number, index: number): IFeature | undefined {
+  const link = loCha.value!.metadata.links[index].find(link => link.after === id)
+
+  if (!link)
+    throw new Error(`Link index ${index} for feature ${id} not found.`)
+
+  return loCha.value!.features.find(feature => feature.id === link!.before)
 }
 </script>
 
@@ -39,7 +48,10 @@ function getLink(feature: IFeature, index: number, position: 'before' | 'after')
               v-for="feature in getBeforeFeatures(group)"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" :link="getLink(feature, index, 'before')" />
+              <LoChaObject
+                :feature="feature"
+                :link="getLink(feature, index, 'before')"
+              />
             </li>
           </ul>
         </div>
@@ -49,7 +61,11 @@ function getLink(feature: IFeature, index: number, position: 'before' | 'after')
               v-for="feature in getAfterFeatures(group)"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" :link="getLink(feature, index, 'after')" />
+              <LoChaObject
+                :feature="feature"
+                :before-feature="getBeforeFeature(feature.id, index)"
+                :link="getLink(feature, index, 'after')"
+              />
             </li>
           </ul>
         </div>
