@@ -319,11 +319,11 @@ function onIntersectionObserver([entry]: IntersectionObserverEntry[]) {
 </script>
 
 <template>
-  <div :id="`map-${id}`" v-intersection-observer="onIntersectionObserver" />
+  <div :id="`map-${id}`" v-intersection-observer="onIntersectionObserver" class="v-map" />
 </template>
 
 <style lang="css" scoped>
-div {
+.v-map {
   height: 280px;
   width: 100%;
 }

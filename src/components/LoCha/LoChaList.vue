@@ -3,8 +3,12 @@ import type { IFeature } from '@/composables/useApi'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
+import LoChaDiff from './LoChaDiff.vue'
 
 const { groups, selectedGroupId, loCha } = useLoCha()
+
+if (!loCha.value)
+  throw new Error('LoCha is empty.')
 
 function getBeforeFeatures(features: IFeature[]) {
   return features.filter(feature => feature.properties.is_deleted || feature.properties.is_before)
@@ -43,6 +47,10 @@ function getAfterFeatures(features: IFeature[]) {
             </li>
           </ul>
         </div>
+        <LoChaDiff :links="loCha!.metadata.links[index]" />
+        <!-- <div class="locha-diff">
+          <slot name="locha-diff" />
+        </div> -->
         <VMap :id="index" :features="group" :bbox="loCha?.bbox" />
       </li>
     </ul>
@@ -88,6 +96,7 @@ function getAfterFeatures(features: IFeature[]) {
 .locha-list > ul > li {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
   gap: 1rem;
   border: 2px solid #cecece;
   background-color: #ffffff;
@@ -95,6 +104,27 @@ function getAfterFeatures(features: IFeature[]) {
 
 .locha-list > ul > li > div {
   padding: 8px;
+}
+
+.before-list {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.after-list {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.v-map {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  place-self: center;
+}
+
+.locha-diff {
+  grid-column: 1 / 3;
+  grid-row: 2;
 }
 
 .locha-list header h2 {

@@ -63,7 +63,21 @@ function handleError(err: Error): void {
       :data="geojson"
       @error="handleError"
       @update-bbox="handleBboxUpdate"
-    />
+    >
+      <!-- <template #locha-diff>
+        <div>
+          <h2>Diff tags</h2>
+          <table v-for="(group, index) in groups" :key="index">
+            <thead>
+              <tr>{{ index }}</tr>
+            </thead>
+            <tbody>
+              <tr>{{ group }}</tr>
+            </tbody>
+          </table>
+        </div>
+      </template> -->
+    </LoCha>
   </main>
 </template>
 

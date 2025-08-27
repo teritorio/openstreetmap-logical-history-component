@@ -31,7 +31,11 @@ watch(() => props.data, (newValue) => {
     <p v-if="!featureCount" class="user-feedback">
       ⚠️ No data
     </p>
-    <LoChaList v-else />
+    <LoChaList v-else>
+      <!-- <template #locha-diff>
+        <slot name="locha-diff" />
+      </template> -->
+    </LoChaList>
   </section>
 </template>
 
