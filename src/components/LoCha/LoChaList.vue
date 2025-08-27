@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IFeature } from '@/composables/useApi'
+import type { ApiLink, IFeature } from '@/composables/useApi'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
@@ -15,6 +15,13 @@ function getBeforeFeatures(features: IFeature[]) {
 
 function getAfterFeatures(features: IFeature[]) {
   return features.filter(feature => feature.properties.is_created || feature.properties.is_after)
+}
+
+function getLink(feature: IFeature, index: number, position: 'before' | 'after'): ApiLink | undefined {
+  if (feature.properties.is_before)
+    return undefined
+
+  return loCha.value?.metadata.links[index].find(link => link[position] === feature.id)
 }
 </script>
 
@@ -32,7 +39,7 @@ function getAfterFeatures(features: IFeature[]) {
               v-for="feature in getBeforeFeatures(group)"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" />
+              <LoChaObject :feature="feature" :link="getLink(feature, index, 'before')" />
             </li>
           </ul>
         </div>
@@ -42,13 +49,10 @@ function getAfterFeatures(features: IFeature[]) {
               v-for="feature in getAfterFeatures(group)"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" />
+              <LoChaObject :feature="feature" :link="getLink(feature, index, 'after')" />
             </li>
           </ul>
         </div>
-        <!-- <div class="locha-diff">
-          <slot name="locha-diff" />
-        </div> -->
         <VMap :id="index" :features="group" :bbox="loCha?.bbox" />
       </li>
     </ul>
@@ -94,7 +98,6 @@ function getAfterFeatures(features: IFeature[]) {
 .locha-list > ul > li {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto auto;
   gap: 1rem;
   border: 2px solid #cecece;
   background-color: #ffffff;
@@ -106,23 +109,19 @@ function getAfterFeatures(features: IFeature[]) {
 
 .before-list {
   grid-column: 1;
-  grid-row: 1;
 }
 
 .after-list {
   grid-column: 2;
-  grid-row: 1;
 }
 
 .v-map {
   grid-column: 3;
-  grid-row: 1 / 3;
   place-self: center;
 }
 
 .locha-diff {
   grid-column: 1 / 3;
-  grid-row: 2;
 }
 
 .locha-list header h2 {
