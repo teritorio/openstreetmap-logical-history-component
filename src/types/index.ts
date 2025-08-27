@@ -1,6 +1,6 @@
 export interface FormData {
   dateStart: string
-  dateEnd: string
+  dateEnd?: string
   bbox: string
 }
 

@@ -19,31 +19,30 @@ defineExpose({ resetForm })
 
 const initialFormValues = {
   dateStart: '',
-  dateEnd: '',
   bbox: '',
 } satisfies FormData
 
 // TODO: move presets to another file.
 const presets = [{
   title: 'Parking - (Points / Lines)',
-  dateStart: new Date('2023-01-01').toISOString().split('T')[0],
-  dateEnd: new Date('2023-12-01').toISOString().split('T')[0],
+  dateStart: new Date('2023-01-01').toISOString().slice(0, 16),
+  dateEnd: new Date('2023-12-01').toISOString().slice(0, 16),
   bbox: '43.57582751611194,-1.4865185506147705,43.57668833005737,-1.4857594854635559',
 
 }, {
   title: 'Bridgehead - (Lines)',
-  dateStart: new Date('2024-07-01').toISOString().split('T')[0],
-  dateEnd: new Date('2024-08-01').toISOString().split('T')[0],
+  dateStart: new Date('2024-07-01').toISOString().slice(0, 16),
+  dateEnd: new Date('2024-08-01').toISOString().slice(0, 16),
   bbox: '44.82039347351967,-0.5420824675324966,44.82208861548204,-0.5393090634110976',
 }, {
   title: 'Buildings - (Surfaces)',
-  dateStart: new Date('2024-12-10').toISOString().split('T')[0],
-  dateEnd: new Date('2024-12-15').toISOString().split('T')[0],
+  dateStart: new Date('2024-12-10').toISOString().slice(0, 16),
+  dateEnd: new Date('2024-12-15').toISOString().slice(0, 16),
   bbox: '42.685107065011486,-1.6537454710167148,42.68686379572838,-1.6509720668953156',
 }, {
   title: 'n+n relation',
-  dateStart: new Date('2023-01-01').toISOString().split('T')[0],
-  dateEnd: new Date('2023-12-01').toISOString().split('T')[0],
+  dateStart: new Date('2023-01-01').toISOString().slice(0, 16),
+  dateEnd: new Date('2023-12-01').toISOString().slice(0, 16),
   bbox: '43.55969828696391,-1.4598269945865354,43.565655969760684,-1.4323757210520682',
 }] satisfies Preset[]
 
@@ -56,7 +55,11 @@ watchEffect(() => {
 })
 
 function resetForm() {
-  Object.assign(formValues, { dateStart: '', dateEnd: '', bbox: '' })
+  Object.assign(formValues, {
+    dateStart: '',
+    dateEnd: '',
+    bbox: '',
+  })
 }
 
 function setPreset(index: number) {
@@ -70,20 +73,22 @@ function setPreset(index: number) {
 
 <template>
   <aside :class="{ minimized: !isOpen }">
-    <!-- Move button in header -->
     <button class="toggle-button" @click="emit('toggleMenu')">
       {{ isOpen ? '⬅️' : '➡️' }}
     </button>
     <form ref="formRef" @submit.prevent="emit('submit', formValues)">
       <h2>Filter by:</h2>
+      <hr>
       <div>
         <label for="date_start">From:</label>
-        <input v-model="formValues.dateStart" type="date" required>
+        <input v-model="formValues.dateStart" name="date_start" type="datetime-local" required>
       </div>
+      <hr>
       <div>
         <label for="date_end">To:</label>
-        <input v-model="formValues.dateEnd" type="date">
+        <input v-model="formValues.dateEnd" name="date_end" type="datetime-local">
       </div>
+      <hr>
       <div>
         <label for="bbox">Bounding Box:</label>
         <input
