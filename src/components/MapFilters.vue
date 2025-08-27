@@ -82,7 +82,7 @@ function setPreset(index: number) {
       </div>
       <div>
         <label for="date_end">To:</label>
-        <input v-model="formValues.dateEnd" type="date" required>
+        <input v-model="formValues.dateEnd" type="date">
       </div>
       <div>
         <label for="bbox">Bounding Box:</label>
