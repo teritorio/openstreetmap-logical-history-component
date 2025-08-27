@@ -3,14 +3,11 @@ import type { IFeature } from '@/composables/useApi'
 import { computed } from 'vue'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 
-const props = withDefaults(defineProps<{
+const props = defineProps<{
   feature: IFeature
-  isSelected?: boolean
-}>(), {
-  isSelected: false,
-})
+}>()
 
-const { highlightGroup, getStatus } = useLoCha()
+const { getStatus } = useLoCha()
 
 const status = computed(() => getStatus(props.feature))
 
@@ -33,7 +30,7 @@ const color = computed(() => loChaColors[status.value])
 </script>
 
 <template>
-  <article class="locha-object" @click="highlightGroup(feature)">
+  <article class="locha-object">
     <header>
       <h3>
         <a
@@ -55,7 +52,7 @@ const color = computed(() => loChaColors[status.value])
         👤{{ feature.properties.username }}
       </a>
     </header>
-    <div v-show="isSelected" class="actions">
+    <div class="actions">
       <a
         :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"
         type="button"

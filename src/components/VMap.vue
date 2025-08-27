@@ -240,7 +240,7 @@ function handleMapOnLoad(): void {
 
 function setupMapLayers(): void {
   if (!map.value)
-    throw new Error('Call useMap.init() function first.')
+    throw new Error('Call initMap() function first.')
 
   if (!map.value.getLayer(LAYERS.Polygon.id)) {
     map.value.addLayer(LAYERS.Polygon)

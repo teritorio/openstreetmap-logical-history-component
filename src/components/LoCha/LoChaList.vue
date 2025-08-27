@@ -3,9 +3,8 @@ import type { IFeature } from '@/composables/useApi'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import LoChaDiff from './LoChaDiff.vue'
 
-const { groups, selectedGroupId, loCha } = useLoCha()
+const { groups, loCha } = useLoCha()
 
 if (!loCha.value)
   throw new Error('LoCha is empty.')
@@ -33,7 +32,7 @@ function getAfterFeatures(features: IFeature[]) {
               v-for="feature in getBeforeFeatures(group)"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" :is-selected="selectedGroupId === index " />
+              <LoChaObject :feature="feature" />
             </li>
           </ul>
         </div>
@@ -43,11 +42,10 @@ function getAfterFeatures(features: IFeature[]) {
               v-for="feature in getAfterFeatures(group)"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" :is-selected="selectedGroupId === index " />
+              <LoChaObject :feature="feature" />
             </li>
           </ul>
         </div>
-        <LoChaDiff :links="loCha!.metadata.links[index]" />
         <!-- <div class="locha-diff">
           <slot name="locha-diff" />
         </div> -->

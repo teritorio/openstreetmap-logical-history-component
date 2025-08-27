@@ -54,18 +54,13 @@ export interface LoCha {
   featureCount: ComputedRef<number | undefined>
   groups: Ref<LoChaGroup[]>
   loCha: Ref<ApiResponse | undefined>
-  selectedGroup: Ref<LoChaGroup | undefined>
-  selectedGroupId: Ref<number | undefined>
-  highlightGroup: (feature: IFeature) => void
   setLoCha: (loCha: ApiResponse) => void
   getStatus: (feature: IFeature) => Status
 }
 
 // Internal state variables
 const loCha = ref<ApiResponse>()
-const selectedGroup = ref<LoChaGroup>()
 const selectedFeatureId = ref<number>()
-const selectedGroupId = ref<number>()
 const groups = ref<LoChaGroup[]>([])
 
 /**
@@ -100,22 +95,6 @@ export function useLoCha(): LoCha {
 
     loCha.value = data
     groups.value = groupFeaturesByLinks(data.features)
-  }
-
-  function highlightGroup(feature: IFeature): void {
-    if (selectedFeatureId.value === feature.id)
-      return
-
-    if (selectedGroupId.value === feature.properties.links) {
-      selectedFeatureId.value = feature.id
-      return
-    }
-
-    _resetGroup()
-
-    selectedFeatureId.value = feature.id
-    selectedGroupId.value = feature.properties.links
-    selectedGroup.value = groups.value[selectedGroupId.value]
   }
 
   function getStatus(feature: IFeature): Status {
@@ -176,17 +155,12 @@ export function useLoCha(): LoCha {
 
   function _resetGroup(): void {
     selectedFeatureId.value = undefined
-    selectedGroupId.value = undefined
-    selectedGroup.value = undefined
   }
 
   return {
     featureCount,
-    highlightGroup,
     loCha,
     groups,
-    selectedGroup,
-    selectedGroupId,
     setLoCha,
     getStatus,
   }
