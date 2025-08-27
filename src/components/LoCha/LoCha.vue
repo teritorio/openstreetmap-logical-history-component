@@ -2,7 +2,7 @@
 import type { ApiResponse } from '@/composables/useApi'
 import type { Error } from '@/types'
 import { watch } from 'vue'
-import LoChaList from '@/components/LoCha/LoChaList.vue'
+import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
 
 const props = defineProps<{
@@ -31,11 +31,11 @@ watch(() => props.data, (newValue) => {
     <p v-if="!featureCount" class="user-feedback">
       ⚠️ No data
     </p>
-    <LoChaList v-else>
+    <LoChaGroupList v-else>
       <!-- <template #locha-diff>
         <slot name="locha-diff" />
       </template> -->
-    </LoChaList>
+    </LoChaGroupList>
   </section>
 </template>
 
@@ -47,7 +47,7 @@ watch(() => props.data, (newValue) => {
   height: inherit;
 }
 
-.locha-list {
+.locha-group-list {
   overflow-y: hidden;
 }
 
