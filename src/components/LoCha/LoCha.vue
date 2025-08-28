@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
-import type { Error } from '@/types'
 import { watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
 
 const props = defineProps<{
   data?: ApiResponse
-}>()
-
-defineEmits<{
-  (e: 'error', payload: Error): void
-  (e: 'updateBbox', bbox: string): void
 }>()
 
 const {

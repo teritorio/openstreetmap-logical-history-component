@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
-import type { Error, FormData } from '@/types'
+import type { FormData } from '@/types'
 import { ref } from 'vue'
 import LoCha from '@/components/LoCha/LoCha.vue'
 import MapFilters from '@/components/MapFilters.vue'
@@ -10,9 +10,8 @@ import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
 
 const $api = useApiConfig()
-const { error, loading, setError } = $api
+const { error, loading } = $api
 const geojson = ref<ApiResponse>()
-const bbox = ref('')
 const mapFiltersRef = ref<InstanceType<typeof MapFilters>>()
 const mapFiltersIsOpen = ref(true)
 
@@ -25,20 +24,11 @@ async function handleSubmit(formData: FormData) {
       date_end: new Date(formData.dateEnd).toISOString(),
       bbox: formData.bbox,
     })
+
+    window.history.pushState({}, '', `${window.location.pathname}?${params}`)
   }
 
   geojson.value = await $api.fetchData(params)
-}
-
-function handleBboxUpdate(value: string) {
-  bbox.value = value
-}
-
-function handleError(err: Error): void {
-  setError(err)
-
-  if (mapFiltersRef.value)
-    mapFiltersRef.value.resetForm()
 }
 </script>
 
@@ -54,16 +44,10 @@ function handleError(err: Error): void {
     <MapFilters
       ref="mapFiltersRef"
       :is-open="mapFiltersIsOpen"
-      :bbox="bbox"
       @submit="handleSubmit"
-      @error="handleError"
       @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen"
     />
-    <LoCha
-      :data="geojson"
-      @error="handleError"
-      @update-bbox="handleBboxUpdate"
-    >
+    <LoCha :data="geojson">
       <!-- <template #locha-diff>
         <div>
           <h2>Diff tags</h2>

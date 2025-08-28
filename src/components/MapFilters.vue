@@ -1,21 +1,17 @@
 <script setup lang="ts">
-import type { Error, FormData, Preset } from '@/types'
-import { reactive, ref, watchEffect } from 'vue'
+import type { FormData, Preset } from '@/types'
+import { onMounted, reactive, ref } from 'vue'
 
-const props = withDefaults(defineProps<{
+withDefaults(defineProps<{
   isOpen?: boolean
-  bbox: string
 }>(), {
   isOpen: true,
 })
 
 const emit = defineEmits<{
   (e: 'submit', payload: FormData): void
-  (e: 'error', payload: Error): void
   (e: 'toggleMenu'): void
 }>()
-
-defineExpose({ resetForm })
 
 const initialFormValues = {
   dateStart: '',
@@ -49,18 +45,18 @@ const presets = [{
 const formRef = ref<InstanceType<typeof HTMLFormElement>>()
 const formValues = reactive<FormData>(initialFormValues)
 
-watchEffect(() => {
-  if (props.bbox)
-    formValues.bbox = props.bbox
-})
+onMounted(() => {
+  const searchParams = new URLSearchParams(window.location.search)
+  if (searchParams.has('date_start') && searchParams.has('date_end') && searchParams.has('bbox')) {
+    Object.assign(formValues, {
+      dateStart: searchParams.get('date_start'),
+      dateEnd: searchParams.get('date_end'),
+      bbox: searchParams.get('bbox'),
+    })
 
-function resetForm() {
-  Object.assign(formValues, {
-    dateStart: '',
-    dateEnd: '',
-    bbox: '',
-  })
-}
+    emit('submit', formValues)
+  }
+})
 
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
