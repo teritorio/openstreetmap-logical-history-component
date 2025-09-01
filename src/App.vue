@@ -18,10 +18,10 @@ const mapFiltersIsOpen = ref(true)
 async function handleSubmit(formData: FormData) {
   let params: URLSearchParams | undefined
 
-  if (formData.dateStart && formData.dateEnd && formData.bbox) {
+  if (formData.dateStart && formData.bbox) {
     params = new URLSearchParams({
       date_start: new Date(formData.dateStart).toISOString(),
-      date_end: new Date(formData.dateEnd).toISOString(),
+      date_end: !formData.dateEnd ? new Date().toISOString() : new Date(formData.dateEnd).toISOString(),
       bbox: formData.bbox,
     })
 

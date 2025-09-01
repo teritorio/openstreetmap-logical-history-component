@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormData, Preset } from '@/types'
 import { onMounted, reactive, ref } from 'vue'
+import MapBbox from '@/components/MapBbox.vue'
 
 withDefaults(defineProps<{
   isOpen?: boolean
@@ -65,6 +66,10 @@ function setPreset(index: number) {
 
   emit('submit', formValues)
 }
+
+function handleBboxChange(bbox: string) {
+  formValues.bbox = bbox
+}
 </script>
 
 <template>
@@ -77,20 +82,34 @@ function setPreset(index: number) {
       <hr>
       <div>
         <label for="date_start">From:</label>
-        <input v-model="formValues.dateStart" name="date_start" type="datetime-local" required>
+        <input
+          id="date_start"
+          v-model="formValues.dateStart"
+          type="datetime-local"
+          required
+        >
       </div>
       <hr>
       <div>
         <label for="date_end">To:</label>
-        <input v-model="formValues.dateEnd" name="date_end" type="datetime-local">
+        <input
+          id="date_end"
+          v-model="formValues.dateEnd"
+          type="datetime-local"
+        >
       </div>
       <hr>
       <div>
         <label for="bbox">Bounding Box:</label>
         <input
-          v-model="formValues.bbox" type="text" placeholder="lat1, lon1, lat2, lon2"
-          pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$" required
+          id="bbox"
+          v-model="formValues.bbox"
+          type="text"
+          placeholder="lat1, lon1, lat2, lon2"
+          pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
+          required
         >
+        <MapBbox :bbox="formValues.bbox" @update-bbox="handleBboxChange" />
       </div>
       <button type="submit">
         Search
@@ -171,10 +190,10 @@ form {
 form div {
   display: flex;
   flex-direction: column;
+  gap: 0.5rem;
 }
 
 label {
-  margin-bottom: 0.5em;
   color: #333;
 }
 
