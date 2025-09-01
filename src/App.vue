@@ -17,6 +17,7 @@ const mapFiltersIsOpen = ref(true)
 
 async function handleSubmit(formData: FormData) {
   let params: URLSearchParams | undefined
+  const currentHash = window.location.hash
 
   if (formData.dateStart && formData.bbox) {
     params = new URLSearchParams({
@@ -25,7 +26,7 @@ async function handleSubmit(formData: FormData) {
       bbox: formData.bbox,
     })
 
-    window.history.pushState({}, '', `${window.location.pathname}?${params}`)
+    window.history.pushState({}, '', `${window.location.pathname}?${params}${currentHash}`)
   }
 
   geojson.value = await $api.fetchData(params)
