@@ -24,23 +24,23 @@ const presets = [{
   title: 'Parking - (Points / Lines)',
   dateStart: new Date('2023-01-01').toISOString().slice(0, 16),
   dateEnd: new Date('2023-12-01').toISOString().slice(0, 16),
-  bbox: '43.57582751611194,-1.4865185506147705,43.57668833005737,-1.4857594854635559',
+  bbox: '-1.4865185506147705,43.57582751611194,-1.4857594854635559,43.57668833005737',
 
 }, {
   title: 'Bridgehead - (Lines)',
   dateStart: new Date('2024-07-01').toISOString().slice(0, 16),
   dateEnd: new Date('2024-08-01').toISOString().slice(0, 16),
-  bbox: '44.82039347351967,-0.5420824675324966,44.82208861548204,-0.5393090634110976',
+  bbox: '-0.5420824675324966,44.82039347351967,-0.5393090634110976,44.82208861548204',
 }, {
   title: 'Buildings - (Surfaces)',
   dateStart: new Date('2024-12-10').toISOString().slice(0, 16),
   dateEnd: new Date('2024-12-15').toISOString().slice(0, 16),
-  bbox: '42.685107065011486,-1.6537454710167148,42.68686379572838,-1.6509720668953156',
+  bbox: '-1.6537454710167148,42.685107065011486,-1.6509720668953156,42.68686379572838',
 }, {
   title: 'n+n relation',
   dateStart: new Date('2023-01-01').toISOString().slice(0, 16),
   dateEnd: new Date('2023-12-01').toISOString().slice(0, 16),
-  bbox: '43.55969828696391,-1.4598269945865354,43.565655969760684,-1.4323757210520682',
+  bbox: '-1.4598269945865354,43.55969828696391,-1.4323757210520682,43.565655969760684',
 }] satisfies Preset[]
 
 const formRef = ref<InstanceType<typeof HTMLFormElement>>()
@@ -48,12 +48,17 @@ const formValues = reactive<FormData>(initialFormValues)
 
 onMounted(() => {
   const searchParams = new URLSearchParams(window.location.search)
-  if (searchParams.has('date_start') && searchParams.has('date_end') && searchParams.has('bbox')) {
+  if (searchParams.has('date_start') && searchParams.has('date_end')) {
     Object.assign(formValues, {
       dateStart: searchParams.get('date_start'),
       dateEnd: searchParams.get('date_end'),
-      bbox: searchParams.get('bbox'),
     })
+
+    if (formValues.dateStart)
+      formValues.dateStart = new Date(formValues.dateStart).toISOString().slice(0, 16)
+
+    if (formValues.dateEnd)
+      formValues.dateEnd = new Date(formValues.dateEnd).toISOString().slice(0, 16)
 
     emit('submit', formValues)
   }
@@ -116,7 +121,7 @@ function handleBboxChange(bbox: string) {
       </button>
     </form>
 
-    <h2>Presets</h2>
+    <h2>Examples</h2>
     <ul>
       <li
         v-for="(preset, index) in presets"
