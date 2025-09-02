@@ -26,9 +26,9 @@ watch(() => props.data, (newValue) => {
       ⚠️ No data
     </p>
     <LoChaGroupList v-else>
-      <!-- <template #locha-diff>
-        <slot name="locha-diff" />
-      </template> -->
+      <template #tags-diff="slotProps">
+        <slot name="tags-diff" v-bind="slotProps" />
+      </template>
     </LoChaGroupList>
   </section>
 </template>

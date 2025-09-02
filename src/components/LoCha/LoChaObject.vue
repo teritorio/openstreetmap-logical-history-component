@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import type { ApiLink, IFeature } from '@/composables/useApi'
+import type { IFeature } from '@/composables/useApi'
 import { computed } from 'vue'
-import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 
 const props = defineProps<{
   feature: IFeature
-  beforeFeature?: IFeature
-  link?: ApiLink
 }>()
 
 const { getStatus } = useLoCha()
@@ -55,7 +52,7 @@ const color = computed(() => loChaColors[status.value])
         👤{{ feature.properties.username }}
       </a>
     </header>
-    <LoChaDiff v-if="link" :link="link" :before-feature="beforeFeature" />
+    <slot name="tags-diff" />
     <div class="actions">
       <a
         :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"

@@ -48,10 +48,11 @@ function getBeforeFeature(id: number, index: number): IFeature | undefined {
           v-for="feature in getBeforeFeatures(features)"
           :key="feature.id"
         >
-          <LoChaObject
-            :feature="feature"
-            :link="getLink(feature, index, 'before')"
-          />
+          <LoChaObject :feature="feature">
+            <template #tags-diff>
+              <slot name="tags-diff" :link="getLink(feature, index, 'before')" />
+            </template>
+          </LoChaObject>
         </li>
       </ul>
     </div>
@@ -61,11 +62,11 @@ function getBeforeFeature(id: number, index: number): IFeature | undefined {
           v-for="feature in getAfterFeatures(features)"
           :key="feature.id"
         >
-          <LoChaObject
-            :feature="feature"
-            :before-feature="getBeforeFeature(feature.id, index)"
-            :link="getLink(feature, index, 'after')"
-          />
+          <LoChaObject :feature="feature">
+            <template #tags-diff>
+              <slot name="tags-diff" :link="getLink(feature, index, 'after')" :before-feature="getBeforeFeature(feature.id, index)" />
+            </template>
+          </LoChaObject>
         </li>
       </ul>
     </div>

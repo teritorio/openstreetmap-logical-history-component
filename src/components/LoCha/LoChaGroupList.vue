@@ -8,11 +8,13 @@ const currentHash = ref<string>()
 
 onMounted(() => {
   currentHash.value = window.location.hash
-  scrollToSection(currentHash.value)
+  if (currentHash.value)
+    scrollToSection(currentHash.value)
 
   window.addEventListener('hashchange', () => {
     currentHash.value = window.location.hash
-    scrollToSection(currentHash.value)
+    if (currentHash.value)
+      scrollToSection(currentHash.value)
   })
 })
 
@@ -55,7 +57,11 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
     <ul>
       <li v-for="(group, index) in groups" :id="`group-${index}`" :key="index" :class="{ selected: currentHash === `#group-${index}` }">
         <a class="anchor-button" :href="`#group-${index}`">🔗</a>
-        <LoChaGroup :features="group" :index="index" />
+        <LoChaGroup :features="group" :index="index">
+          <template #tags-diff="slotProps">
+            <slot name="tags-diff" v-bind="slotProps" />
+          </template>
+        </LoChaGroup>
       </li>
     </ul>
     <iframe name="hidden_josm_target" style="display: none" />

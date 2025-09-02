@@ -3,6 +3,7 @@ import type { ApiResponse } from '@/composables/useApi'
 import type { FormData } from '@/types'
 import { ref } from 'vue'
 import LoCha from '@/components/LoCha/LoCha.vue'
+import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import MapFilters from '@/components/MapFilters.vue'
 import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
@@ -49,19 +50,9 @@ async function handleSubmit(formData: FormData) {
       @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen"
     />
     <LoCha :data="geojson">
-      <!-- <template #locha-diff>
-        <div>
-          <h2>Diff tags</h2>
-          <table v-for="(group, index) in groups" :key="index">
-            <thead>
-              <tr>{{ index }}</tr>
-            </thead>
-            <tbody>
-              <tr>{{ group }}</tr>
-            </tbody>
-          </table>
-        </div>
-      </template> -->
+      <template #tags-diff="{ link, beforeFeature }">
+        <LoChaDiff v-if="link" :link="link" :before-feature="beforeFeature" />
+      </template>
     </LoCha>
   </main>
 </template>
