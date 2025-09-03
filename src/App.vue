@@ -28,8 +28,9 @@ const initialFormValues = computed<FormData>(() => ({
 }))
 
 watch(
-  () => route.query,
-  async (query) => {
+  () => JSON.stringify(route.query),
+  async () => {
+    const query = route.query
     if (query.date_start && query.bbox) {
       await fetchData({
         date_start: String(query.date_start),
