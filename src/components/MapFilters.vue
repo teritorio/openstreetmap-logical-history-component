@@ -1,23 +1,23 @@
 <script setup lang="ts">
 import type { FormData, Preset } from '@/types'
-import { onMounted, reactive, ref } from 'vue'
+import { reactive, ref, watchEffect } from 'vue'
 import MapBbox from '@/components/MapBbox.vue'
 
-withDefaults(defineProps<{
-  isOpen?: boolean
-}>(), {
-  isOpen: true,
-})
+const props = withDefaults(
+  defineProps<{
+    isOpen?: boolean
+    initialValues?: FormData
+  }>(),
+  {
+    isOpen: true,
+    initialValues: () => ({ dateStart: '', dateEnd: '', bbox: '' }),
+  },
+)
 
 const emit = defineEmits<{
   (e: 'submit', payload: FormData): void
   (e: 'toggleMenu'): void
 }>()
-
-const initialFormValues = {
-  dateStart: '',
-  bbox: '',
-} satisfies FormData
 
 // TODO: move presets to another file.
 const presets = [{
@@ -44,31 +44,21 @@ const presets = [{
 }] satisfies Preset[]
 
 const formRef = ref<InstanceType<typeof HTMLFormElement>>()
-const formValues = reactive<FormData>(initialFormValues)
+const formValues = reactive<FormData>({
+  dateStart: '',
+  dateEnd: '',
+  bbox: '',
+})
 
-onMounted(() => {
-  const searchParams = new URLSearchParams(window.location.search)
-  if (searchParams.has('date_start') && searchParams.has('date_end')) {
-    Object.assign(formValues, {
-      dateStart: searchParams.get('date_start'),
-      dateEnd: searchParams.get('date_end'),
-    })
-
-    if (formValues.dateStart)
-      formValues.dateStart = new Date(formValues.dateStart).toISOString().slice(0, 16)
-
-    if (formValues.dateEnd)
-      formValues.dateEnd = new Date(formValues.dateEnd).toISOString().slice(0, 16)
-
-    emit('submit', formValues)
+watchEffect(() => {
+  if (props.initialValues) {
+    Object.assign(formValues, props.initialValues)
   }
 })
 
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
-
   Object.assign(formValues, preset)
-
   emit('submit', formValues)
 }
 
@@ -114,7 +104,10 @@ function handleBboxChange(bbox: string) {
           pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
           required
         >
-        <MapBbox :bbox="formValues.bbox" @update-bbox="handleBboxChange" />
+        <MapBbox
+          :bbox="formValues.bbox"
+          @update-bbox="handleBboxChange"
+        />
       </div>
       <button type="submit">
         Search

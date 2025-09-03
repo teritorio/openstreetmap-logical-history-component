@@ -48,7 +48,8 @@
     "@turf/bbox": "^7.2.0",
     "@vueuse/components": "^13.7.0",
     "@vueuse/core": "^13.7.0",
-    "underscore": "^1.13.7"
+    "underscore": "^1.13.7",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.2.1",

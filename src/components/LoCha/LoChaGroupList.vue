@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { useLoCha } from '@/composables/useLoCha'
 
@@ -18,7 +18,7 @@ onMounted(() => {
   })
 })
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
   window.removeEventListener('hashchange', () => {
     currentHash.value = undefined
   })

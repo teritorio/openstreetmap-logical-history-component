@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
-import type { FormData } from '@/types'
-import { ref } from 'vue'
+import type { FormData, FormDataApi } from '@/types'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import LoCha from '@/components/LoCha/LoCha.vue'
 import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import MapFilters from '@/components/MapFilters.vue'
@@ -9,6 +10,7 @@ import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
+import { fromDatetimeLocal, toDatetimeLocal } from './utils/date-format'
 
 const $api = useApiConfig()
 const { error, loading } = $api
@@ -16,21 +18,50 @@ const geojson = ref<ApiResponse>()
 const mapFiltersRef = ref<InstanceType<typeof MapFilters>>()
 const mapFiltersIsOpen = ref(true)
 
-async function handleSubmit(formData: FormData) {
-  let params: URLSearchParams | undefined
-  const currentHash = window.location.hash
+const route = useRoute()
+const router = useRouter()
 
-  if (formData.dateStart && formData.bbox) {
-    params = new URLSearchParams({
-      date_start: new Date(formData.dateStart).toISOString(),
-      date_end: !formData.dateEnd ? new Date().toISOString() : new Date(formData.dateEnd).toISOString(),
-      bbox: formData.bbox,
-    })
+const initialFormValues = computed<FormData>(() => ({
+  dateStart: route.query.date_start ? toDatetimeLocal(String(route.query.date_start)) : '',
+  dateEnd: route.query.date_end ? toDatetimeLocal(String(route.query.date_end)) : '',
+  bbox: route.query.bbox ? String(route.query.bbox) : '',
+}))
 
-    window.history.pushState({}, '', `${window.location.pathname}?${params}${currentHash}`)
-  }
+watch(
+  () => route.query,
+  async (query) => {
+    if (query.date_start && query.bbox) {
+      await fetchData({
+        date_start: String(query.date_start),
+        date_end: query.date_end ? String(query.date_end) : new Date().toISOString(),
+        bbox: String(query.bbox),
+      })
+    }
+  },
+  { immediate: true },
+)
 
-  geojson.value = await $api.fetchData(params)
+async function fetchData(query: FormDataApi) {
+  geojson.value = await $api.fetchData(query)
+}
+
+function handleSubmit(data: FormData) {
+  if (!data.dateStart)
+    throw new Error('Missing start date.')
+
+  const query = {
+    date_start: fromDatetimeLocal(data.dateStart),
+    date_end: data.dateEnd
+      ? fromDatetimeLocal(data.dateEnd)
+      : new Date().toISOString(),
+    bbox: data.bbox ?? '',
+  } as FormDataApi
+
+  router.push({
+    path: route.path,
+    query,
+    hash: route.hash,
+  })
 }
 </script>
 
@@ -45,6 +76,7 @@ async function handleSubmit(formData: FormData) {
   >
     <MapFilters
       ref="mapFiltersRef"
+      :initial-values="initialFormValues"
       :is-open="mapFiltersIsOpen"
       @submit="handleSubmit"
       @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen"
