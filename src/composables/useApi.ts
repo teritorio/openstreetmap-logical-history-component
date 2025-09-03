@@ -20,7 +20,7 @@ interface ApiComposable {
    * @param params - Optional URLSearchParams object that can be used to append query parameters to the API request.
    * @returns A Promise resolving to an `ApiResponse` or `undefined` if there was an issue.
    */
-  fetchData: (params?: FormDataApi) => Promise<ApiResponse | undefined>
+  fetchData: (params: FormDataApi) => Promise<ApiResponse | undefined>
 
   /**
    * A reactive reference indicating whether the API request is currently loading.
@@ -140,9 +140,16 @@ export function useApiConfig(): ApiComposable {
    * @param params - Optional query parameters to append to the API endpoint.
    * @returns The constructed API URL.
    */
-  function buildApiUrl(params?: FormDataApi): string {
+  function buildApiUrl(params: FormDataApi): string {
+    const searchParams = new URLSearchParams()
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== '')
+        searchParams.set(key, value)
+    })
+
     const endpoint = '/api/0.1/overpass_logical_history'
-    return params ? `${apiBaseUrl}${endpoint}?${params.toString()}` : `${apiBaseUrl}${endpoint}`
+    return params ? `${apiBaseUrl}${endpoint}?${searchParams}` : `${apiBaseUrl}${endpoint}`
   }
 
   /**
@@ -151,7 +158,7 @@ export function useApiConfig(): ApiComposable {
    * @param params - Optional query parameters to include in the API request.
    * @returns The API response with transformed features, or undefined if an error occurred.
    */
-  async function fetchData(params?: FormDataApi): Promise<ApiResponse | undefined> {
+  async function fetchData(params: FormDataApi): Promise<ApiResponse | undefined> {
     resetError()
     loading.value = true
 
