@@ -71,7 +71,7 @@ function handleBboxChange(bbox: string) {
     <form ref="formRef" @submit.prevent="emit('submit', formValues)">
       <h2>Filter by:</h2>
       <div>
-        <label for="date_start"><span class="required">*</span> From:</label>
+        <label for="date_start">From <span class="required">*</span></label>
         <input
           id="date_start"
           v-model="formValues.dateStart"
@@ -80,7 +80,7 @@ function handleBboxChange(bbox: string) {
         >
       </div>
       <div>
-        <label for="date_end">To:</label>
+        <label for="date_end">To</label>
         <input
           id="date_end"
           v-model="formValues.dateEnd"
@@ -88,7 +88,7 @@ function handleBboxChange(bbox: string) {
         >
       </div>
       <div>
-        <label for="bbox"><span class="required">*</span> Bounding Box:</label>
+        <label for="bbox">Bounding Box <span class="required">*</span></label>
         <input
           id="bbox"
           v-model="formValues.bbox"

@@ -1,6 +1,7 @@
 import type { Reactive, Ref } from 'vue'
 import type { Error } from '@/types'
 import { area } from '@turf/area'
+import booleanEqual from '@turf/boolean-equal'
 import { reactive, ref } from 'vue'
 
 /**
@@ -81,6 +82,7 @@ export interface IFeature extends GeoJSON.Feature {
     objtype: ObjectType
     id: number
     geom_distance: number | null
+    geom_changed: boolean
     deleted: boolean
     links: number
     members?: null
@@ -205,6 +207,12 @@ export function useApiConfig(): ApiComposable {
 
       if (!link)
         throw new Error(`Feature ${feature.id} has no link.`)
+
+      const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
+
+      if (linkedFeature) {
+        feature.properties.geom_changed = !booleanEqual(feature.geometry, linkedFeature.geometry)
+      }
 
       if (link.before !== undefined && link.after === undefined) {
         return {
