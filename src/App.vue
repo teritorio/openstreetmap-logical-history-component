@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
-import type { FormData, FormDataApi } from '@/types'
+import type { FormData } from '@/types'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LoCha from '@/components/LoCha/LoCha.vue'
@@ -42,7 +42,7 @@ watch(
   { immediate: true },
 )
 
-async function fetchData(query: FormDataApi) {
+async function fetchData(query: Record<string, string>) {
   geojson.value = await $api.fetchData(query)
 }
 
@@ -56,12 +56,11 @@ function handleSubmit(data: FormData) {
       ? fromDatetimeLocal(data.dateEnd)
       : new Date().toISOString(),
     bbox: data.bbox ?? '',
-  } as FormDataApi
+  }
 
   router.push({
     path: route.path,
     query,
-    hash: route.hash,
   })
 }
 </script>
