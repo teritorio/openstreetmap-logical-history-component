@@ -1,10 +1,12 @@
+import type { LocationQueryRaw } from 'vue-router'
+
 export interface FormData {
   dateStart: string
   dateEnd?: string
   bbox: string
 }
 
-export interface FormDataApi {
+export interface FormDataApi extends LocationQueryRaw {
   date_start: string
   date_end?: string
   bbox: string

@@ -80,7 +80,8 @@ onMounted(() => {
 
 <style scoped>
 .map-bbox {
-  height: 280px;
+  border: 1px solid grey;
+  height: 250px;
   width: 100%;
 }
 </style>

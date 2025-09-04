@@ -67,7 +67,7 @@ function handleSubmit(data: FormData) {
 </script>
 
 <template>
-  <VHeader />
+  <VHeader @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen" />
   <VLoading v-if="loading" />
   <VError v-if="error.message" :message="error.message" :type="error.type" />
   <main
@@ -80,7 +80,6 @@ function handleSubmit(data: FormData) {
       :initial-values="initialFormValues"
       :is-open="mapFiltersIsOpen"
       @submit="handleSubmit"
-      @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen"
     />
     <LoCha :data="geojson">
       <template #tags-diff="{ link, beforeFeature }">
@@ -94,7 +93,7 @@ function handleSubmit(data: FormData) {
 main {
   display: grid;
   grid-template-rows: 1fr;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 64px);
   transition: grid-template-columns 0.3s ease;
 }
 </style>

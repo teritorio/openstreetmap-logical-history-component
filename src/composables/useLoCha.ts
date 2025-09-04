@@ -14,7 +14,8 @@ export type Status = 'create' | 'delete' | 'updateBefore' | 'updateAfter'
  * The Color type defines colors based on feature status.
  * - 'create' maps to '#52c41a'
  * - 'delete' maps to '#FF0000'
- * - 'update' maps to '#E6A23C'
+ * - 'updateBefore' maps to '#FFA479'
+ * - 'updateAfter' maps to '#F2BE00'
  */
 export type Color = {
   [key in Status]: key extends 'create'

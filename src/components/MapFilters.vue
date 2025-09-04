@@ -16,7 +16,6 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'submit', payload: FormData): void
-  (e: 'toggleMenu'): void
 }>()
 
 // TODO: move presets to another file.
@@ -69,15 +68,10 @@ function handleBboxChange(bbox: string) {
 
 <template>
   <aside :class="{ minimized: !isOpen }">
-    <button class="toggle-button" @click="emit('toggleMenu')">
-      {{ isOpen ? '⬅️' : '➡️' }}
-    </button>
     <form ref="formRef" @submit.prevent="emit('submit', formValues)">
       <h2>Filter by:</h2>
-      <pre>* required fields</pre>
-      <hr>
       <div>
-        <label for="date_start">* From:</label>
+        <label for="date_start"><span class="required">*</span> From:</label>
         <input
           id="date_start"
           v-model="formValues.dateStart"
@@ -85,7 +79,6 @@ function handleBboxChange(bbox: string) {
           required
         >
       </div>
-      <hr>
       <div>
         <label for="date_end">To:</label>
         <input
@@ -94,9 +87,8 @@ function handleBboxChange(bbox: string) {
           type="datetime-local"
         >
       </div>
-      <hr>
       <div>
-        <label for="bbox">* Bounding Box:</label>
+        <label for="bbox"><span class="required">*</span> Bounding Box:</label>
         <input
           id="bbox"
           v-model="formValues.bbox"
@@ -110,6 +102,7 @@ function handleBboxChange(bbox: string) {
           @update-bbox="handleBboxChange"
         />
       </div>
+      <pre>* required fields</pre>
       <button type="submit">
         Search
       </button>
@@ -134,9 +127,9 @@ aside {
   flex-direction: column;
   gap: 0.5em;
   border-right: 1px solid #ddd;
-  padding: 1em;
   position: relative;
   height: inherit;
+  padding: 1rem;
 }
 
 .minimized {
@@ -152,28 +145,6 @@ aside {
   display: none;
 }
 
-.toggle-button {
-  background-color: #ffffff;
-  color: #fff;
-  border-radius: 50%;
-  border: none;
-  padding: 0.5em;
-  cursor: pointer;
-  height: 48px;
-  width: 48px;
-  position: absolute;
-  right: 0;
-  bottom: 1em;
-  transform: translateX(50%);
-  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
-  font-size: 1.2em;
-  z-index: 1;
-}
-
-.toggle-button:hover {
-  background-color: #f4f4f4;
-}
-
 ul {
   list-style: none;
 }
@@ -182,11 +153,9 @@ form {
   display: flex;
   flex-direction: column;
   gap: 1em;
-  background-color: #f4f4f4;
-  padding: 1em;
 }
 
-form div {
+form > div {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -194,6 +163,15 @@ form div {
 
 label {
   color: #333;
+}
+
+pre {
+  text-align: right;
+}
+
+.required,
+pre {
+  color: red;
 }
 
 input,
