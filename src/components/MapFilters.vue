@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormData, Preset } from '@/types'
-import { reactive, ref, watchEffect } from 'vue'
+import { reactive, ref, shallowRef, useTemplateRef, watchEffect } from 'vue'
 import MapBbox from '@/components/MapBbox.vue'
 
 const props = withDefaults(
@@ -48,6 +48,8 @@ const formValues = reactive<FormData>({
   dateEnd: '',
   bbox: '',
 })
+const mapBboxRef = useTemplateRef('mapBboxRef')
+const needZoom = shallowRef(false)
 
 watchEffect(() => {
   if (props.initialValues) {
@@ -62,13 +64,33 @@ function setPreset(index: number) {
 }
 
 function handleBboxChange(bbox: string) {
+  if (!mapBboxRef.value)
+    return
+
+  if (mapBboxRef.value.getZoom() >= 14)
+    needZoom.value = false
+
   formValues.bbox = bbox
+}
+
+function handleSubmit(): void {
+  if (!mapBboxRef.value)
+    return
+
+  needZoom.value = false
+
+  if (mapBboxRef.value.getZoom() < 14) {
+    needZoom.value = true
+    return
+  }
+
+  emit('submit', formValues)
 }
 </script>
 
 <template>
   <aside :class="{ minimized: !isOpen }">
-    <form ref="formRef" @submit.prevent="emit('submit', formValues)">
+    <form ref="formRef" @submit.prevent="handleSubmit">
       <h2>Filter by:</h2>
       <div>
         <label for="date_start">From <span class="required">*</span></label>
@@ -98,9 +120,11 @@ function handleBboxChange(bbox: string) {
           required
         >
         <MapBbox
+          ref="mapBboxRef"
           :bbox="formValues.bbox"
           @update-bbox="handleBboxChange"
         />
+        <pre v-if="needZoom">Need smaller bbox, zoom more !</pre>
       </div>
       <pre>* required fields</pre>
       <button type="submit">

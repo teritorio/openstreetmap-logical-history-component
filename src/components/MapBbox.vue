@@ -28,6 +28,13 @@ function fitMapToBbox(bbox: string): void {
   )
 }
 
+function getZoom(): number {
+  if (!map.value)
+    throw new Error('Init map first.')
+
+  return map.value.getZoom()
+}
+
 function emitBbox(): void {
   if (!map.value)
     return
@@ -72,6 +79,8 @@ onMounted(() => {
     map.value!.on('moveend', emitBbox)
   })
 })
+
+defineExpose({ getZoom })
 </script>
 
 <template>
