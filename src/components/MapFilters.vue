@@ -67,9 +67,7 @@ function handleBboxChange(bbox: string) {
   if (!mapBboxRef.value)
     return
 
-  if (mapBboxRef.value.getZoom() >= 14)
-    needZoom.value = false
-
+  needZoom.value = mapBboxRef.value.getZoom() < 14
   formValues.bbox = bbox
 }
 
@@ -127,8 +125,8 @@ function handleSubmit(): void {
         <pre v-if="needZoom">Need smaller bbox, zoom more !</pre>
       </div>
       <pre>* required fields</pre>
-      <button type="submit">
-        Search
+      <button type="submit" :disabled="needZoom">
+        Run
       </button>
     </form>
 
@@ -215,6 +213,11 @@ input {
   background: #082e4e;
   color: #fff;
   cursor: pointer;
+}
+
+[type='submit']:is(:disabled) {
+  opacity: 0.5;
+  cursor: initial;
 }
 
 @media (max-width: 768px) {

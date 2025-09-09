@@ -75,6 +75,8 @@ onMounted(() => {
   map.value.on('load', () => {
     if (props.bbox)
       fitMapToBbox(props.bbox)
+    else
+      emit('updateBbox', '')
 
     map.value!.on('moveend', emitBbox)
   })
