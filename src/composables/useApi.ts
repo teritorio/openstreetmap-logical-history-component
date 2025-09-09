@@ -42,9 +42,11 @@ type ObjectType = 'node' | 'way' | 'relation'
 
 export type ActionType = 'accept' | 'reject'
 
-export type Action = ['diff' | ActionType | string | null]
+export type ActionTypeOptions = Record<string, string | string[] | object>
 
-type Actions = Record<string, Action[]>
+export type Action = [string, ActionType | null, ActionTypeOptions | null]
+
+export type Actions = Record<string, Action[]>
 
 interface Changeset {
   id: number

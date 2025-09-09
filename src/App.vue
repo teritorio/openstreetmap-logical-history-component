@@ -81,8 +81,15 @@ function handleSubmit(data: FormData) {
       @submit="handleSubmit"
     />
     <LoCha :data="geojson">
-      <template #tags-diff="{ link, beforeFeature }">
-        <LoChaDiff v-if="link" :link="link" :before-feature="beforeFeature" />
+      <template #tags-diff="{ title, diff, attribs, dst, src }">
+        <LoChaDiff
+          v-if="diff"
+          :title="title"
+          :attribs="attribs"
+          :diff="diff"
+          :dst="dst"
+          :src="src"
+        />
       </template>
     </LoCha>
   </main>

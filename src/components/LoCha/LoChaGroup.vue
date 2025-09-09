@@ -23,20 +23,36 @@ function getAfterFeatures(features: IFeature[]) {
   return features.filter(feature => feature.properties.is_created || feature.properties.is_after)
 }
 
-function getLink(feature: IFeature, index: number, position: 'before' | 'after'): ApiLink | undefined {
+function getDiff(
+  feature: IFeature,
+  index: number,
+  position: 'before' | 'after',
+  type: 'attribs' | 'tags',
+): ApiLink['diff_attribs'] | ApiLink['diff_tags'] {
   if (feature.properties.is_before)
     return undefined
 
-  return loCha.value!.metadata.links[index].find(link => link[position] === feature.id)
+  return loCha.value!.metadata.links[index].find(link => link[position] === feature.id)?.[`diff_${type}`]
 }
 
-function getBeforeFeature(id: number, index: number): IFeature | undefined {
+function getBeforeProperties(id: number, index: number): IFeature['properties'] | undefined {
   const link = loCha.value!.metadata.links[index].find(link => link.after === id)
 
   if (!link)
     throw new Error(`Link index ${index} for feature ${id} not found.`)
 
-  return loCha.value!.features.find(feature => feature.id === link!.before)
+  return loCha.value!.features.find(feature => feature.id === link!.before)?.properties
+}
+
+function getTagsTitle(id: number, index: number): string | undefined {
+  const link = loCha.value!.metadata.links[index].find(link => link.after === id)
+
+  if (!link)
+    throw new Error(`Link index ${index} for feature ${id} not found.`)
+
+  const feature = loCha.value!.features.find(feature => feature.id === link!.before)
+
+  return feature && feature.properties.objtype[0] + feature.properties.id
 }
 </script>
 
@@ -50,7 +66,12 @@ function getBeforeFeature(id: number, index: number): IFeature | undefined {
         >
           <LoChaObject :feature="feature">
             <template #tags-diff>
-              <slot name="tags-diff" :link="getLink(feature, index, 'before')" />
+              <slot
+                name="tags-diff"
+                :diff="getDiff(feature, index, 'before', 'tags')"
+                :attribs="getDiff(feature, index, 'before', 'attribs')"
+                :src="feature.properties"
+              />
             </template>
           </LoChaObject>
         </li>
@@ -64,7 +85,14 @@ function getBeforeFeature(id: number, index: number): IFeature | undefined {
         >
           <LoChaObject :feature="feature">
             <template #tags-diff>
-              <slot name="tags-diff" :link="getLink(feature, index, 'after')" :before-feature="getBeforeFeature(feature.id, index)" />
+              <slot
+                name="tags-diff"
+                :title="getTagsTitle(feature.id, index)"
+                :diff="getDiff(feature, index, 'after', 'tags')"
+                :attribs="getDiff(feature, index, 'after', 'attribs')"
+                :dst="feature.properties"
+                :src="getBeforeProperties(feature.id, index)"
+              />
             </template>
           </LoChaObject>
         </li>
