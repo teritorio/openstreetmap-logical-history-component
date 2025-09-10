@@ -10,7 +10,7 @@ const emit = defineEmits<{
       ☰
     </button>
     <img src="/teritorio.png" alt="Logo Teritorio">
-    <h1>OSM LoCha UI Component</h1>
+    <h1>OpenStreetMap Logical History</h1>
   </header>
 </template>
 
