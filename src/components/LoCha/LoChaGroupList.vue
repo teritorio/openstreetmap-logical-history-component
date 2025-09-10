@@ -55,8 +55,8 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
       <h2>After</h2>
     </header>
     <ul>
-      <li v-for="(group, index) in groups" :id="`group-${index}`" :key="index" :class="{ selected: currentHash === `#group-${index}` }">
-        <a class="anchor-button" :href="`#group-${index}`">🔗</a>
+      <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#map-${index}` }">
+        <a class="anchor-button" :href="`#map-${index}`">🔗</a>
         <LoChaGroup :features="group" :index="index">
           <template #tags-diff="slotProps">
             <slot name="tags-diff" v-bind="slotProps" />
