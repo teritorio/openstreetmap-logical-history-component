@@ -34,7 +34,7 @@ watch(
     if (query.date_start && query.bbox) {
       await fetchData({
         date_start: String(query.date_start),
-        date_end: query.date_end ? String(query.date_end) : new Date().toISOString(),
+        date_end: query.date_end ? String(query.date_end) : undefined,
         bbox: String(query.bbox),
       })
     }
@@ -42,7 +42,7 @@ watch(
   { immediate: true },
 )
 
-async function fetchData(query: Record<string, string>) {
+async function fetchData(query: Record<string, string | undefined>) {
   geojson.value = await $api.fetchData(query)
 }
 
@@ -54,7 +54,7 @@ function handleSubmit(data: FormData) {
     date_start: fromDatetimeLocal(data.dateStart),
     date_end: data.dateEnd
       ? fromDatetimeLocal(data.dateEnd)
-      : new Date().toISOString(),
+      : undefined,
     bbox: data.bbox ?? '',
   }
 

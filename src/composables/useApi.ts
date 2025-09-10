@@ -21,7 +21,7 @@ interface ApiComposable {
    * @param params - Optional URLSearchParams object that can be used to append query parameters to the API request.
    * @returns A Promise resolving to an `ApiResponse` or `undefined` if there was an issue.
    */
-  fetchData: (params: Record<string, string>) => Promise<ApiResponse | undefined>
+  fetchData: (params: Record<string, string | undefined>) => Promise<ApiResponse | undefined>
 
   /**
    * A reactive reference indicating whether the API request is currently loading.
@@ -144,7 +144,7 @@ export function useApiConfig(): ApiComposable {
    * @param params - Optional query parameters to append to the API endpoint.
    * @returns The constructed API URL.
    */
-  function buildApiUrl(params: Record<string, string>): string {
+  function buildApiUrl(params: Record<string, string | undefined>): string {
     const searchParams = new URLSearchParams()
 
     Object.entries(params).forEach(([key, value]) => {
@@ -162,7 +162,7 @@ export function useApiConfig(): ApiComposable {
    * @param params - Optional query parameters to include in the API request.
    * @returns The API response with transformed features, or undefined if an error occurred.
    */
-  async function fetchData(params: Record<string, string>): Promise<ApiResponse | undefined> {
+  async function fetchData(params: Record<string, string | undefined>): Promise<ApiResponse | undefined> {
     resetError()
     loading.value = true
 
