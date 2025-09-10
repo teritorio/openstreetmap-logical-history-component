@@ -21,8 +21,8 @@ const emit = defineEmits<{
 // TODO: move presets to another file.
 const presets = [{
   title: 'Parking - (Points / Lines)',
-  dateStart: new Date('2023-01-01').toISOString().slice(0, 16),
-  dateEnd: new Date('2023-12-01').toISOString().slice(0, 16),
+  dateStart: new Date('2023-08-01').toISOString().slice(0, 16),
+  dateEnd: new Date('2023-09-30').toISOString().slice(0, 16),
   bbox: '-1.4865185506147705,43.57582751611194,-1.4857594854635559,43.57668833005737',
 
 }, {
