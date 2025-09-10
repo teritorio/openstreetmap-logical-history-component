@@ -83,7 +83,7 @@ function handleSubmit(data: FormData) {
     <LoCha :data="geojson">
       <template #tags-diff="{ title, diff, attribs, dst, src }">
         <LoChaDiff
-          v-if="diff"
+          v-if="!(src?.is_before && !dst)"
           :title="title"
           :attribs="attribs"
           :diff="diff"

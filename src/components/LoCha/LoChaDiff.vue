@@ -10,7 +10,7 @@ import { loChaColors } from '@/composables/useLoCha'
 const props = withDefaults(
   defineProps<{
     clear?: string[]
-    diff: NonNullable<ApiLink['diff_tags']>
+    diff: ApiLink['diff_tags']
     attribs: ApiLink['diff_attribs']
     dst?: IFeature['properties']
     exclude?: string[]
@@ -30,7 +30,7 @@ const groupedTagKeys = computed((): string[][] => {
       ...Object.keys(props.dst?.tags || {}),
     ]),
     (key: string) =>
-      props.diff[key]
+      props.diff?.[key]
         ? -maxActionPriority(props.diff[key])
         : 0,
   )
@@ -38,7 +38,7 @@ const groupedTagKeys = computed((): string[][] => {
   return Object.values(
     groupBy(
       keys,
-      key => props.diff[key]?.map(diff => `${diff}`).join('||'),
+      key => props.diff?.[key]?.map(diff => `${diff}`).join('||') || '',
     ),
   )
 })
@@ -71,9 +71,9 @@ function action2priority(logAction: ActionType | null): number {
   return logAction ? { reject: 2, accept: 0 }[logAction] : 1
 }
 
-function actionIcon(key: string): string {
+function actionIcon(key: string): string | undefined {
   return (
-    props.diff[key]
+    props.diff?.[key]
     && (
       !props.src?.tags || !(key in props.src.tags)
         ? '➕'
@@ -83,9 +83,9 @@ function actionIcon(key: string): string {
   )
 }
 
-function backgroundClass(key: string): string {
+function backgroundClass(key: string): string | undefined {
   return (
-    props.diff[key]
+    props.diff?.[key]
     && (!props.src?.tags || !(key in props.src.tags)
       ? 'attribute-added'
       : !(key in (props.dst?.tags || {}))
@@ -129,8 +129,8 @@ function diffText(before: string, after: string): Change[] {
                   />
                 </template>
                 <LoChaDiffTag
-                  v-if="diff[groupedKey[0]] !== undefined"
-                  :diff="diff[groupedKey[0]]"
+                  v-if="diff?.[groupedKey[0]] !== undefined"
+                  :diff="diff?.[groupedKey[0]]"
                   type="tags"
                 />
                 <template v-else-if="groupIndex !== 0">
@@ -145,7 +145,7 @@ function diffText(before: string, after: string): Change[] {
             <tr
               v-if="!exclude.includes(key)"
               :class="
-                (diff[groupedKey[0]] === undefined
+                (diff?.[groupedKey[0]] === undefined
                   || diff[groupedKey[0]][0] === undefined
                   || diff[groupedKey[0]][0][1]) !== 'reject' && 'no_changes'
               "
@@ -155,7 +155,7 @@ function diffText(before: string, after: string): Change[] {
               </td>
               <td
                 :class="
-                  (diff[groupedKey[0]] === undefined
+                  (diff?.[groupedKey[0]] === undefined
                     || diff[groupedKey[0]][0] === undefined
                     || diff[groupedKey[0]][0][1]) !== 'reject' || [
                     backgroundClass(key),
@@ -167,7 +167,7 @@ function diffText(before: string, after: string): Change[] {
               </td>
               <td
                 :class="
-                  (diff[groupedKey[0]] === undefined
+                  (diff?.[groupedKey[0]] === undefined
                     || diff[groupedKey[0]][0] === undefined
                     || diff[groupedKey[0]][0][1]) !== 'reject' || [
                     backgroundClass(key),
@@ -178,7 +178,7 @@ function diffText(before: string, after: string): Change[] {
                 <template v-if="clear.includes(key)">
                   [...]
                 </template>
-                <template v-else-if="diff[key]">
+                <template v-else-if="diff?.[key]">
                   <span v-if="!src?.tags || !(key in src.tags)">{{ dst?.tags?.[key] }} </span>
                   <span v-else-if="!(key in (dst?.tags || {}))">{{ src.tags[key] }} </span>
                   <span
