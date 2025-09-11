@@ -11,11 +11,9 @@ const props = withDefaults(
   defineProps<{
     clear?: string[]
     diff: ApiLink['diff_tags']
-    attribs: ApiLink['diff_attribs']
     dst?: IFeature['properties']
     exclude?: string[]
     src?: IFeature['properties']
-    title?: string
   }>(),
   {
     clear: () => [],
@@ -39,26 +37,6 @@ const groupedTagKeys = computed((): string[][] => {
     groupBy(
       keys,
       key => props.diff?.[key]?.map(diff => `${diff}`).join('||') || '',
-    ),
-  )
-})
-
-const groupedAttribKeys = computed((): string[][] => {
-  const keys: string[] = sortBy(
-    uniq([
-      ...Object.keys(props.src || {}),
-      ...Object.keys(props.dst || {}),
-    ]),
-    (key: string) =>
-      props.attribs?.[key]
-        ? -maxActionPriority(props.attribs[key])
-        : 0,
-  )
-
-  return Object.values(
-    groupBy(
-      keys,
-      key => props.attribs?.[key]?.map(diff => `${diff}`).join('||') || '',
     ),
   )
 })
@@ -113,21 +91,8 @@ function diffText(before: string, after: string): Change[] {
       >
         <thead>
           <tr>
-            <th v-if="title">
-              🔗{{ title }}
-            </th>
-            <th colspan="2">
+            <th colspan="3">
               <div>
-                <template
-                  v-for="(groupedAttribKey, groupAttribIndex) in groupedAttribKeys"
-                  :key="groupAttribIndex"
-                >
-                  <LoChaDiffTag
-                    v-if="attribs?.[groupedAttribKey[0]] !== undefined"
-                    :diff="attribs?.[groupedAttribKey[0]]"
-                    type="geom"
-                  />
-                </template>
                 <LoChaDiffTag
                   v-if="diff?.[groupedKey[0]] !== undefined"
                   :diff="diff?.[groupedKey[0]]"

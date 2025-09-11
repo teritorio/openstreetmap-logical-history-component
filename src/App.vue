@@ -81,11 +81,13 @@ function handleSubmit(data: FormData) {
       @submit="handleSubmit"
     />
     <LoCha :data="geojson">
-      <template #tags-diff="{ title, diff, attribs, dst, src }">
+      <template #tags-diff="{ title, date, diff, dst, src }">
+        <div class="infos">
+          <span v-if="title" class="title">🔗 {{ title }}</span>
+          <span class="date">📅 {{ date }}</span>
+        </div>
         <LoChaDiff
           v-if="!(src?.is_before && !dst)"
-          :title="title"
-          :attribs="attribs"
           :diff="diff"
           :dst="dst"
           :src="src"

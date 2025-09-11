@@ -44,15 +44,19 @@ function getBeforeProperties(id: number, index: number): IFeature['properties'] 
   return loCha.value!.features.find(feature => feature.id === link!.before)?.properties
 }
 
-function getTagsTitle(id: number, index: number): string | undefined {
-  const link = loCha.value!.metadata.links[index].find(link => link.after === id)
+function getTagsTitle(feature: IFeature, index: number): string {
+  const link = loCha.value!.metadata.links[index].find(link => link.after === feature.id)
+  let title = ''
 
   if (!link)
-    throw new Error(`Link index ${index} for feature ${id} not found.`)
+    throw new Error(`Link index ${index} for feature ${feature.id} not found.`)
 
-  const feature = loCha.value!.features.find(feature => feature.id === link!.before)
+  const beforeFeature = loCha.value!.features.find(feature => feature.id === link!.before)
 
-  return feature && feature.properties.objtype[0] + feature.properties.id
+  if (beforeFeature)
+    title = `${beforeFeature.properties.objtype[0]}${beforeFeature.properties.id}-v${beforeFeature.properties.version}`
+
+  return title
 }
 </script>
 
@@ -68,8 +72,8 @@ function getTagsTitle(id: number, index: number): string | undefined {
             <template #tags-diff>
               <slot
                 name="tags-diff"
+                :date="feature.properties.created"
                 :diff="getDiff(feature, index, 'before', 'tags')"
-                :attribs="getDiff(feature, index, 'before', 'attribs')"
                 :src="feature.properties"
               />
             </template>
@@ -87,7 +91,8 @@ function getTagsTitle(id: number, index: number): string | undefined {
             <template #tags-diff>
               <slot
                 name="tags-diff"
-                :title="getTagsTitle(feature.id, index)"
+                :date="feature.properties.created"
+                :title="getTagsTitle(feature, index)"
                 :diff="getDiff(feature, index, 'after', 'tags')"
                 :attribs="getDiff(feature, index, 'after', 'attribs')"
                 :dst="feature.properties"

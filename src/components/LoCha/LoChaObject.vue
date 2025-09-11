@@ -39,7 +39,7 @@ const color = computed(() => loChaColors[status.value])
           target="_blank"
           @click.stop
         >
-          {{ `${feature.properties.objtype[0]}${feature.properties.id}` }}
+          {{ `${feature.properties.objtype[0]}${feature.properties.id}-v${feature.properties.version}` }}
         </a>
         {{ name }}
       </h3>
@@ -115,6 +115,17 @@ h3 + a {
 
 .actions {
   display: flex;
+}
+
+:deep(.date),
+:deep(.title) {
+  font-size: 12px;
+  color: grey;
+}
+
+:deep(.infos) {
+  display: flex;
+  gap: 0.5rem;
 }
 
 [type='button'] {
