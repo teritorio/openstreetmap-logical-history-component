@@ -14,7 +14,7 @@ const props = defineProps<{
   bbox?: GeoJSON.BBox
 }>()
 
-type LayerKey = 'Polygon' | 'Point' | 'LineString' | 'Bbox'
+type LayerKey = 'Polygon' | 'Point' | 'LineString' | 'LineStringBorder' | 'Bbox'
 
 type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
@@ -30,6 +30,7 @@ const LAYERS = {
     source: BBOX_SOURCE_ID,
     paint: {
       'line-color': '#000000',
+      'line-width': 4,
     },
   },
   Polygon: {
@@ -59,23 +60,22 @@ const LAYERS = {
     },
     filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
   },
+  LineStringBorder: {
+    id: 'feature-lines-border',
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-width': 6,
+      'line-color': '#000000',
+    },
+    filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
+  },
   LineString: {
     id: 'feature-lines',
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        6,
-        4,
-      ],
-      'line-opacity': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        1,
-        0.5,
-      ],
+      'line-width': 4,
       'line-color': [
         'case',
         ['==', ['get', 'geom_changed'], false],
@@ -250,6 +250,10 @@ function setupMapLayers(): void {
 
   if (!map.value.getLayer(LAYERS.Polygon.id)) {
     map.value.addLayer(LAYERS.Polygon)
+  }
+
+  if (!map.value.getLayer(LAYERS.LineStringBorder.id)) {
+    map.value.addLayer(LAYERS.LineStringBorder)
   }
 
   if (!map.value.getLayer(LAYERS.LineString.id)) {
