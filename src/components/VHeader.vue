@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import { shallowRef } from 'vue'
+import VDialog from './VDialog.vue'
+
 const emit = defineEmits<{
   (e: 'toggleMenu'): void
 }>()
+
+const isOpen = shallowRef(false)
 </script>
 
 <template>
@@ -11,7 +16,11 @@ const emit = defineEmits<{
     </button>
     <img src="/teritorio.png" alt="Logo Teritorio">
     <h1>OpenStreetMap Logical History</h1>
+    <button class="info-button" @click="isOpen = true">
+      &#x1f6c8;
+    </button>
   </header>
+  <VDialog v-if="isOpen" @close="isOpen = false" />
 </template>
 
 <style lang="css" scoped>
@@ -31,7 +40,12 @@ img {
   width: 40px;
 }
 
-.toggle-button {
+.info-button {
+  margin-left: auto;
+}
+
+.toggle-button,
+.info-button {
   background: none;
   border: none;
   color: #fff;
@@ -40,5 +54,6 @@ img {
   height: 48px;
   width: 48px;
   font-size: 1.5em;
+  line-height: 1;
 }
 </style>
