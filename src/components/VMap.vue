@@ -14,7 +14,7 @@ const props = defineProps<{
   bbox?: GeoJSON.BBox
 }>()
 
-type LayerKey = 'Polygon' | 'Point' | 'LineString' | 'LineStringBorder' | 'Bbox'
+type LayerKey = 'Polygon' | 'PolygonBorder' | 'Point' | 'LineString' | 'LineStringBorder' | 'Bbox'
 
 type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
@@ -32,6 +32,16 @@ const LAYERS = {
       'line-color': '#000000',
       'line-width': 4,
     },
+  },
+  PolygonBorder: {
+    id: 'feature-polygons-border',
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-width': 2,
+      'line-color': '#000000',
+    },
+    filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
   },
   Polygon: {
     id: 'feature-polygons',
@@ -56,7 +66,6 @@ const LAYERS = {
         loChaColors.updateBefore,
         loChaColors.updateAfter,
       ],
-      'fill-outline-color': '#000000',
     },
     filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
   },
@@ -65,8 +74,11 @@ const LAYERS = {
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 6,
+      'line-width': 4,
       'line-color': '#000000',
+    },
+    layout: {
+      'line-cap': 'round',
     },
     filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
   },
@@ -75,7 +87,7 @@ const LAYERS = {
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 4,
+      'line-width': 2,
       'line-color': [
         'case',
         ['==', ['get', 'geom_changed'], false],
@@ -247,6 +259,10 @@ function handleMapOnLoad(): void {
 function setupMapLayers(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
+
+  if (!map.value.getLayer(LAYERS.PolygonBorder.id)) {
+    map.value.addLayer(LAYERS.PolygonBorder)
+  }
 
   if (!map.value.getLayer(LAYERS.Polygon.id)) {
     map.value.addLayer(LAYERS.Polygon)
