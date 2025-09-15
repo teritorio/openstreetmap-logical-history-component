@@ -36,6 +36,11 @@ interface ApiComposable {
    * @param err - The error object to be set.
    */
   setError: (err: Error) => void
+
+  /**
+   * Resets the error state
+   */
+  resetError: () => void
 }
 
 type ObjectType = 'node' | 'way' | 'relation'
@@ -266,10 +271,6 @@ export function useApiConfig(): ApiComposable {
 
   function setError(err: Error): void {
     Object.assign(error, err)
-
-    setTimeout(() => {
-      resetError()
-    }, 3000)
   }
 
   function resetError(): void {
@@ -281,5 +282,6 @@ export function useApiConfig(): ApiComposable {
     fetchData,
     loading,
     setError,
+    resetError,
   }
 }

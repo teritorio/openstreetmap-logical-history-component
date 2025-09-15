@@ -6,6 +6,10 @@ defineProps<{
   type: ErrorType
 }>()
 
+defineEmits<{
+  (e: 'close'): void
+}>()
+
 const colors = {
   error: '#ff4d4f',
   warning: '#faad14',
@@ -15,9 +19,12 @@ const colors = {
 </script>
 
 <template>
-  <span class="alert" :style="{ backgroundColor: colors[type] }">
+  <div class="alert" :style="{ backgroundColor: colors[type] }">
     {{ message }}
-  </span>
+    <button @click="$emit('close')">
+      &#10006;
+    </button>
+  </div>
 </template>
 
 <style lang="css" scoped>
@@ -37,9 +44,18 @@ const colors = {
   gap: 10px;
   z-index: 20;
   opacity: 0;
-  animation:
-    slideIn 0.5s ease-out forwards,
-    fadeOut 0.5s 3s ease-out forwards;
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+button {
+  background-color: transparent;
+  border: none;
+  box-shadow: unset;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  cursor: pointer;
 }
 
 .alert::before {
@@ -55,13 +71,6 @@ const colors = {
   to {
     transform: translateX(-50%) translateY(0);
     opacity: 1;
-  }
-}
-
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    transform: translateX(-50%) translateY(-20px);
   }
 }
 </style>

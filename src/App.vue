@@ -10,10 +10,10 @@ import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
-import { fromDatetimeLocal, toDatetimeLocal } from './utils/date-format'
+import { fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
 
 const $api = useApiConfig()
-const { error, loading } = $api
+const { error, loading, resetError } = $api
 const geojson = ref<ApiResponse>()
 const mapFiltersRef = ref<InstanceType<typeof MapFilters>>()
 const mapFiltersIsOpen = ref(true)
@@ -68,7 +68,12 @@ function handleSubmit(data: FormData) {
 <template>
   <VHeader @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen" />
   <VLoading v-if="loading" />
-  <VError v-if="error.message" :message="error.message" :type="error.type" />
+  <VError
+    v-if="error.message"
+    :message="error.message"
+    :type="error.type"
+    @close="resetError"
+  />
   <main
     :style="{
       gridTemplateColumns: mapFiltersIsOpen ? '300px 1fr' : '0px 1fr',
