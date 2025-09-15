@@ -84,7 +84,7 @@ function handleSubmit(data: FormData) {
       <template #tags-diff="{ title, date, diff, dst, src }">
         <div class="infos">
           <span v-if="title" class="title">🔗 {{ title }}</span>
-          <span class="date">📅 {{ date }}</span>
+          <span v-if="dst?.is_after" class="date">📅 {{ date }}</span>
         </div>
         <LoChaDiff
           v-if="!(src?.is_before && !dst)"

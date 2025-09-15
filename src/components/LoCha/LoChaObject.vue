@@ -11,18 +11,14 @@ const { getStatus } = useLoCha()
 
 const status = computed(() => getStatus(props.feature))
 
-const name = computed(() => {
-  const content = props.feature.properties.tags.name || '-'
-
+const statusContent = computed(() => {
   switch (status.value) {
     case 'create':
-      return `\u2795 ${content}`
+      return 'created'
     case 'delete':
-      return `\u2716 ${content}`
-    case 'updateAfter':
-    case 'updateBefore':
+      return 'deleted'
     default:
-      return `\u{1F503} ${content}`
+      return ''
   }
 })
 
@@ -32,7 +28,7 @@ const color = computed(() => loChaColors[status.value])
 <template>
   <article class="locha-object">
     <header>
-      <h3>
+      <div class="wrap">
         <a
           :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"
           title="OSM History"
@@ -41,8 +37,21 @@ const color = computed(() => loChaColors[status.value])
         >
           {{ `${feature.properties.objtype[0]}${feature.properties.id}-v${feature.properties.version}` }}
         </a>
-        {{ name }}
-      </h3>
+        <div
+          v-if="status === 'create' || status === 'delete'"
+          class="status-content"
+          :class="{
+            'object-created': status === 'create',
+            'object-deleted': status === 'delete',
+          }"
+        >
+          {{ statusContent }}
+        </div>
+      </div>
+      <h3>{{ props.feature.properties.tags.name }}</h3>
+      <p class="date">
+        📅 {{ props.feature.properties.created }}
+      </p>
       <a
         :href="`https://www.openstreetmap.org/user/${feature.properties.username}`"
         :title="`View ${feature.properties.username} OSM profile`"
@@ -108,9 +117,15 @@ h3 {
   font-weight: 400;
 }
 
-h3 + a {
+header > a {
   font-size: 0.75em;
   color: #333333;
+}
+
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .actions {
@@ -136,5 +151,27 @@ h3 + a {
   border: 1px solid #dcdfe6;
   background-color: #ffffff;
   text-align: center;
+}
+
+.status-content {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.object-deleted {
+  background: color-mix(in srgb, v-bind('loChaColors.delete') 20%, #ffffff 80%);
+  border-color: v-bind('loChaColors.delete');
+}
+
+.object-created {
+  background: color-mix(in srgb, v-bind('loChaColors.create') 20%, #ffffff 80%);
+  border-color: v-bind('loChaColors.create');
 }
 </style>
