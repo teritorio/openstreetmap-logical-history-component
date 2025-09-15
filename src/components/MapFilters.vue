@@ -37,9 +37,8 @@ const presets = [{
   bbox: '-1.6537454710167148,42.685107065011486,-1.6509720668953156,42.68686379572838',
 }, {
   title: 'n+n relation',
-  dateStart: new Date('2023-01-01').toISOString().slice(0, 16),
-  dateEnd: new Date('2023-12-01').toISOString().slice(0, 16),
-  bbox: '-1.4598269945865354,43.55969828696391,-1.4323757210520682,43.565655969760684',
+  dateStart: new Date('2025-09-05').toISOString().slice(0, 16),
+  bbox: '1.7526036474026228,49.12499299921325,1.7531567019438796,49.12533170522417',
 }] satisfies Preset[]
 
 const formRef = ref<InstanceType<typeof HTMLFormElement>>()
