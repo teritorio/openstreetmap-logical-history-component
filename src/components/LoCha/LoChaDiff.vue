@@ -150,7 +150,7 @@ function diffText(before: string, after: string): Change[] {
                     v-else-if="typeof src.tags[key] === 'string'
                       && showTextDiff(src.tags[key], dst?.tags?.[key] || '')
                     "
-                    class="attribut-changed"
+                    class="attribute-changed"
                   >
                     <span
                       v-for="(part, i) in diffText(src.tags[key], dst?.tags?.[key] || '')"
