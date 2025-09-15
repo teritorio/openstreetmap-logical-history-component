@@ -110,9 +110,9 @@ function diffText(before: string, after: string): Change[] {
             <tr
               v-if="!exclude.includes(key)"
               :class="
-                (diff?.[groupedKey[0]] === undefined
-                  || diff[groupedKey[0]][0] === undefined
-                  || diff[groupedKey[0]][0][1]) !== 'reject' && 'no_changes'
+                (diff?.[key] === undefined
+                  || diff[key][0] === undefined
+                  || diff[key][0][0]) !== 'reject' && 'no_changes'
               "
             >
               <td class="key" :class="[backgroundClass(key)]">
@@ -120,9 +120,9 @@ function diffText(before: string, after: string): Change[] {
               </td>
               <td
                 :class="
-                  (diff?.[groupedKey[0]] === undefined
-                    || diff[groupedKey[0]][0] === undefined
-                    || diff[groupedKey[0]][0][1]) !== 'reject' || [
+                  (diff?.[key] === undefined
+                    || diff[key][0] === undefined
+                    || diff[key][0][0]) !== 'reject' || [
                     backgroundClass(key),
                     'key',
                   ]
@@ -132,9 +132,9 @@ function diffText(before: string, after: string): Change[] {
               </td>
               <td
                 :class="
-                  (diff?.[groupedKey[0]] === undefined
-                    || diff[groupedKey[0]][0] === undefined
-                    || diff[groupedKey[0]][0][1]) !== 'reject' || [
+                  (diff?.[key] === undefined
+                    || diff[key][0] === undefined
+                    || diff[key][0][0]) !== 'reject' || [
                     backgroundClass(key),
                     'value',
                   ]
@@ -229,15 +229,15 @@ td {
 }
 
 .attribute-removed {
-  background: color-mix(in srgb, v-bind('loChaColors.delete') 20%, #ffffff 80%);
+  background-color: color-mix(in srgb, v-bind('loChaColors.delete') 20%, #ffffff 80%);
 }
 
 .attribute-added {
-  background: color-mix(in srgb, v-bind('loChaColors.create'), 20%, #ffffff 80%);
+  background-color: color-mix(in srgb, v-bind('loChaColors.create') 20%, #ffffff 80%);
 }
 
 .attribute-changed {
-  background: color-mix(in srgb, v-bind('loChaColors.updateAfter') 20%, #ffffff 80%);
+  background-color: color-mix(in srgb, v-bind('loChaColors.updateAfter') 20%, #ffffff 80%);
 }
 
 .no_changes {
