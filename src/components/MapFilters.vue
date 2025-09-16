@@ -38,6 +38,7 @@ const presets = [{
 }, {
   title: 'n+n relation',
   dateStart: new Date('2025-09-05').toISOString().slice(0, 16),
+  dateEnd: new Date('2025-10-05').toISOString().slice(0, 16),
   bbox: '1.7526036474026228,49.12499299921325,1.7531567019438796,49.12533170522417',
 }] satisfies Preset[]
 

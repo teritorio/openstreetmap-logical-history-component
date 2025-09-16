@@ -260,12 +260,12 @@ function setupMapLayers(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
 
-  if (!map.value.getLayer(LAYERS.PolygonBorder.id)) {
-    map.value.addLayer(LAYERS.PolygonBorder)
-  }
-
   if (!map.value.getLayer(LAYERS.Polygon.id)) {
     map.value.addLayer(LAYERS.Polygon)
+  }
+
+  if (!map.value.getLayer(LAYERS.PolygonBorder.id)) {
+    map.value.addLayer(LAYERS.PolygonBorder)
   }
 
   if (!map.value.getLayer(LAYERS.LineStringBorder.id)) {
