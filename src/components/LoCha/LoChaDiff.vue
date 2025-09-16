@@ -208,7 +208,7 @@ th,
 td {
   border: 1px solid #000000;
   border-collapse: collapse;
-  padding: 8px;
+  padding: 0.15rem;
 }
 
 .item {

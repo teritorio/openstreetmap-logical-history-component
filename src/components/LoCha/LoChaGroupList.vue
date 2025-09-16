@@ -55,9 +55,9 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
       <h2>After</h2>
     </header>
     <ul>
-      <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#map-${index}` }">
-        <a class="anchor-button" :href="`#map-${index}`">🔗</a>
-        <LoChaGroup :features="group" :index="index">
+      <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#group-${index}` }">
+        <a class="anchor-button" :href="`#group-${index}`">🔗</a>
+        <LoChaGroup :id="`group-${index}`" :features="group" :index="index">
           <template #tags-diff="slotProps">
             <slot name="tags-diff" v-bind="slotProps" />
           </template>
@@ -110,7 +110,7 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
 
 .locha-group-list > ul > li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
 }
 

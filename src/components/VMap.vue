@@ -74,7 +74,7 @@ const LAYERS = {
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 4,
+      'line-width': 6,
       'line-color': '#000000',
     },
     layout: {
@@ -87,7 +87,7 @@ const LAYERS = {
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 2,
+      'line-width': 3,
       'line-color': [
         'case',
         ['==', ['get', 'geom_changed'], false],

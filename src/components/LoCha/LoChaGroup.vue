@@ -127,7 +127,6 @@ function getTagsTitle(feature: IFeature, index: number): string {
 
 .v-map {
   grid-column: 3;
-  place-self: center;
 }
 
 ul {
