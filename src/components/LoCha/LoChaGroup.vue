@@ -16,11 +16,11 @@ if (!loCha.value)
   throw new Error('LoCha is empty.')
 
 function getBeforeFeatures(features: IFeature[]) {
-  return features.filter(feature => feature.properties.deleted || feature.properties.is_before)
+  return features.filter(feature => feature.properties.is_before)
 }
 
 function getAfterFeatures(features: IFeature[]) {
-  return features.filter(feature => feature.properties.is_created || feature.properties.is_after)
+  return features.filter(feature => feature.properties.is_after)
 }
 
 function getDiff(

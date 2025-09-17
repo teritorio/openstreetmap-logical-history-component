@@ -223,13 +223,7 @@ export function useApiConfig(): ApiComposable {
       }
 
       if (link.before === undefined && link.after !== undefined) {
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            is_created: true,
-          },
-        }
+        return undefined
       }
       else {
         if (feature.id === link.before) {
@@ -255,6 +249,7 @@ export function useApiConfig(): ApiComposable {
 
       return feature
     })
+      .filter(f => f !== undefined)
       .sort((a, b) => area(b) - area(a)) // Sort by area surface in order to have bigger geometries before smaller ones.
   }
 
