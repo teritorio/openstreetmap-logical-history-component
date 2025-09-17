@@ -23,16 +23,14 @@ function getAfterFeatures(features: IFeature[]) {
   return features.filter(feature => feature.properties.is_after)
 }
 
-function getDiff(
+function getDiffs(
   feature: IFeature,
   index: number,
-  position: 'before' | 'after',
-  type: 'attribs' | 'tags',
-): ApiLink['diff_attribs'] | ApiLink['diff_tags'] {
+): ApiLink[] | undefined {
   if (feature.properties.is_before)
     return undefined
 
-  return loCha.value!.metadata.links[index].find(link => link[position] === feature.id)?.[`diff_${type}`]
+  return loCha.value!.metadata.links[index].filter(link => link.before === feature.id || link.after === feature.id)
 }
 
 function getBeforeProperties(id: number, index: number): IFeature['properties'] | undefined {
@@ -44,12 +42,8 @@ function getBeforeProperties(id: number, index: number): IFeature['properties'] 
   return loCha.value!.features.find(feature => feature.id === link!.before)?.properties
 }
 
-function getTagsTitle(feature: IFeature, index: number): string {
-  const link = loCha.value!.metadata.links[index].find(link => link.after === feature.id)
+function getTagsTitle(link: ApiLink): string {
   let title = ''
-
-  if (!link)
-    throw new Error(`Link index ${index} for feature ${feature.id} not found.`)
 
   const beforeFeature = loCha.value!.features.find(feature => feature.id === link!.before)
 
@@ -71,9 +65,11 @@ function getTagsTitle(feature: IFeature, index: number): string {
           <LoChaObject :feature="feature">
             <template #tags-diff>
               <slot
+                v-for="(link, i) in getDiffs(feature, index)"
+                :key="i"
                 name="tags-diff"
                 :date="feature.properties.created"
-                :diff="getDiff(feature, index, 'before', 'tags')"
+                :diff="link.diff_tags"
                 :src="feature.properties"
               />
             </template>
@@ -90,11 +86,13 @@ function getTagsTitle(feature: IFeature, index: number): string {
           <LoChaObject :feature="feature">
             <template #tags-diff>
               <slot
+                v-for="(link, i) in getDiffs(feature, index)"
+                :key="i"
                 name="tags-diff"
                 :date="feature.properties.created"
-                :title="getTagsTitle(feature, index)"
-                :diff="getDiff(feature, index, 'after', 'tags')"
-                :attribs="getDiff(feature, index, 'after', 'attribs')"
+                :title="getTagsTitle(link)"
+                :diff="link.diff_tags"
+                :attribs="link.diff_attribs"
                 :dst="feature.properties"
                 :src="getBeforeProperties(feature.id, index)"
               />
