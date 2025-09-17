@@ -103,7 +103,7 @@ export function useLoCha(): LoCha {
       return loChaStatus.create
     }
 
-    if (feature.properties.is_deleted) {
+    if (feature.properties.deleted) {
       return loChaStatus.delete
     }
 

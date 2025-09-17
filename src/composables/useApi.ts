@@ -100,7 +100,6 @@ export interface IFeature extends GeoJSON.Feature {
     is_before?: boolean
     is_after?: boolean
     is_created?: boolean
-    is_deleted?: boolean
   }
 }
 
@@ -221,16 +220,6 @@ export function useApiConfig(): ApiComposable {
 
       if (linkedFeature) {
         feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)
-      }
-
-      if (link.before !== undefined && link.after === undefined) {
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            is_deleted: true,
-          },
-        }
       }
 
       if (link.before === undefined && link.after !== undefined) {
