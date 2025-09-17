@@ -114,38 +114,6 @@ export function useLoCha(): LoCha {
     return loChaStatus.updateAfter
   }
 
-  function _getFeature(id: number): IFeature {
-    if (!loCha.value)
-      throw new Error('LoCha not initialized, call setLoCha() first.')
-
-    const feature = loCha.value.features.find(feature => feature.id === id)
-
-    if (!feature)
-      throw new Error(`Feature with ID ${id} not found.`)
-
-    return feature
-  }
-
-  function _sortByObjType(feature: IFeature): number {
-    switch (feature.properties.objtype) {
-      case 'node': return 1
-      case 'way': return 2
-      case 'relation': return 3
-      default: return 4
-    }
-  }
-
-  function _sortByActionType(feature: IFeature): number {
-    const { is_before, is_after, is_created, is_deleted } = feature.properties
-    if (is_before || is_after)
-      return 1
-    if (is_created)
-      return 2
-    if (is_deleted)
-      return 3
-    return 4
-  }
-
   /**
    * Resets the LoCha state by clearing the LoCha data and resetting the feature arrays.
    */
