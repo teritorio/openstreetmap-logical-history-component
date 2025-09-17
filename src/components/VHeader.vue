@@ -1,12 +1,23 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
+import { onMounted, shallowRef } from 'vue'
 import VDialog from './VDialog.vue'
 
 const emit = defineEmits<{
   (e: 'toggleMenu'): void
 }>()
 
-const isOpen = shallowRef(false)
+const showDialog = shallowRef(true)
+
+onMounted(() => {
+  const hasSeenDialog = localStorage.getItem('seenDialog')
+
+  if (!hasSeenDialog) {
+    localStorage.setItem('seenDialog', 'true')
+  }
+  else {
+    showDialog.value = false
+  }
+})
 </script>
 
 <template>
@@ -16,11 +27,11 @@ const isOpen = shallowRef(false)
     </button>
     <img src="/teritorio.png" alt="Logo Teritorio">
     <h1>OpenStreetMap Logical History</h1>
-    <button class="info-button" @click="isOpen = true">
-      &#x1f6c8;
+    <button class="info-button" @click="showDialog = true">
+      &#x1f6c8; How it works ?
     </button>
   </header>
-  <VDialog v-if="isOpen" @close="isOpen = false" />
+  <VDialog v-if="showDialog" @close="showDialog = false" />
 </template>
 
 <style lang="css" scoped>
@@ -42,6 +53,13 @@ img {
 
 .info-button {
   margin-left: auto;
+  font-size: 1.25em;
+}
+
+.toggle-button {
+  height: 48px;
+  width: 48px;
+  font-size: 1.5em;
 }
 
 .toggle-button,
@@ -51,9 +69,6 @@ img {
   color: #fff;
   padding: 0.5em;
   cursor: pointer;
-  height: 48px;
-  width: 48px;
-  font-size: 1.5em;
   line-height: 1;
 }
 </style>

@@ -56,7 +56,7 @@ const LAYERS = {
       ],
       'fill-color': [
         'case',
-        ['==', ['get', 'geom_changed'], false],
+        ['==', ['get', 'geom'], false],
         '#f4f4f5',
         ['==', ['get', 'is_created'], true],
         loChaColors.create,
@@ -90,7 +90,7 @@ const LAYERS = {
       'line-width': 3,
       'line-color': [
         'case',
-        ['==', ['get', 'geom_changed'], false],
+        ['==', ['get', 'geom'], false],
         '#f4f4f5',
         ['==', ['get', 'is_created'], true],
         loChaColors.create,
@@ -125,7 +125,7 @@ const LAYERS = {
       ],
       'circle-color': [
         'case',
-        ['==', ['get', 'geom_changed'], false],
+        ['==', ['get', 'geom'], false],
         '#f4f4f5',
         ['==', ['get', 'is_created'], true],
         loChaColors.create,

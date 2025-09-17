@@ -89,7 +89,7 @@ export interface IFeature extends GeoJSON.Feature {
     objtype: ObjectType
     id: number
     geom_distance: number | null
-    geom_changed: boolean
+    geom: boolean
     deleted: boolean
     links: number
     members?: null
@@ -220,7 +220,7 @@ export function useApiConfig(): ApiComposable {
       const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
 
       if (linkedFeature) {
-        feature.properties.geom_changed = !booleanEqual(feature.geometry, linkedFeature.geometry)
+        feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)
       }
 
       if (link.before !== undefined && link.after === undefined) {

@@ -47,9 +47,9 @@ defineEmits<{
       </p>
     </section>
 
-    <section aria-labelledby="more">
-      <h3 id="more">
-        More
+    <section aria-labelledby="how-it-works">
+      <h3 id="how-it-works">
+        How it works
       </h3>
       <p>
         Read the full story on Medium:
@@ -78,5 +78,19 @@ dialog {
   top: 50%;
   transform: translate(-50%, -50%);
   padding: 1rem;
+}
+
+button {
+  float: right;
+}
+
+ol {
+  padding-left: 1rem;
+}
+
+h2,
+section,
+header {
+  margin-bottom: 1rem;
 }
 </style>
