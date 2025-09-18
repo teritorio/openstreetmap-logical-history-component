@@ -222,28 +222,26 @@ export function useApiConfig(): ApiComposable {
         feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)
       }
 
-      if (link.before === undefined && link.after !== undefined) {
-        return undefined
-      }
-      else {
-        if (feature.id === link.before) {
-          feature = {
-            ...feature,
-            properties: {
-              ...feature.properties,
-              is_before: true,
-            },
-          }
+      if (feature.id === link.before) {
+        feature = {
+          ...feature,
+          properties: {
+            ...feature.properties,
+            is_before: true,
+          },
         }
+      }
 
-        if (feature.id === link.after) {
-          feature = {
-            ...feature,
-            properties: {
-              ...feature.properties,
-              is_after: true,
-            },
-          }
+      if (
+        (feature.id === link.after)
+        || (link.before === undefined && link.after !== undefined)
+      ) {
+        feature = {
+          ...feature,
+          properties: {
+            ...feature.properties,
+            is_after: true,
+          },
         }
       }
 
