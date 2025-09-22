@@ -78,6 +78,8 @@ dialog {
   top: 50%;
   transform: translate(-50%, -50%);
   padding: 1rem;
+  max-height: 80%;
+  overflow-y: scroll;
 }
 
 button {
