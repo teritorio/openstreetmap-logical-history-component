@@ -30,7 +30,7 @@ const LAYERS = {
     source: BBOX_SOURCE_ID,
     paint: {
       'line-color': '#000000',
-      'line-width': 4,
+      'line-width': 1,
     },
   },
   PolygonBorder: {
@@ -211,11 +211,11 @@ function displayBbox(): void {
       geometry: {
         type: 'Polygon',
         coordinates: [[
-          [props.bbox[0], props.bbox[1]],
-          [props.bbox[2], props.bbox[1]],
-          [props.bbox[2], props.bbox[3]],
-          [props.bbox[0], props.bbox[3]],
-          [props.bbox[0], props.bbox[1]],
+          [props.bbox[1], props.bbox[0]],
+          [props.bbox[3], props.bbox[0]],
+          [props.bbox[3], props.bbox[2]],
+          [props.bbox[1], props.bbox[2]],
+          [props.bbox[1], props.bbox[0]],
         ]],
       },
       properties: {},
