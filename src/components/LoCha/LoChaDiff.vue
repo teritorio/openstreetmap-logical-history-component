@@ -182,9 +182,6 @@ function diffText(before: string, after: string): Change[] {
         </tbody>
       </template>
     </table>
-    <p v-else>
-      0 tags changes
-    </p>
   </div>
 </template>
 

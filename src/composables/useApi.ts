@@ -218,7 +218,7 @@ export function useApiConfig(): ApiComposable {
 
       const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
 
-      if (linkedFeature) {
+      if (linkedFeature?.geometry && feature.geometry) {
         feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)
       }
 
@@ -248,7 +248,21 @@ export function useApiConfig(): ApiComposable {
       return feature
     })
       .filter(f => f !== undefined)
-      .sort((a, b) => area(b) - area(a)) // Sort by area surface in order to have bigger geometries before smaller ones.
+      .sort((a, b) => {
+        const aGeom = a.geometry
+        const bGeom = b.geometry
+
+        if (!aGeom && !bGeom)
+          return 0
+
+        if (!aGeom)
+          return 1
+
+        if (!bGeom)
+          return -1
+
+        return area(b) - area(a)
+      }) // Sort by area surface in order to have bigger geometries before smaller ones.
   }
 
   function setError(err: Error): void {
