@@ -5,6 +5,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LoCha from '@/components/LoCha/LoCha.vue'
 import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
+import LoChaDiffTag from '@/components/LoCha/LoChaDiffTag.vue'
 import MapFilters from '@/components/MapFilters.vue'
 import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
@@ -86,11 +87,16 @@ function handleSubmit(data: FormData) {
       @submit="handleSubmit"
     />
     <LoCha :data="geojson">
-      <template #tags-diff="{ title, date, diff, dst, src }">
+      <template #tags-diff="{ title, date, diff, attribs, dst, src }">
         <div class="infos">
           <span v-if="title" class="title">🔗 {{ title }}</span>
           <span v-if="dst?.is_after && src" class="date">📅 {{ date }}</span>
         </div>
+        <LoChaDiffTag
+          v-if="attribs"
+          :diff="attribs.geom"
+          type="geom"
+        />
         <LoChaDiff
           v-if="!(src?.is_before && !dst)"
           :diff="diff"

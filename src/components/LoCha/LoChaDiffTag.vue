@@ -41,6 +41,8 @@ defineProps<{
   border-radius: 10px;
   font-size: 0.75rem;
   white-space: nowrap;
+  font-weight: bold;
+  width: fit-content;
 }
 
 .no_changes {
