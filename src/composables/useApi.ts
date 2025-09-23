@@ -1,7 +1,6 @@
 import type { Reactive, Ref } from 'vue'
 import type { Error } from '@/types'
 import { area } from '@turf/area'
-import booleanEqual from '@turf/boolean-equal'
 import { reactive, ref } from 'vue'
 
 /**
@@ -215,12 +214,6 @@ export function useApiConfig(): ApiComposable {
 
       if (!link)
         throw new Error(`Feature ${feature.id} has no link.`)
-
-      const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
-
-      if (linkedFeature?.geometry && feature.geometry) {
-        feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)
-      }
 
       if (feature.id === link.before) {
         feature = {
