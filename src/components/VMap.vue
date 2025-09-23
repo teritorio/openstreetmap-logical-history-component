@@ -74,8 +74,14 @@ const LAYERS = {
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 6,
+      'line-width': 1,
       'line-color': '#000000',
+      'line-offset': [
+        'case',
+        ['get', 'is_before'],
+        -3,
+        3,
+      ],
     },
     layout: {
       'line-cap': 'round',
@@ -87,7 +93,7 @@ const LAYERS = {
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 3,
+      'line-width': 6,
       'line-color': [
         'case',
         ['==', ['get', 'geom'], false],
@@ -99,6 +105,18 @@ const LAYERS = {
         ['==', ['get', 'is_before'], true],
         loChaColors.updateBefore,
         loChaColors.updateAfter,
+      ],
+      'line-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0.5,
+      ],
+      'line-offset': [
+        'case',
+        ['get', 'is_before'],
+        -3,
+        3,
       ],
     },
     layout: {
