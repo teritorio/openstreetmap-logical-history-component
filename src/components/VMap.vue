@@ -52,7 +52,7 @@ const LAYERS = {
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         1,
-        0.5,
+        0.3,
       ],
       'fill-color': [
         'case',
@@ -120,7 +120,7 @@ const LAYERS = {
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         1,
-        0.5,
+        0.3,
 
       ],
       'circle-color': [
