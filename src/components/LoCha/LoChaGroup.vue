@@ -33,12 +33,7 @@ function getDiffs(
   return loCha.value!.metadata.links[index].filter(link => link.before === feature.id || link.after === feature.id)
 }
 
-function getBeforeProperties(id: number, index: number): IFeature['properties'] | undefined {
-  const link = loCha.value!.metadata.links[index].find(link => link.after === id)
-
-  if (!link)
-    throw new Error(`Link index ${index} for feature ${id} not found.`)
-
+function getBeforeProperties(link: ApiLink): IFeature['properties'] | undefined {
   return loCha.value!.features.find(feature => feature.id === link!.before)?.properties
 }
 
@@ -94,7 +89,7 @@ function getTagsTitle(link: ApiLink): string {
                 :diff="link.diff_tags"
                 :attribs="link.diff_attribs"
                 :dst="feature.properties"
-                :src="getBeforeProperties(feature.id, index)"
+                :src="getBeforeProperties(link)"
               />
             </template>
           </LoChaObject>
