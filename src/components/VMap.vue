@@ -101,6 +101,9 @@ const LAYERS = {
         loChaColors.updateAfter,
       ],
     },
+    layout: {
+      'line-cap': 'round',
+    },
     filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
   },
   Point: {
