@@ -36,7 +36,7 @@ const presets = [{
   dateEnd: new Date('2024-12-15').toISOString().slice(0, 16),
   bbox: '-1.6537454710167148,42.685107065011486,-1.6509720668953156,42.68686379572838',
 }, {
-  title: 'n+n relation',
+  title: 'Node to Way Tags',
   dateStart: new Date('2025-09-04').toISOString().slice(0, 16),
   dateEnd: new Date('2025-10-04').toISOString().slice(0, 16),
   bbox: '1.890431110148569,49.126892511822376,1.8909489817189638,49.127209658721114',
