@@ -44,6 +44,7 @@
     "vue": "^3.5.13"
   },
   "dependencies": {
+    "@sentry/vite-plugin": "^4.3.0",
     "@sentry/vue": "^10.12.0",
     "@turf/area": "^7.2.0",
     "@turf/bbox": "^7.2.0",
