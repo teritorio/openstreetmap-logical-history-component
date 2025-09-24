@@ -84,27 +84,16 @@ function diffText(before: string, after: string): Change[] {
 
 <template>
   <div class="locha-diff">
-    <table v-if="groupedTagKeys.length">
-      <template
-        v-for="(groupedKey, groupIndex) in groupedTagKeys"
-        :key="groupIndex"
-      >
-        <thead>
-          <tr>
-            <th colspan="3">
-              <div>
-                <LoChaDiffTag
-                  v-if="diff?.[groupedKey[0]] !== undefined"
-                  :diff="diff?.[groupedKey[0]]"
-                  type="tags"
-                />
-                <template v-else-if="groupIndex !== 0">
-                  &nbsp;
-                </template>
-              </div>
-            </th>
-          </tr>
-        </thead>
+    <template
+      v-for="(groupedKey, groupIndex) in groupedTagKeys"
+      :key="groupIndex"
+    >
+      <LoChaDiffTag
+        v-if="diff?.[groupedKey[0]] !== undefined"
+        :diff="diff?.[groupedKey[0]]"
+        type="tags"
+      />
+      <table v-if="groupedTagKeys.length">
         <tbody>
           <template v-for="key in groupedKey" :key="key">
             <tr
@@ -180,15 +169,16 @@ function diffText(before: string, after: string): Change[] {
             </tr>
           </template>
         </tbody>
-      </template>
-    </table>
+      </table>
+    </template>
   </div>
 </template>
 
 <style lang="css" scoped>
 .locha-diff {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
   width: fit-content;
 }
 
