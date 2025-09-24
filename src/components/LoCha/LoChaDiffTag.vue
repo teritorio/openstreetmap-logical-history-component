@@ -24,7 +24,7 @@ defineProps<{
         'no_changes': action[1] !== 'reject',
       }"
     >
-      {{ type }}: {{ action[0] }}
+      {{ type }}
     </div>
   </template>
 </template>

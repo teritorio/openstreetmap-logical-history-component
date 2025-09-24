@@ -92,11 +92,13 @@ function handleSubmit(data: FormData) {
           <span v-if="title" class="title">🔗 {{ title }}</span>
           <span v-if="dst?.is_after && src" class="date">📅 {{ date }}</span>
         </div>
-        <LoChaDiffTag
-          v-if="attribs?.geom"
-          :diff="attribs.geom"
-          type="geom"
-        />
+        <div v-if="attribs?.geom">
+          Diff on
+          <LoChaDiffTag
+            :diff="attribs.geom"
+            type="geom"
+          />
+        </div>
         <LoChaDiff
           v-if="!(src?.is_before && !dst)"
           :diff="diff"

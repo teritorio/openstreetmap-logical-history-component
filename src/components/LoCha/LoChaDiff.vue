@@ -88,11 +88,14 @@ function diffText(before: string, after: string): Change[] {
       v-for="(groupedKey, groupIndex) in groupedTagKeys"
       :key="groupIndex"
     >
-      <LoChaDiffTag
-        v-if="diff?.[groupedKey[0]] !== undefined"
-        :diff="diff?.[groupedKey[0]]"
-        type="tags"
-      />
+      <div v-if="diff?.[groupedKey[0]] !== undefined">
+        Diff on
+        <LoChaDiffTag
+
+          :diff="diff?.[groupedKey[0]]"
+          type="tags"
+        />
+      </div>
       <table v-if="groupedTagKeys.length">
         <tbody>
           <template v-for="key in groupedKey" :key="key">
