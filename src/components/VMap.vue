@@ -1,7 +1,15 @@
 <script setup lang="ts">
 import type { AddLayerObject, GeoJSONSource, LngLatLike, MapMouseEvent } from 'maplibre-gl'
+import type { IFeature } from '@/composables/useApi'
 import type { LoChaGroup } from '@/composables/useLoCha'
 import turfBbox from '@turf/bbox'
+import turfBboxPolygon from '@turf/bbox-polygon'
+import turfBuffer from '@turf/buffer'
+import turfConcave from '@turf/concave'
+import turfConvex from '@turf/convex'
+import { featureCollection as turfFeatureCollection, lineString as turfLineString, point as turfPoint } from '@turf/helpers'
+import turfIntersect from '@turf/intersect'
+import turfUnion from '@turf/union'
 import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
 import { shallowRef, watch } from 'vue'
@@ -246,22 +254,117 @@ function displayBbox(): void {
   map.value.addLayer(LAYERS.Bbox)
 }
 
+function createConcavePolygon(features: IFeature[]): GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null {
+  const polygons: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>[] = []
+  const points: GeoJSON.Feature<GeoJSON.Point>[] = []
+
+  for (const f of features) {
+    if (!f.geometry)
+      continue
+
+    switch (f.geometry.type) {
+      case 'Point':
+        points.push(turfPoint(f.geometry.coordinates))
+        break
+      case 'LineString':
+        for (const coord of f.geometry.coordinates) {
+          points.push(turfPoint(coord))
+        }
+        break
+      case 'Polygon':
+      case 'MultiPolygon':
+        polygons.push(f as GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>)
+        break
+    }
+  }
+
+  let hullPolygon: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null = null
+
+  if (points.length >= 3) {
+    const fc = turfFeatureCollection(points)
+    hullPolygon = turfConcave(fc, { maxEdge: 1.5 }) ?? turfConvex(fc)
+  }
+  else if (points.length === 2) {
+    const line = turfLineString(points.map(p => p.geometry.coordinates))
+    hullPolygon = turfBuffer(line, 0.001, { units: 'kilometers' }) || null
+  }
+  else if (points.length === 1) {
+    hullPolygon = turfBuffer(points[0], 0.001, { units: 'kilometers' }) || null
+  }
+
+  if (polygons.length === 0)
+    return hullPolygon
+
+  // Merge all existing polygons
+  let merged = polygons[0]
+
+  for (let i = 1; i < polygons.length; i++) {
+    const unionResult = turfUnion(turfFeatureCollection([merged, polygons[i]]))
+    if (unionResult)
+      merged = unionResult
+  }
+
+  if (hullPolygon) {
+    // Merge hull with existing polygons
+    const unionResult = turfUnion(turfFeatureCollection([merged, hullPolygon]))
+    if (unionResult)
+      merged = unionResult
+  }
+
+  return merged
+}
+
+function intersectWithBbox(
+  polygon: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>,
+  bbox: GeoJSON.BBox,
+): GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null {
+  const bboxPoly = turfBboxPolygon(bbox)
+
+  return turfIntersect(turfFeatureCollection([polygon, bboxPoly]))
+}
+
+function normalizeBbox(
+  bbox: GeoJSON.BBox,
+): [number, number, number, number] {
+  let minX = bbox[0]
+  let minY = bbox[1]
+  let maxX = bbox[2]
+  let maxY = bbox[3]
+
+  if (Math.abs(minX) <= 90 && Math.abs(maxX) <= 90) {
+    [minX, minY] = [minY, minX];
+    [maxX, maxY] = [maxY, maxX]
+  }
+
+  return [minX, minY, maxX, maxY]
+}
+
 function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
 
   displayBbox()
 
-  map.value.fitBounds(new maplibre.LngLatBounds(
-    turfBbox({
-      type: 'FeatureCollection',
-      features: props.features,
-    }) as [number, number, number, number],
-  ), {
-    padding: paddingOptions,
-    animate: false,
-    maxZoom: 17,
-  })
+  const featuresPolygon = createConcavePolygon(props.features)
+
+  if (featuresPolygon && props.bbox) {
+    const clipped = intersectWithBbox(featuresPolygon, normalizeBbox(props.bbox))
+
+    if (clipped) {
+      const boundsArray = turfBbox(clipped)
+
+      const bounds: [[number, number], [number, number]] = [
+        [boundsArray[0], boundsArray[1]],
+        [boundsArray[2], boundsArray[3]],
+      ]
+
+      map.value.fitBounds(bounds, {
+        padding: paddingOptions,
+        animate: false,
+        maxZoom: 17,
+      })
+    }
+  }
 
   map.value!.addSource(SOURCE_ID, {
     type: 'geojson',
