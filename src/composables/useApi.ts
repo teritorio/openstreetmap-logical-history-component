@@ -177,7 +177,7 @@ export function useApiConfig(): ApiComposable {
       .then(async (res) => {
         if (!res.ok) {
           const message = await res.text()
-          throw new Error(message)
+          throw new Error(message || res.statusText)
         }
 
         return await res.json() as ApiResponse
