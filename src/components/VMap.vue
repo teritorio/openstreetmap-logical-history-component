@@ -39,6 +39,7 @@ const LAYERS = {
     paint: {
       'line-color': '#000000',
       'line-width': 1,
+      'line-dasharray': [2, 2],
     },
   },
   PolygonBorder: {
@@ -46,7 +47,12 @@ const LAYERS = {
     type: 'line',
     source: SOURCE_ID,
     paint: {
-      'line-width': 2,
+      'line-width': [
+        'case',
+        ['==', ['get', 'is_before'], true],
+        1,
+        2,
+      ],
       'line-color': '#000000',
     },
     filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
@@ -77,25 +83,6 @@ const LAYERS = {
     },
     filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
   },
-  LineStringBorder: {
-    id: 'feature-lines-border',
-    type: 'line',
-    source: SOURCE_ID,
-    paint: {
-      'line-width': 1,
-      'line-color': '#000000',
-      'line-offset': [
-        'case',
-        ['get', 'is_before'],
-        -3,
-        3,
-      ],
-    },
-    layout: {
-      'line-cap': 'round',
-    },
-    filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
-  },
   LineString: {
     id: 'feature-lines',
     type: 'line',
@@ -122,9 +109,33 @@ const LAYERS = {
       ],
       'line-offset': [
         'case',
-        ['get', 'is_before'],
+        ['==', ['get', 'is_before'], true],
         -3,
         3,
+      ],
+    },
+    layout: {
+      'line-cap': 'round',
+    },
+    filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
+  },
+  LineStringBorder: {
+    id: 'feature-lines-border',
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-width': [
+        'case',
+        ['==', ['get', 'is_before'], true],
+        1,
+        2,
+      ],
+      'line-color': '#000000',
+      'line-offset': [
+        'case',
+        ['==', ['get', 'is_before'], true],
+        -2,
+        2,
       ],
     },
     layout: {
@@ -144,7 +155,12 @@ const LAYERS = {
         12,
       ],
       'circle-stroke-color': '#000000',
-      'circle-stroke-width': 2,
+      'circle-stroke-width': [
+        'case',
+        ['==', ['get', 'is_before'], true],
+        1,
+        2,
+      ],
       'circle-opacity': [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
