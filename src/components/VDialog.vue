@@ -42,7 +42,8 @@ defineEmits<{
       <p>
         Both the time range and area are limited to reduce the required data and computation time.
         The OSM data comes from the Overpass API Attic data (
-        <a href="https://overpass-api.de/" target="_blank" rel="noopener noreferrer">overpass-api.de</a>),
+        <a href="https://overpass-api.de/" target="_blank" rel="noopener noreferrer">overpass-api.de</a>)
+        or the Ohsome API (<a href="https://docs.ohsome.org/ohsome-api/v1/" target="_blank" rel="noopener noreferrer">ohsome.org</a>),
         which may impose usage limitations.
       </p>
     </section>
