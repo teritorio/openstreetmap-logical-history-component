@@ -1,15 +1,13 @@
 <script setup lang="ts">
+import type { BBox } from 'geojson'
 import type { AddLayerObject, GeoJSONSource, LngLatLike, MapMouseEvent } from 'maplibre-gl'
-import type { IFeature } from '@/composables/useApi'
 import type { LoChaGroup } from '@/composables/useLoCha'
 import turfBbox from '@turf/bbox'
+import turfBboxClip from '@turf/bbox-clip'
 import turfBboxPolygon from '@turf/bbox-polygon'
-import turfBuffer from '@turf/buffer'
-import turfConcave from '@turf/concave'
-import turfConvex from '@turf/convex'
-import { featureCollection as turfFeatureCollection, lineString as turfLineString, point as turfPoint } from '@turf/helpers'
-import turfIntersect from '@turf/intersect'
-import turfUnion from '@turf/union'
+import turfBooleanContains from '@turf/boolean-contains'
+import turfEnvelope from '@turf/envelope'
+import { featureCollection as turfFeatureCollection } from '@turf/helpers'
 import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
 import { shallowRef, watch } from 'vue'
@@ -242,12 +240,9 @@ function initMap() {
   }
 }
 
-function displayBbox(): void {
+function displayBbox(bbox: BBox): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
-
-  if (!props.bbox)
-    return
 
   map.value.addSource(BBOX_SOURCE_ID, {
     type: 'geojson',
@@ -256,11 +251,11 @@ function displayBbox(): void {
       geometry: {
         type: 'Polygon',
         coordinates: [[
-          [props.bbox[1], props.bbox[0]],
-          [props.bbox[3], props.bbox[0]],
-          [props.bbox[3], props.bbox[2]],
-          [props.bbox[1], props.bbox[2]],
-          [props.bbox[1], props.bbox[0]],
+          [bbox[1], bbox[0]],
+          [bbox[3], bbox[0]],
+          [bbox[3], bbox[2]],
+          [bbox[1], bbox[2]],
+          [bbox[1], bbox[0]],
         ]],
       },
       properties: {},
@@ -270,73 +265,45 @@ function displayBbox(): void {
   map.value.addLayer(LAYERS.Bbox)
 }
 
-function createConcavePolygon(features: IFeature[]): GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null {
-  const polygons: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>[] = []
-  const points: GeoJSON.Feature<GeoJSON.Point>[] = []
-
-  for (const f of features) {
-    if (!f.geometry)
-      continue
-
-    switch (f.geometry.type) {
-      case 'Point':
-        points.push(turfPoint(f.geometry.coordinates))
-        break
-      case 'LineString':
-        for (const coord of f.geometry.coordinates) {
-          points.push(turfPoint(coord))
-        }
-        break
-      case 'Polygon':
-      case 'MultiPolygon':
-        polygons.push(f as GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>)
-        break
-    }
-  }
-
-  let hullPolygon: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null = null
-
-  if (points.length >= 3) {
-    const fc = turfFeatureCollection(points)
-    hullPolygon = turfConcave(fc, { maxEdge: 1.5 }) ?? turfConvex(fc)
-  }
-  else if (points.length === 2) {
-    const line = turfLineString(points.map(p => p.geometry.coordinates))
-    hullPolygon = turfBuffer(line, 0.001, { units: 'kilometers' }) || null
-  }
-  else if (points.length === 1) {
-    hullPolygon = turfBuffer(points[0], 0.001, { units: 'kilometers' }) || null
-  }
-
-  if (polygons.length === 0)
-    return hullPolygon
-
-  // Merge all existing polygons
-  let merged = polygons[0]
-
-  for (let i = 1; i < polygons.length; i++) {
-    const unionResult = turfUnion(turfFeatureCollection([merged, polygons[i]]))
-    if (unionResult)
-      merged = unionResult
-  }
-
-  if (hullPolygon) {
-    // Merge hull with existing polygons
-    const unionResult = turfUnion(turfFeatureCollection([merged, hullPolygon]))
-    if (unionResult)
-      merged = unionResult
-  }
-
-  return merged
+function isPolygonOrLine(
+  f: GeoJSON.Feature<GeoJSON.Geometry>,
+): f is GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon> {
+  return (
+    f.geometry && (
+      f.geometry.type === 'LineString'
+      || f.geometry.type === 'MultiLineString'
+      || f.geometry.type === 'Polygon'
+      || f.geometry.type === 'MultiPolygon'
+    )
+  )
 }
 
-function intersectWithBbox(
-  polygon: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon>,
-  bbox: GeoJSON.BBox,
-): GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null {
-  const bboxPoly = turfBboxPolygon(bbox)
+function clipAndEnvelope(
+  features: GeoJSON.Feature[],
+  bbox: BBox,
+): GeoJSON.Feature<GeoJSON.Polygon> | null {
+  const clipped = features
+    .map((f) => {
+      if (!f.geometry)
+        return null
 
-  return turfIntersect(turfFeatureCollection([polygon, bboxPoly]))
+      if (f.geometry.type === 'Point' || f.geometry.type === 'MultiPoint') {
+        return turfBooleanContains(turfBboxPolygon(bbox), f) ? f : null
+      }
+      else if (isPolygonOrLine(f)) {
+        return turfBboxClip(f, bbox)
+      }
+
+      return null
+    })
+    .filter((f): f is GeoJSON.Feature => f !== null)
+
+  if (clipped.length === 0)
+    return null
+
+  const fc = turfFeatureCollection(clipped)
+
+  return turfEnvelope(fc)
 }
 
 function normalizeBbox(
@@ -359,12 +326,13 @@ function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
 
-  displayBbox()
+  if (props.bbox) {
+    displayBbox(props.bbox)
 
-  const featuresPolygon = createConcavePolygon(props.features)
-
-  if (featuresPolygon && props.bbox) {
-    const clipped = intersectWithBbox(featuresPolygon, normalizeBbox(props.bbox))
+    // Loop bboxClip()
+    // Merge du résultat de tous les bboxClip() en FeatureCollection
+    // utilliser envelope avec la FeatureCollection de bboxClip()
+    const clipped = clipAndEnvelope(props.features, normalizeBbox(props.bbox))
 
     if (clipped) {
       const boundsArray = turfBbox(clipped)
@@ -377,7 +345,6 @@ function handleMapOnLoad(): void {
       map.value.fitBounds(bounds, {
         padding: paddingOptions,
         animate: false,
-        maxZoom: 17,
       })
     }
   }
