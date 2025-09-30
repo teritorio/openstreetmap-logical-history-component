@@ -222,10 +222,10 @@ function initMap() {
       hash: false,
       container: `map-${props.id}`,
       bounds: props.bbox && [
-        props.bbox[0],
         props.bbox[1],
-        props.bbox[2],
+        props.bbox[0],
         props.bbox[3],
+        props.bbox[2],
       ],
       fitBoundsOptions: {
         padding: paddingOptions,
