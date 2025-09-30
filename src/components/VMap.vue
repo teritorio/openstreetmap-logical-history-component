@@ -184,10 +184,10 @@ const LAYERS = {
 } satisfies Partial<Record<LayerKey, AddLayerObject>>
 
 const paddingOptions = {
-  top: 20,
-  left: 20,
-  right: 20,
-  bottom: 60,
+  top: 60,
+  left: 60,
+  right: 60,
+  bottom: 80,
 }
 
 const map = shallowRef<maplibre.Map>()
@@ -218,25 +218,32 @@ watch(() => props.features, (newValue) => {
 
 function initMap() {
   if (!map.value) {
-    map.value = new maplibre.Map({
-      hash: false,
-      container: `map-${props.id}`,
-      bounds: props.bbox && [
-        props.bbox[1],
-        props.bbox[0],
-        props.bbox[3],
-        props.bbox[2],
-      ],
-      fitBoundsOptions: {
-        padding: paddingOptions,
-        animate: false,
-      },
-      style: MAP_STYLE_URL,
-    })
+    if (props.bbox) {
+      const clipped = clipAndEnvelope(props.features, normalizeBbox(props.bbox))
 
-    map.value.addControl(new maplibre.NavigationControl())
+      if (clipped) {
+        const boundsArray = turfBbox(clipped)
 
-    map.value.on('load', handleMapOnLoad)
+        const bounds: [[number, number], [number, number]] = [
+          [boundsArray[0], boundsArray[1]],
+          [boundsArray[2], boundsArray[3]],
+        ]
+
+        map.value = new maplibre.Map({
+          hash: false,
+          container: `map-${props.id}`,
+          bounds,
+          fitBoundsOptions: {
+            padding: paddingOptions,
+            animate: false,
+          },
+          style: MAP_STYLE_URL,
+        })
+        map.value.addControl(new maplibre.NavigationControl())
+
+        map.value.on('load', handleMapOnLoad)
+      }
+    }
   }
 }
 
@@ -328,25 +335,6 @@ function handleMapOnLoad(): void {
 
   if (props.bbox) {
     displayBbox(props.bbox)
-
-    // Loop bboxClip()
-    // Merge du résultat de tous les bboxClip() en FeatureCollection
-    // utilliser envelope avec la FeatureCollection de bboxClip()
-    const clipped = clipAndEnvelope(props.features, normalizeBbox(props.bbox))
-
-    if (clipped) {
-      const boundsArray = turfBbox(clipped)
-
-      const bounds: [[number, number], [number, number]] = [
-        [boundsArray[0], boundsArray[1]],
-        [boundsArray[2], boundsArray[3]],
-      ]
-
-      map.value.fitBounds(bounds, {
-        padding: paddingOptions,
-        animate: false,
-      })
-    }
   }
 
   map.value!.addSource(SOURCE_ID, {
