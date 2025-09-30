@@ -14,7 +14,7 @@ const emit = defineEmits<{
 const map = shallowRef<maplibre.Map | null>(null)
 let ignoreNextPropUpdate = false
 
-const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/positron/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
+const MAP_STYLE_URL = 'https://maps.cartoway.com/styles/positron/style.json'
 
 function fitMapToBbox(bbox: string): void {
   if (!map.value)

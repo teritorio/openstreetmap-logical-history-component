@@ -28,7 +28,7 @@ type MapMouseEventWithFeatures = MapMouseEvent & {
 
 const BBOX_SOURCE_ID = 'bbox'
 const SOURCE_ID = 'lochas'
-const MAP_STYLE_URL = 'https://vecto.teritorio.xyz/styles/positron/style.json?key=teritorio-demo-1-eTuhasohVahquais0giuth7i'
+const MAP_STYLE_URL = 'https://maps.cartoway.com/styles/positron/style.json'
 const LAYERS = {
   Bbox: {
     id: 'bbox-layer',
