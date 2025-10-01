@@ -53,6 +53,19 @@ export type Action = [string, ActionType | null, ActionTypeOptions | null]
 
 export type Actions = Record<string, Action[]>
 
+export interface Reason {
+  geom: {
+    distance?: number
+    score: number
+    reason: string
+  }
+  tags: {
+    score: number
+    reason: string
+  }
+  conflate: string
+}
+
 interface Changeset {
   id: number
   created_at: string
@@ -81,6 +94,7 @@ export interface ApiLink {
   after?: number
   diff_attribs?: Actions
   diff_tags?: Actions
+  reason: Reason
 }
 
 export interface IFeature extends GeoJSON.Feature {

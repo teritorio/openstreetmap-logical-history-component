@@ -4,7 +4,6 @@ import type { Action, ActionType, ApiLink, IFeature } from '@/composables/useApi
 import { diffChars } from 'diff'
 import { groupBy, sortBy, uniq } from 'underscore'
 import { computed } from 'vue'
-import LoChaDiffTag from '@/components/LoCha/LoChaDiffTag.vue'
 import { loChaColors } from '@/composables/useLoCha'
 
 const props = withDefaults(
@@ -98,13 +97,6 @@ function diffText(before: string, after: string): Change[] {
       v-for="(groupedKey, groupIndex) in groupedTagKeys"
       :key="groupIndex"
     >
-      <div v-if="diff?.[groupedKey[0]] !== undefined">
-        Diff on
-        <LoChaDiffTag
-          :diff="diff?.[groupedKey[0]]"
-          type="tags"
-        />
-      </div>
       <table v-if="groupedTagKeys.length">
         <tbody>
           <template v-for="key in groupedKey" :key="key">
