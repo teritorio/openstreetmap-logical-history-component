@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { useLoCha } from '@/composables/useLoCha'
+import { formatDate } from '@/utils/date-format'
 
 const { groups } = useLoCha()
 const currentHash = ref<string>()
@@ -22,6 +24,22 @@ onBeforeUnmount(() => {
   window.removeEventListener('hashchange', () => {
     currentHash.value = undefined
   })
+})
+
+const route = useRoute()
+const dateFrom = computed(() => {
+  if (route.query.date_start) {
+    return formatDate(route.query.date_start.toString())
+  }
+
+  return undefined
+})
+const dateTo = computed(() => {
+  if (route.query.date_end) {
+    return formatDate(route.query.date_end.toString())
+  }
+
+  return undefined
 })
 
 function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {}): boolean {
@@ -51,8 +69,8 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
 <template>
   <div class="locha-group-list">
     <header>
-      <h2>Before</h2>
-      <h2>After</h2>
+      <h2>Before : {{ dateFrom }}</h2>
+      <h2>After : {{ dateTo }}</h2>
     </header>
     <ul>
       <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#group-${index}` }">

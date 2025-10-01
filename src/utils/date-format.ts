@@ -18,3 +18,17 @@ export function toDatetimeLocal(iso: string): string {
 export function fromDatetimeLocal(local: string): string {
   return new Date(local).toISOString()
 }
+
+export function formatDate(input: string): string {
+  const date = new Date(input)
+  const locale = navigator.language
+
+  const datePart = date.toLocaleDateString(locale)
+  const timePart = date.toLocaleTimeString(locale, {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: true,
+  })
+
+  return `${datePart} at ${timePart}`
+}
