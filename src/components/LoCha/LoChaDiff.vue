@@ -22,6 +22,9 @@ const props = withDefaults(
 )
 
 const groupedTagKeys = computed((): string[][] => {
+  if (props.src && !props.dst)
+    return [Object.keys(props.src.tags)]
+
   const keys: string[] = sortBy(
     uniq([
       ...Object.keys(props.src?.tags || {}),
@@ -50,25 +53,32 @@ function action2priority(logAction: ActionType | null): number {
 }
 
 function actionIcon(key: string): string | undefined {
+  if (props.src && !props.dst)
+    return undefined
+
   return (
     props.diff?.[key]
     && (
       !props.src?.tags || !(key in props.src.tags)
         ? '➕'
-        : !(key in (props.dst?.tags || {}))
-            ? '✖'
-            : '~')
+        : props.dst && !props.dst.tags[key]
+          ? '✖'
+          : '~')
   )
 }
 
 function backgroundClass(key: string): string | undefined {
+  if (props.src && !props.dst) {
+    return undefined
+  }
+
   return (
     props.diff?.[key]
     && (!props.src?.tags || !(key in props.src.tags)
       ? 'attribute-added'
-      : !(key in (props.dst?.tags || {}))
-          ? 'attribute-removed'
-          : 'attribute-changed')
+      : props.dst && !props.dst.tags[key]
+        ? 'attribute-removed'
+        : 'attribute-changed')
   )
 }
 
@@ -91,7 +101,6 @@ function diffText(before: string, after: string): Change[] {
       <div v-if="diff?.[groupedKey[0]] !== undefined">
         Diff on
         <LoChaDiffTag
-
           :diff="diff?.[groupedKey[0]]"
           type="tags"
         />
@@ -102,9 +111,10 @@ function diffText(before: string, after: string): Change[] {
             <tr
               v-if="!exclude.includes(key)"
               :class="
-                (diff?.[key] === undefined
-                  || diff[key][0] === undefined
-                  || diff[key][0][0]) !== 'reject' && 'no_changes'
+                (src && !dst && 'no_changes')
+                  || (diff?.[key] === undefined
+                    || diff[key][0] === undefined
+                    || diff[key][0][0]) !== 'reject' && 'no_changes'
               "
             >
               <td class="key" :class="[backgroundClass(key)]">
@@ -164,6 +174,9 @@ function diffText(before: string, after: string): Change[] {
                     <br>
                     <span class="diff-text-added">{{ dst?.tags?.[key] }}</span>
                   </span>
+                </template>
+                <template v-else-if="!dst && src">
+                  {{ src.tags?.[key] }}
                 </template>
                 <template v-else>
                   {{ dst?.tags?.[key] }}

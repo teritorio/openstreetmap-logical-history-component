@@ -100,7 +100,7 @@ function handleSubmit(data: FormData) {
           />
         </div>
         <LoChaDiff
-          v-if="!(src?.is_before && !dst)"
+          v-if="!dst?.deleted"
           :diff="diff"
           :dst="dst"
           :src="src"

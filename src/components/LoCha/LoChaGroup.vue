@@ -27,8 +27,10 @@ function getDiffs(
   feature: IFeature,
   index: number,
 ): ApiLink[] | undefined {
-  if (feature.properties.is_before)
-    return undefined
+  if (feature.properties.is_before) {
+    const link = loCha.value!.metadata.links[index].find(link => link.before === feature.id || link.after === feature.id)
+    return link && [link]
+  }
 
   return loCha.value!.metadata.links[index].filter(link => link.before === feature.id || link.after === feature.id)
 }
