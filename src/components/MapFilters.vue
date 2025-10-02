@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormData, Preset } from '@/types'
 import { reactive, ref, shallowRef, useTemplateRef, watchEffect } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import MapBbox from '@/components/MapBbox.vue'
 
 const props = withDefaults(
@@ -57,9 +58,13 @@ watchEffect(() => {
   }
 })
 
+const router = useRouter()
+const route = useRoute()
+
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
   Object.assign(formValues, preset)
+  router.replace({ path: route.path, hash: '' })
   emit('submit', formValues)
 }
 

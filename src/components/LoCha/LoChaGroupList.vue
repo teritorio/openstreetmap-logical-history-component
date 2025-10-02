@@ -1,32 +1,23 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { useLoCha } from '@/composables/useLoCha'
 import { formatDate } from '@/utils/date-format'
 
 const { groups } = useLoCha()
+const route = useRoute()
 const currentHash = ref<string>()
 
-onMounted(() => {
-  currentHash.value = window.location.hash
-  if (currentHash.value)
-    scrollToSection(currentHash.value)
-
-  window.addEventListener('hashchange', () => {
-    currentHash.value = window.location.hash
-    if (currentHash.value)
-      scrollToSection(currentHash.value)
-  })
+watch(() => route.hash, (newValue) => {
+  currentHash.value = newValue
+  if (newValue) {
+    nextTick(() => scrollToSection(newValue))
+  }
+}, {
+  immediate: true,
 })
 
-onBeforeUnmount(() => {
-  window.removeEventListener('hashchange', () => {
-    currentHash.value = undefined
-  })
-})
-
-const route = useRoute()
 const dateFrom = computed(() => {
   if (route.query.date_start) {
     return formatDate(route.query.date_start.toString())
