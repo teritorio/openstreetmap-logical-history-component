@@ -6,10 +6,22 @@ const props = defineProps<{
   reason: Reason
 }>()
 
-const nonEmptyEntries = computed(() => Object.entries(props.reason).filter(([_key, values]) => !!values))
+const nonEmptyEntries = computed(() => Object.entries(props.reason).filter(([_key, values]) => !!values) as Array<[keyof Reason, Reason[keyof Reason]]>)
 
-function isObject(entry?: any): boolean {
-  return entry && typeof entry === 'object' && !Array.isArray(entry)
+function isObject(entry?: Reason[keyof Reason]): boolean {
+  return !!entry && typeof entry === 'object' && !Array.isArray(entry)
+}
+
+function formatNumericValue(key: string, val: number | string): number | string {
+  switch (key) {
+    case 'score':
+      return `${Math.round(((1 - (val as number)) * 100))}%`
+    case 'max_distance':
+    case 'min_distance':
+      return `${Number.parseFloat((val as number).toFixed(2))}m`
+    default:
+      return val
+  }
 }
 </script>
 
@@ -20,7 +32,7 @@ function isObject(entry?: any): boolean {
       <hr>
       <p v-if="!isObject(values)">{{ values }}</p>
       <p v-for="[key2, value] in Object.entries(values)" v-else :key="key2">
-        <b>{{ key2 }}</b>: {{ value }}
+        <b>{{ key2 }}</b>: {{ formatNumericValue(key2, value) }}
       </p>
     </span>
   </div>

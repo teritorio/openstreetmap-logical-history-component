@@ -236,6 +236,7 @@ function initMap() {
           fitBoundsOptions: {
             padding: paddingOptions,
             animate: false,
+            maxZoom: 17,
           },
           style: MAP_STYLE_URL,
           attributionControl: {
