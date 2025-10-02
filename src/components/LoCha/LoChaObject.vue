@@ -13,8 +13,8 @@ const status = computed(() => getStatus(props.feature))
 
 const statusContent = computed(() => {
   switch (status.value) {
-    case 'create':
-      return 'created'
+    case 'new':
+      return 'new'
     case 'delete':
       return 'deleted'
     default:
@@ -38,10 +38,10 @@ const color = computed(() => loChaColors[status.value])
           {{ `${feature.properties.objtype[0]}${feature.properties.id}-v${feature.properties.version}` }}
         </a>
         <div
-          v-if="status === 'create' || status === 'delete'"
+          v-if="status === 'new' || status === 'delete'"
           class="status-content"
           :class="{
-            'object-created': status === 'create',
+            'object-new': status === 'new',
             'object-deleted': status === 'delete',
           }"
         >
@@ -170,8 +170,8 @@ header > a {
   border-color: v-bind('loChaColors.delete');
 }
 
-.object-created {
-  background: color-mix(in srgb, v-bind('loChaColors.create') 20%, #ffffff 80%);
-  border-color: v-bind('loChaColors.create');
+.object-new {
+  background: color-mix(in srgb, v-bind('loChaColors.new') 20%, #ffffff 80%);
+  border-color: v-bind('loChaColors.new');
 }
 </style>

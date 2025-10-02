@@ -71,9 +71,9 @@ function backgroundClass(key: string): string | undefined {
   return (
     props.diff?.[key]
     && (!props.src?.tags || !(key in props.src.tags)
-      ? 'attribute-added'
+      ? 'attribute-new'
       : props.dst && !props.dst.tags[key]
-        ? 'attribute-removed'
+        ? 'attribute-deleted'
         : 'attribute-changed')
   )
 }
@@ -213,19 +213,19 @@ td {
 }
 
 .diff-text-added {
-  color: v-bind('loChaColors.create');
+  color: v-bind('loChaColors.new');
 }
 
 .diff-text-same {
   text-decoration: underline;
 }
 
-.attribute-removed {
+.attribute-deleted {
   background-color: color-mix(in srgb, v-bind('loChaColors.delete') 20%, #ffffff 80%);
 }
 
-.attribute-added {
-  background-color: color-mix(in srgb, v-bind('loChaColors.create') 20%, #ffffff 80%);
+.attribute-new {
+  background-color: color-mix(in srgb, v-bind('loChaColors.new') 20%, #ffffff 80%);
 }
 
 .attribute-changed {

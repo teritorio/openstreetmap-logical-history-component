@@ -53,16 +53,21 @@ export type Action = [string, ActionType | null, ActionTypeOptions | null]
 
 export type Actions = Record<string, Action[]>
 
+export interface ReasonGeom {
+  max_distance?: number
+  min_distance?: number
+  score: number
+  reason: string
+}
+
+export interface ReasonTags {
+  score: number
+  reason: string
+}
+
 export interface Reason {
-  geom: {
-    distance?: number
-    score: number
-    reason: string
-  }
-  tags: {
-    score: number
-    reason: string
-  }
+  geom: ReasonGeom
+  tags: ReasonTags
   conflate: string
 }
 
@@ -113,7 +118,7 @@ export interface IFeature extends GeoJSON.Feature {
     tags: Record<string, string>
     is_before?: boolean
     is_after?: boolean
-    is_created?: boolean
+    is_new?: boolean
   }
 }
 
@@ -237,7 +242,7 @@ export function useApiConfig(): ApiComposable {
       }
 
       if (feature.id === link.before) {
-        feature = {
+        return {
           ...feature,
           properties: {
             ...feature.properties,
@@ -246,11 +251,25 @@ export function useApiConfig(): ApiComposable {
         }
       }
 
+      if (feature.id === link.after) {
+        const hasBefore = group.filter(link => 'before' in link)
+
+        if (!hasBefore.length) {
+          return {
+            ...feature,
+            properties: {
+              ...feature.properties,
+              is_new: true,
+            },
+          }
+        }
+      }
+
       if (
         (feature.id === link.after)
         || (link.before === undefined && link.after !== undefined)
       ) {
-        feature = {
+        return {
           ...feature,
           properties: {
             ...feature.properties,

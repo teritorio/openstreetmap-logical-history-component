@@ -20,7 +20,7 @@ function getBeforeFeatures(features: IFeature[]) {
 }
 
 function getAfterFeatures(features: IFeature[]) {
-  return features.filter(feature => feature.properties.is_after)
+  return features.filter(feature => feature.properties.is_after || feature.properties.is_new)
 }
 
 function getDiffs(

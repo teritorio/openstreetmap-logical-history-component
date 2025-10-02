@@ -4,21 +4,21 @@ import { computed, ref } from 'vue'
 
 /**
  * The possible statuses for features in the system.
- * - 'create': New features.
+ * - 'new': New features.
  * - 'delete': Deleted features.
  * - 'update': Updated features.
  */
-export type Status = 'create' | 'delete' | 'updateBefore' | 'updateAfter'
+export type Status = 'new' | 'delete' | 'updateBefore' | 'updateAfter'
 
 /**
  * The Color type defines colors based on feature status.
- * - 'create' maps to '#52c41a'
+ * - 'new' maps to '#52c41a'
  * - 'delete' maps to '#FF0000'
  * - 'updateBefore' maps to '#FFA479'
  * - 'updateAfter' maps to '#F2BE00'
  */
 export type Color = {
-  [key in Status]: key extends 'create'
+  [key in Status]: key extends 'new'
     ? '#52c41a'
     : key extends 'delete'
       ? '#FF0000'
@@ -33,18 +33,18 @@ export type LoChaGroup = IFeature[]
  * A predefined object that maps status types to corresponding color codes.
  */
 export const loChaColors = {
-  create: '#52c41a',
+  new: '#52c41a',
   delete: '#FF0000',
   updateBefore: '#FFA479',
   updateAfter: '#F2BE00',
 } satisfies Color
 
 /**
- * Creates a mapping of status keys to themselves (i.e., 'create' -> 'create', 'delete' -> 'delete', etc.).
+ * Creates a mapping of status keys to themselves (i.e., 'new' -> 'new', 'delete' -> 'delete', etc.).
  * This is useful for status-based filtering or logic.
  */
 export const loChaStatus = Object.fromEntries(
-  ['create', 'delete', 'updateAfter', 'updateBefore'].map(key => [key, key]),
+  ['new', 'delete', 'updateAfter', 'updateBefore'].map(key => [key, key]),
 ) as Record<Status, Status>
 
 /**
@@ -99,8 +99,8 @@ export function useLoCha(): LoCha {
   }
 
   function getStatus(feature: IFeature): Status {
-    if (feature.properties.is_created) {
-      return loChaStatus.create
+    if (feature.properties.is_new) {
+      return loChaStatus.new
     }
 
     if (feature.properties.deleted) {
