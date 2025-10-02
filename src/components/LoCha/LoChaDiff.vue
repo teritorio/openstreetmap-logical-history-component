@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Change } from 'diff'
-import type { Action, ActionType, ApiLink, IFeature } from '@/composables/useApi'
+import type { ApiLink, IFeature } from '@/composables/useApi'
 import { diffChars } from 'diff'
 import { groupBy, sortBy, uniq } from 'underscore'
 import { computed } from 'vue'
@@ -29,10 +29,15 @@ const groupedTagKeys = computed((): string[][] => {
       ...Object.keys(props.src?.tags || {}),
       ...Object.keys(props.dst?.tags || {}),
     ]),
-    (key: string) =>
-      props.diff?.[key]
-        ? -maxActionPriority(props.diff[key])
-        : 0,
+    (key: string) => {
+      return props.diff?.[key]
+        && (
+          !props.src?.tags || !(key in props.src.tags)
+            ? 0
+            : props.dst && !props.dst.tags[key]
+              ? 2
+              : 1)
+    },
   )
 
   return Object.values(
@@ -42,14 +47,6 @@ const groupedTagKeys = computed((): string[][] => {
     ),
   )
 })
-
-function maxActionPriority(actions: Action[]): number {
-  return Math.max(...actions.map(action => action2priority(action[1])))
-}
-
-function action2priority(logAction: ActionType | null): number {
-  return logAction ? { reject: 2, accept: 0 }[logAction] : 1
-}
 
 function actionIcon(key: string): string | undefined {
   if (props.src && !props.dst)
