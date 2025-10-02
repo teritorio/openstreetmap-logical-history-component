@@ -64,6 +64,15 @@ defineEmits<{
       </p>
     </section>
 
+    <section aria-labelledby="limitations">
+      <h3 id="limitations">
+        Limitations
+      </h3>
+      <p>
+        The OSM relations are not fetched from history data to avoid deal with large objects.
+      </p>
+    </section>
+
     <footer>
       <p>Released under <a href="https://www.gnu.org/licenses/agpl-3.0.en.html" target="_blank" rel="noopener noreferrer">AGPL-3.0</a> by Teritorio.</p>
     </footer>
