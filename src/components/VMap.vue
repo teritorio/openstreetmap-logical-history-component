@@ -238,6 +238,9 @@ function initMap() {
             animate: false,
           },
           style: MAP_STYLE_URL,
+          attributionControl: {
+            compact: false,
+          },
         })
         map.value.addControl(new maplibre.NavigationControl())
 

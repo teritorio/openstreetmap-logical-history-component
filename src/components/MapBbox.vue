@@ -68,6 +68,9 @@ onMounted(() => {
   map.value = new maplibre.Map({
     container: 'bbox-selector',
     style: MAP_STYLE_URL,
+    attributionControl: {
+      compact: false,
+    },
   })
 
   map.value.addControl(new maplibre.NavigationControl())
