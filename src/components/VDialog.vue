@@ -53,8 +53,8 @@ defineEmits<{
         How it works
       </h3>
       <p>
-        Read the full story on Medium:
-        <a href="https://medium.com/p/eea089a6d72e/edit" target="_blank" rel="noopener noreferrer">medium.com — full article</a>.
+        Read the full story:
+        <a href="https://github.com/teritorio/openstreetmap-logical-history/blob/master/doc/OSM-Logical-History-From-technical-diffs-to-reconstructed-semantic-object-history.md" target="_blank" rel="noopener noreferrer">medium.com — full article</a>.
       </p>
       <p>
         Hack the code on GitHub:
