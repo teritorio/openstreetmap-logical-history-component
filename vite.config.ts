@@ -19,9 +19,10 @@ export default defineConfig(({ command, mode }) => {
       vue(),
       sentryVitePlugin({
         authToken: env.VITE_SENTRY_AUTH_TOKEN,
-        org: 'teritorio',
-        project: 'openstreetmap-logical-history-dev-frontend',
-        url: 'https://sentry.teritorio.xyz',
+        org: env.VITE_SENTRY_ORG,
+        project: env.VITE_SENTRY_PROJECT,
+        url: env.VITE_SENTRY_URL,
+        telemetry: false,
       }),
     ],
   } satisfies UserConfig

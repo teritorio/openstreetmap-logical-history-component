@@ -8,7 +8,7 @@ const app = createApp(App)
 
 Sentry.init({
   app,
-  dsn: 'https://fc5e84020ff3efe66cc8d61008908f04@sentry.teritorio.xyz/21',
+  dsn: import.meta.env.VITE_SENTRY_DSN,
   integrations: [],
 })
 
