@@ -15,8 +15,7 @@ yarn-error.log*
 *.swp
 
 # Environment files
-.env
-.env.*.local
+.env.local
 
 # Git-related
 .git/

@@ -4,6 +4,8 @@
 
 Install dependencies
 
+Copy `.env` file into `.env.local`
+
 ```bash
 yarn install
 ```
