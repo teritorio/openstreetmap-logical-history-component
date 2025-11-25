@@ -1,25 +1,44 @@
 # OpenStreetMap logical history (LoCha) UI component
 
-## Run project locally
+A Vue-based UI component for visualizing and interacting with OpenStreetMap logical history data.
 
-Install dependencies
+## Getting started
 
-Copy `.env` file into `.env.local`
+### Prerequisites
+
+- Node.js (v20.19+ or v22.12+)
+- Yarn 2+ package manager
+
+### Installation
+
+1. **Set up environment variables**
+
+   Copy the example environment file and configure it with your settings:
 
 ```bash
-yarn install
+   cp .env .env.local
 ```
 
-Serve the demo page
+Update `.env.local` with your configuration values.
+
+3. **Install dependencies**
 
 ```bash
-yarn dev
+   yarn install
 ```
 
-## Contribution
+4. **Start the development server**
 
-Please see the [contribution guide](CONTRIBUTING.md).
+```bash
+   yarn dev
+```
+
+The demo page will be available at `http://localhost:5173` (or another port if 5173 is in use).
+
+## Contributing
+
+We welcome contributions! Please see our [contribution guide](CONTRIBUTING.md) for details on how to get started.
 
 ## Author
 
-[Teritorio](https://teritorio.fr)
+Developed and maintained by [Teritorio](https://teritorio.fr)
