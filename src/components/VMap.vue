@@ -218,35 +218,35 @@ watch(() => props.features, (newValue) => {
 
 function initMap() {
   if (!map.value) {
-    if (props.bbox) {
-      const clipped = clipAndEnvelope(props.features, normalizeBbox(props.bbox))
+    const clipped = props.bbox
+      ? clipAndEnvelope(props.features, normalizeBbox(props.bbox))
+      : turfFeatureCollection(props.features)
 
-      if (clipped) {
-        const boundsArray = turfBbox(clipped)
+    if (clipped) {
+      const boundsArray = turfBbox(clipped)
 
-        const bounds: [[number, number], [number, number]] = [
-          [boundsArray[0], boundsArray[1]],
-          [boundsArray[2], boundsArray[3]],
-        ]
+      const bounds: [[number, number], [number, number]] = [
+        [boundsArray[0], boundsArray[1]],
+        [boundsArray[2], boundsArray[3]],
+      ]
 
-        map.value = new maplibre.Map({
-          hash: false,
-          container: `map-${props.id}`,
-          bounds,
-          fitBoundsOptions: {
-            padding: paddingOptions,
-            animate: false,
-            maxZoom: 17,
-          },
-          style: MAP_STYLE_URL,
-          attributionControl: {
-            compact: false,
-          },
-        })
-        map.value.addControl(new maplibre.NavigationControl())
+      map.value = new maplibre.Map({
+        hash: false,
+        container: `map-${props.id}`,
+        bounds,
+        fitBoundsOptions: {
+          padding: paddingOptions,
+          animate: false,
+          maxZoom: 17,
+        },
+        style: MAP_STYLE_URL,
+        attributionControl: {
+          compact: false,
+        },
+      })
+      map.value.addControl(new maplibre.NavigationControl())
 
-        map.value.on('load', handleMapOnLoad)
-      }
+      map.value.on('load', handleMapOnLoad)
     }
   }
 }
