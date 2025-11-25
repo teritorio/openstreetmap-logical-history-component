@@ -99,7 +99,7 @@ export interface ApiLink {
   after?: number
   diff_attribs?: Actions
   diff_tags?: Actions
-  reason: Reason
+  conflation_reason: Reason
 }
 
 export interface IFeature extends GeoJSON.Feature {

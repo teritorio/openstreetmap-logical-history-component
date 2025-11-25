@@ -68,7 +68,7 @@ function getTagsTitle(link: ApiLink): string {
                 :date="feature.properties.created"
                 :diff="link.diff_tags"
                 :src="feature.properties"
-                :reason="link.reason"
+                :reason="link.conflation_reason"
               />
             </template>
           </LoChaObject>
@@ -90,7 +90,7 @@ function getTagsTitle(link: ApiLink): string {
                 :date="feature.properties.created"
                 :title="getTagsTitle(link)"
                 :diff="link.diff_tags"
-                :reason="link.reason"
+                :reason="link.conflation_reason"
                 :dst="feature.properties"
                 :src="getBeforeProperties(link)"
               />
