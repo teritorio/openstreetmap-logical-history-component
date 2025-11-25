@@ -79,7 +79,7 @@ export default defineConfig(({ command, mode }) => {
     server: {
       proxy: {
         '/api': {
-          target: 'https://osm-logical-history-dev.teritorio.xyz',
+          target: env.VITE_API_ENDPOINT,
           changeOrigin: true,
         },
       },
