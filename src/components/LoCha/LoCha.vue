@@ -1,12 +1,17 @@
 <script setup lang="ts">
 import type { ApiResponse } from '@/composables/useApi'
-import { watch } from 'vue'
+import { provide, watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   data?: ApiResponse
-}>()
+  reasonCollapsed?: boolean
+}>(), {
+  reasonCollapsed: true,
+})
+
+provide('reasonCollapsed', props.reasonCollapsed)
 
 const {
   featureCount,
