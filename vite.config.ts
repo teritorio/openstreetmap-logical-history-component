@@ -19,9 +19,13 @@ export default defineConfig(({ command, mode }) => {
       vue(),
       sentryVitePlugin({
         authToken: env.VITE_SENTRY_AUTH_TOKEN,
-        org: env.VITE_SENTRY_ORG,
-        project: env.VITE_SENTRY_PROJECT,
-        url: env.VITE_SENTRY_URL,
+        sourcemaps: {
+          filesToDeleteAfterUpload: [
+            './**/*.map',
+            '.*/**/public/**/*.map',
+            './dist/**/client/**/*.map',
+          ],
+        },
         telemetry: false,
       }),
     ],

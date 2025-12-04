@@ -9,7 +9,6 @@ const app = createApp(App)
 Sentry.init({
   app,
   dsn: import.meta.env.VITE_SENTRY_DSN,
-  integrations: [],
 })
 
 app.use(router)
