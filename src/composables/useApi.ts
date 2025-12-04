@@ -140,8 +140,6 @@ export interface ApiResponse extends GeoJSON.FeatureCollection {
  * @constant {string} API_BASE_URL_DEV - The base URL for the development environment.
  * @constant {string} API_BASE_URL_PROD - The base URL for the production environment.
  */
-const API_BASE_URL_DEV = 'http://localhost:5173'
-const API_BASE_URL_PROD = 'https://osm-logical-history-dev.teritorio.xyz'
 
 /**
  * Provides a composable for API configuration and interaction.
@@ -150,8 +148,8 @@ const API_BASE_URL_PROD = 'https://osm-logical-history-dev.teritorio.xyz'
  */
 export function useApiConfig(): ApiComposable {
   const apiBaseUrl = import.meta.env.MODE === 'development'
-    ? API_BASE_URL_DEV
-    : API_BASE_URL_PROD
+    ? import.meta.env.VITE_APP_HOST
+    : import.meta.env.VITE_API_ENDPOINT
 
   const errorInitialState = {
     message: undefined,
