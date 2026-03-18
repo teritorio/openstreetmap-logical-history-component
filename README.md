@@ -60,21 +60,19 @@ A scoped slot exposed on each feature group, allowing custom rendering of tag di
 
 Slot props (always present):
 
-| Prop     | Type      | Description                  |
-| -------- | --------- | ---------------------------- |
-| `date`   | `string`  | The feature's creation date. |
-| `diff`   | `Actions` | The tag diff actions.        |
-| `reason` | `Reason`  | The conflation reason.       |
+| Prop     | Type                     | Description                                                                                                               |
+| -------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| `date`   | `string`                 | The feature's creation date.                                                                                              |
+| `diff`   | `Actions`                | The tag diff actions.                                                                                                     |
+| `reason` | `Reason`                 | The conflation reason.                                                                                                    |
+| `src`    | `IFeature['properties']` | Source feature properties. On "before" features this is the feature itself; on "after" it is the linked "before" feature. |
 
 Additional slot props on "after" features only:
 
-| Prop    | Type                     | Description                            |
-| ------- | ------------------------ | -------------------------------------- |
-| `title` | `string`                 | A label for the tag diff.              |
-| `dst`   | `IFeature['properties']` | Destination (after) feature properties |
-| `src`   | `IFeature['properties']` | Source (before) feature properties.    |
-
-On "before" features, `src` is the feature's own properties.
+| Prop    | Type                     | Description                             |
+| ------- | ------------------------ | --------------------------------------- |
+| `title` | `string`                 | A label for the tag diff.               |
+| `dst`   | `IFeature['properties']` | Destination (after) feature properties. |
 
 ### Types
 
