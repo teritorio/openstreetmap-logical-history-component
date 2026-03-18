@@ -2,14 +2,109 @@
 
 A Vue-based UI component for visualizing and interacting with OpenStreetMap logical history data.
 
-## Getting started
+## Usage
+
+### Installation
+
+```bash
+npm install @teritorio/openstreetmap-logical-history-component
+# or
+yarn add @teritorio/openstreetmap-logical-history-component
+```
+
+#### Peer dependencies
+
+The component requires `vue` and `maplibre-gl` as peer dependencies:
+
+```bash
+npm install vue maplibre-gl
+```
+
+### Importing
+
+```ts
+import { LoCha } from '@teritorio/openstreetmap-logical-history-component'
+import '@teritorio/openstreetmap-logical-history-component/style.css'
+```
+
+### Basic example
+
+```vue
+<script setup lang="ts">
+import type { ApiResponse } from '@teritorio/openstreetmap-logical-history-component'
+import { LoCha } from '@teritorio/openstreetmap-logical-history-component'
+import { ref } from 'vue'
+import '@teritorio/openstreetmap-logical-history-component/style.css'
+
+const data = ref<ApiResponse>()
+
+// Fetch data from your API and assign it to `data`
+</script>
+
+<template>
+  <LoCha :data="data" />
+</template>
+```
+
+### Props
+
+| Prop              | Type          | Default     | Description                                                   |
+| ----------------- | ------------- | ----------- | ------------------------------------------------------------- |
+| `data`            | `ApiResponse` | `undefined` | The API response containing features and metadata to display. |
+| `reasonCollapsed` | `boolean`     | `true`      | Whether conflation reason details are collapsed by default.   |
+
+### Slots
+
+#### `#tags-diff`
+
+A scoped slot exposed on each feature group, allowing custom rendering of tag diffs.
+
+Slot props:
+
+| Prop     | Type                     | Description                                             |
+| -------- | ------------------------ | ------------------------------------------------------- |
+| `date`   | `string`                 | The feature's creation date.                            |
+| `title`  | `string`                 | A label for the tag diff (present on "after" features). |
+| `diff`   | `Actions`                | The tag diff actions.                                   |
+| `src`    | `IFeature['properties']` | Source (before) feature properties.                     |
+| `dst`    | `IFeature['properties']` | Destination (after) feature properties.                 |
+| `reason` | `Reason`                 | The conflation reason for this link.                    |
+
+### Types
+
+All consumer-facing types are exported from the package entry point:
+
+```ts
+import type {
+  Action,
+  Actions,
+  ActionType,
+  ApiLink,
+  ApiLinkGroups,
+  ApiResponse,
+  IFeature,
+  Reason,
+  ReasonGeom,
+  ReasonTags,
+} from '@teritorio/openstreetmap-logical-history-component'
+```
+
+### `ApiResponse` shape
+
+`ApiResponse` extends `GeoJSON.FeatureCollection` with:
+
+- `features` — an array of `IFeature` objects (GeoJSON features with OSM-specific properties such as `objtype`, `version`, `username`, `tags`, etc.)
+- `metadata.links` — a record mapping link group IDs to arrays of `ApiLink` objects describing before/after relationships between features
+- `metadata.changesets` — an array of OSM changeset objects
+
+## Development
 
 ### Prerequisites
 
 - Node.js (v20.19+ or v22.12+)
 - Yarn 2+ package manager
 
-### Installation
+### Setup
 
 1. **Set up environment variables**
 
@@ -21,13 +116,13 @@ A Vue-based UI component for visualizing and interacting with OpenStreetMap logi
 
 Update `.env.local` with your configuration values.
 
-3. **Install dependencies**
+2. **Install dependencies**
 
 ```bash
    yarn install
 ```
 
-4. **Start the development server**
+3. **Start the development server**
 
 ```bash
    yarn dev
