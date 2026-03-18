@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createApiResponse, createFeature, createLink } from '../factories'
 
 // Mock turf modules
@@ -19,6 +19,10 @@ vi.mock('@turf/area', () => ({
 }))
 
 describe('useApi', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
   describe('useApiConfig', () => {
     it('returns error, fetchData, loading, setError, resetError', async () => {
       const { useApiConfig } = await import('@/composables/useApi')
@@ -70,8 +74,6 @@ describe('useApi', () => {
       expect(loading.value).toBe(true)
       await promise
       expect(loading.value).toBe(false)
-
-      vi.unstubAllGlobals()
     })
 
     it('returns undefined and sets error on fetch failure', async () => {
@@ -84,8 +86,6 @@ describe('useApi', () => {
       expect(result).toBeUndefined()
       expect(error.message).toBe('Network error')
       expect(error.type).toBe('error')
-
-      vi.unstubAllGlobals()
     })
 
     it('returns undefined and sets error on non-ok response', async () => {
@@ -103,8 +103,6 @@ describe('useApi', () => {
       expect(result).toBeUndefined()
       expect(error.message).toBe('Server error message')
       expect(error.type).toBe('error')
-
-      vi.unstubAllGlobals()
     })
 
     it('resets error before each fetch', async () => {
@@ -121,8 +119,6 @@ describe('useApi', () => {
 
       await fetchData({ date_start: '2024-01-01' })
       expect(error.message).toBeUndefined()
-
-      vi.unstubAllGlobals()
     })
 
     it('filters out undefined and empty params from the URL', async () => {
@@ -145,8 +141,6 @@ describe('useApi', () => {
       expect(calledUrl).toContain('date_start=2024-01-01')
       expect(calledUrl).not.toContain('date_end')
       expect(calledUrl).not.toContain('bbox')
-
-      vi.unstubAllGlobals()
     })
   })
 
@@ -168,11 +162,9 @@ describe('useApi', () => {
       const result = await fetchData({ date_start: '2024-01-01' })
       const beforeFeature = result?.features.find(f => f.id === 10)
       expect(beforeFeature?.properties.is_before).toBe(true)
-
-      vi.unstubAllGlobals()
     })
 
-    it('sets is_after flag when feature ID matches link.after', async () => {
+    it('sets is_after flag when feature ID matches link.after with before present', async () => {
       const feature1 = createFeature({ id: 10, properties: { links: 1 } as any })
       const feature2 = createFeature({ id: 20, properties: { links: 1 } as any })
       const links = { 1: [createLink({ before: 10, after: 20 })] }
@@ -189,11 +181,28 @@ describe('useApi', () => {
       const result = await fetchData({ date_start: '2024-01-01' })
       const afterFeature = result?.features.find(f => f.id === 20)
       expect(afterFeature?.properties.is_after).toBe(true)
-
-      vi.unstubAllGlobals()
     })
 
-    it('sets is_new flag when link has no before', async () => {
+    it('sets is_after flag when link.before is undefined but link.after is defined', async () => {
+      const feature = createFeature({ id: 10, properties: { links: 1 } as any })
+      // Link has 'before' key but set to undefined, and 'after' set to feature id
+      const links = { 1: [createLink({ before: undefined, after: 10 })] }
+      const mockData = createApiResponse([feature], links)
+
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockData),
+      }))
+
+      const { useApiConfig } = await import('@/composables/useApi')
+      const { fetchData } = useApiConfig()
+
+      const result = await fetchData({ date_start: '2024-01-01' })
+      const afterFeature = result?.features.find(f => f.id === 10)
+      expect(afterFeature?.properties.is_after).toBe(true)
+    })
+
+    it('sets is_new flag when link has no before key', async () => {
       const feature = createFeature({ id: 10, properties: { links: 1 } as any })
       // The 'before' key must not exist at all (not just undefined) for is_new to trigger
       const link = { action: 'accept' as const, after: 10, diff_attribs: undefined, diff_tags: undefined, conflation_reason: { geom: { score: 0.9, reason: 'test' }, tags: { score: 0.8, reason: 'test' }, conflate: 'test' } }
@@ -211,8 +220,61 @@ describe('useApi', () => {
       const result = await fetchData({ date_start: '2024-01-01' })
       const newFeature = result?.features.find(f => f.id === 10)
       expect(newFeature?.properties.is_new).toBe(true)
+    })
 
-      vi.unstubAllGlobals()
+    it('sets geom to true when linked features have different geometries', async () => {
+      const feature1 = createFeature({
+        id: 10,
+        geometry: { type: 'Point', coordinates: [2.35, 48.85] },
+        properties: { links: 1 } as any,
+      })
+      const feature2 = createFeature({
+        id: 20,
+        geometry: { type: 'Point', coordinates: [3.00, 49.00] },
+        properties: { links: 1 } as any,
+      })
+      const links = { 1: [createLink({ before: 10, after: 20 })] }
+      const mockData = createApiResponse([feature1, feature2], links)
+
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockData),
+      }))
+
+      const { useApiConfig } = await import('@/composables/useApi')
+      const { fetchData } = useApiConfig()
+
+      const result = await fetchData({ date_start: '2024-01-01' })
+      const beforeFeature = result?.features.find(f => f.id === 10)
+      expect(beforeFeature?.properties.geom).toBe(true)
+    })
+
+    it('sets geom to false when linked features have identical geometries', async () => {
+      const sharedGeometry = { type: 'Point' as const, coordinates: [2.35, 48.85] }
+      const feature1 = createFeature({
+        id: 10,
+        geometry: sharedGeometry,
+        properties: { links: 1 } as any,
+      })
+      const feature2 = createFeature({
+        id: 20,
+        geometry: sharedGeometry,
+        properties: { links: 1 } as any,
+      })
+      const links = { 1: [createLink({ before: 10, after: 20 })] }
+      const mockData = createApiResponse([feature1, feature2], links)
+
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve(mockData),
+      }))
+
+      const { useApiConfig } = await import('@/composables/useApi')
+      const { fetchData } = useApiConfig()
+
+      const result = await fetchData({ date_start: '2024-01-01' })
+      const beforeFeature = result?.features.find(f => f.id === 10)
+      expect(beforeFeature?.properties.geom).toBe(false)
     })
 
     it('throws error when feature has no matching group', async () => {
@@ -231,8 +293,6 @@ describe('useApi', () => {
       const result = await fetchData({ date_start: '2024-01-01' })
       expect(result).toBeUndefined()
       expect(error.message).toContain('has no group')
-
-      vi.unstubAllGlobals()
     })
 
     it('throws error when feature has no matching link', async () => {
@@ -251,8 +311,6 @@ describe('useApi', () => {
       const result = await fetchData({ date_start: '2024-01-01' })
       expect(result).toBeUndefined()
       expect(error.message).toContain('has no link')
-
-      vi.unstubAllGlobals()
     })
 
     it('sorts features by area in descending order', async () => {
@@ -290,8 +348,6 @@ describe('useApi', () => {
       // Large polygon (5 coords = area 500) should come before small (4 coords = area 400)
       expect(result?.features[0].id).toBe(20)
       expect(result?.features[1].id).toBe(10)
-
-      vi.unstubAllGlobals()
     })
   })
 })
