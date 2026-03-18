@@ -1,8 +1,15 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useLoCha } from '@/composables/useLoCha'
 import { createApiResponse, createFeature, createLink } from '../factories'
 
 describe('useLoCha', () => {
+  beforeEach(() => {
+    // Reset shared module-level state before each test
+    const { loCha, groups } = useLoCha()
+    loCha.value = undefined
+    groups.value = []
+  })
+
   describe('getStatus', () => {
     it('returns "new" for features with is_new flag', () => {
       const { getStatus } = useLoCha()
@@ -119,9 +126,7 @@ describe('useLoCha', () => {
 
   describe('featureCount', () => {
     it('returns undefined when no data is set', () => {
-      const { featureCount, loCha } = useLoCha()
-      // Reset state
-      loCha.value = undefined
+      const { featureCount } = useLoCha()
       expect(featureCount.value).toBeUndefined()
     })
 

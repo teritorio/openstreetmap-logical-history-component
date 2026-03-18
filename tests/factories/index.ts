@@ -1,6 +1,8 @@
 import type { ActionType, ApiLink, ApiLinkGroups, ApiResponse, IFeature } from '@/composables/useApi'
 
 export function createFeature(overrides: Partial<IFeature> & { id: number }): IFeature {
+  const { properties: propOverrides, ...rest } = overrides
+
   return {
     type: 'Feature',
     geometry: {
@@ -8,6 +10,7 @@ export function createFeature(overrides: Partial<IFeature> & { id: number }): IF
       coordinates: [2.35, 48.85],
     },
     id: overrides.id,
+    ...rest,
     properties: {
       objtype: 'node',
       id: overrides.id,
@@ -20,10 +23,8 @@ export function createFeature(overrides: Partial<IFeature> & { id: number }): IF
       username: 'testuser',
       created: '2024-01-01T00:00:00Z',
       tags: { name: 'Test' },
-      ...overrides.properties,
+      ...propOverrides,
     },
-    ...overrides,
-    // Ensure properties spread doesn't override the merged properties
   } as IFeature
 }
 
