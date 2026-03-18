@@ -67,6 +67,7 @@
     "@types/underscore": "^1.13.0",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vitest/coverage-v8": "^4.1.0",
+    "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.9.0",
     "eslint": "^10.0.3",
     "eslint-plugin-format": "^2.0.1",
