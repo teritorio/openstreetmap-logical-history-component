@@ -34,7 +34,6 @@ import '@teritorio/openstreetmap-logical-history-component/style.css'
 import type { ApiResponse } from '@teritorio/openstreetmap-logical-history-component'
 import { LoCha } from '@teritorio/openstreetmap-logical-history-component'
 import { ref } from 'vue'
-import '@teritorio/openstreetmap-logical-history-component/style.css'
 
 const data = ref<ApiResponse>()
 
@@ -59,16 +58,23 @@ const data = ref<ApiResponse>()
 
 A scoped slot exposed on each feature group, allowing custom rendering of tag diffs.
 
-Slot props:
+Slot props (always present):
 
-| Prop     | Type                     | Description                                             |
-| -------- | ------------------------ | ------------------------------------------------------- |
-| `date`   | `string`                 | The feature's creation date.                            |
-| `title`  | `string`                 | A label for the tag diff (present on "after" features). |
-| `diff`   | `Actions`                | The tag diff actions.                                   |
-| `src`    | `IFeature['properties']` | Source (before) feature properties.                     |
-| `dst`    | `IFeature['properties']` | Destination (after) feature properties.                 |
-| `reason` | `Reason`                 | The conflation reason for this link.                    |
+| Prop     | Type      | Description                  |
+| -------- | --------- | ---------------------------- |
+| `date`   | `string`  | The feature's creation date. |
+| `diff`   | `Actions` | The tag diff actions.        |
+| `reason` | `Reason`  | The conflation reason.       |
+
+Additional slot props on "after" features only:
+
+| Prop    | Type                     | Description                            |
+| ------- | ------------------------ | -------------------------------------- |
+| `title` | `string`                 | A label for the tag diff.              |
+| `dst`   | `IFeature['properties']` | Destination (after) feature properties |
+| `src`   | `IFeature['properties']` | Source (before) feature properties.    |
+
+On "before" features, `src` is the feature's own properties.
 
 ### Types
 
