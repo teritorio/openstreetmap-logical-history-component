@@ -61,7 +61,6 @@ export interface LoCha {
 
 // Internal state variables
 const loCha = ref<ApiResponse>()
-const selectedFeatureId = ref<number>()
 const groups = ref<LoChaGroup[]>([])
 
 /**
@@ -119,11 +118,6 @@ export function useLoCha(): LoCha {
    */
   function _resetState(): void {
     loCha.value = undefined
-    _resetGroup()
-  }
-
-  function _resetGroup(): void {
-    selectedFeatureId.value = undefined
   }
 
   return {
