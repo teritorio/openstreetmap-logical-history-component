@@ -1718,7 +1718,6 @@ __metadata:
     "@vue/test-utils": "npm:^2.4.6"
     "@vue/tsconfig": "npm:^0.9.0"
     "@vueuse/components": "npm:^14.2.1"
-    "@vueuse/core": "npm:^14.2.1"
     diff: "npm:^8.0.3"
     eslint: "npm:^10.0.3"
     eslint-plugin-format: "npm:^2.0.1"
@@ -2639,7 +2638,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@vueuse/core@npm:14.2.1, @vueuse/core@npm:^14.2.1":
+"@vueuse/core@npm:14.2.1":
   version: 14.2.1
   resolution: "@vueuse/core@npm:14.2.1"
   dependencies:

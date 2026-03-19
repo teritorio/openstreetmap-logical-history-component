@@ -46,7 +46,6 @@
     "vue": "^3.5.13"
   },
   "dependencies": {
-    "@sentry/vite-plugin": "^5.1.1",
     "@sentry/vue": "^10.44.0",
     "@turf/area": "^7.3.4",
     "@turf/bbox": "^7.3.4",
@@ -57,7 +56,6 @@
     "@turf/envelope": "^7.3.4",
     "@turf/helpers": "^7.3.4",
     "@vueuse/components": "^14.2.1",
-    "@vueuse/core": "^14.2.1",
     "diff": "^8.0.3",
     "underscore": "^1.13.8",
     "vue-router": "^5.0.3"
@@ -66,6 +64,7 @@
     "@antfu/eslint-config": "^7.7.3",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
+    "@sentry/vite-plugin": "^5.1.1",
     "@types/underscore": "^1.13.0",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vitest/coverage-v8": "^4.1.0",
