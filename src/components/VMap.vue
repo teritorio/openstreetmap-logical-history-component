@@ -1,18 +1,15 @@
 <script setup lang="ts">
 import type { BBox } from 'geojson'
-import type { AddLayerObject, GeoJSONSource, LngLatLike, MapMouseEvent } from 'maplibre-gl'
+import type { LngLatLike, MapMouseEvent } from 'maplibre-gl'
 import type { LoChaGroup } from '@/composables/useLoCha'
 import turfBbox from '@turf/bbox'
-import turfBboxClip from '@turf/bbox-clip'
-import turfBboxPolygon from '@turf/bbox-polygon'
-import turfBooleanContains from '@turf/boolean-contains'
-import turfEnvelope from '@turf/envelope'
 import { featureCollection as turfFeatureCollection } from '@turf/helpers'
 import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
 import { shallowRef, watch } from 'vue'
-import { loChaColors } from '@/composables/useLoCha'
-import { MAP_STYLE_URL, NO_GEOM_COLOR } from '@/constants/map'
+import { MAP_STYLE_URL } from '@/constants/map'
+import { BBOX_SOURCE_ID, LAYERS, SOURCE_ID } from '@/constants/mapLayers'
+import { clipAndEnvelope, normalizeBbox } from '@/utils/geom'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
@@ -21,167 +18,9 @@ const props = defineProps<{
   bbox?: GeoJSON.BBox
 }>()
 
-type LayerKey = 'Polygon' | 'PolygonBorder' | 'Point' | 'LineString' | 'LineStringBorder' | 'Bbox'
-
 type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
 }
-
-const BBOX_SOURCE_ID = 'bbox'
-const SOURCE_ID = 'lochas'
-const LAYERS = {
-  Bbox: {
-    id: 'bbox-layer',
-    type: 'line',
-    source: BBOX_SOURCE_ID,
-    paint: {
-      'line-color': '#000000',
-      'line-width': 1,
-      'line-dasharray': [2, 2],
-    },
-  },
-  PolygonBorder: {
-    id: 'feature-polygons-border',
-    type: 'line',
-    source: SOURCE_ID,
-    paint: {
-      'line-width': [
-        'case',
-        ['==', ['get', 'is_before'], true],
-        1,
-        2,
-      ],
-      'line-color': '#000000',
-    },
-    filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
-  },
-  Polygon: {
-    id: 'feature-polygons',
-    type: 'fill',
-    source: SOURCE_ID,
-    paint: {
-      'fill-opacity': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        1,
-        0.3,
-      ],
-      'fill-color': [
-        'case',
-        ['==', ['get', 'geom'], false],
-        NO_GEOM_COLOR,
-        ['==', ['get', 'is_new'], true],
-        loChaColors.new,
-        ['==', ['get', 'deleted'], true],
-        loChaColors.delete,
-        ['==', ['get', 'is_before'], true],
-        loChaColors.updateBefore,
-        loChaColors.updateAfter,
-      ],
-    },
-    filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
-  },
-  LineString: {
-    id: 'feature-lines',
-    type: 'line',
-    source: SOURCE_ID,
-    paint: {
-      'line-width': 6,
-      'line-color': [
-        'case',
-        ['==', ['get', 'geom'], false],
-        NO_GEOM_COLOR,
-        ['==', ['get', 'is_new'], true],
-        loChaColors.new,
-        ['==', ['get', 'deleted'], true],
-        loChaColors.delete,
-        ['==', ['get', 'is_before'], true],
-        loChaColors.updateBefore,
-        loChaColors.updateAfter,
-      ],
-      'line-opacity': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        1,
-        0.5,
-      ],
-      'line-offset': [
-        'case',
-        ['==', ['get', 'is_before'], true],
-        -3,
-        3,
-      ],
-    },
-    layout: {
-      'line-cap': 'round',
-    },
-    filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
-  },
-  LineStringBorder: {
-    id: 'feature-lines-border',
-    type: 'line',
-    source: SOURCE_ID,
-    paint: {
-      'line-width': [
-        'case',
-        ['==', ['get', 'is_before'], true],
-        1,
-        2,
-      ],
-      'line-color': '#000000',
-      'line-offset': [
-        'case',
-        ['==', ['get', 'is_before'], true],
-        -2,
-        2,
-      ],
-    },
-    layout: {
-      'line-cap': 'round',
-    },
-    filter: ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
-  },
-  Point: {
-    id: 'feature-points',
-    type: 'circle',
-    source: SOURCE_ID,
-    paint: {
-      'circle-radius': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        14,
-        12,
-      ],
-      'circle-stroke-color': '#000000',
-      'circle-stroke-width': [
-        'case',
-        ['==', ['get', 'is_before'], true],
-        1,
-        2,
-      ],
-      'circle-opacity': [
-        'case',
-        ['boolean', ['feature-state', 'hover'], false],
-        1,
-        0.3,
-
-      ],
-      'circle-color': [
-        'case',
-        ['==', ['get', 'geom'], false],
-        NO_GEOM_COLOR,
-        ['==', ['get', 'is_new'], true],
-        loChaColors.new,
-        ['==', ['get', 'deleted'], true],
-        loChaColors.delete,
-        ['==', ['get', 'is_before'], true],
-        loChaColors.updateBefore,
-        loChaColors.updateAfter,
-      ],
-    },
-    filter: ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]],
-  },
-} satisfies Partial<Record<LayerKey, AddLayerObject>>
 
 const paddingOptions = {
   top: 60,
@@ -194,8 +33,6 @@ const map = shallowRef<maplibre.Map>()
 const isVisible = shallowRef(false)
 const popup = shallowRef<maplibre.Popup>()
 const hoveredStateFeature = shallowRef<maplibre.MapGeoJSONFeature>()
-const source = shallowRef<GeoJSONSource>()
-
 watch(isVisible, (newState) => {
   if (newState) {
     initMap()
@@ -276,63 +113,6 @@ function displayBbox(bbox: BBox): void {
   map.value.addLayer(LAYERS.Bbox)
 }
 
-function isPolygonOrLine(
-  f: GeoJSON.Feature<GeoJSON.Geometry>,
-): f is GeoJSON.Feature<GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon> {
-  return (
-    f.geometry && (
-      f.geometry.type === 'LineString'
-      || f.geometry.type === 'MultiLineString'
-      || f.geometry.type === 'Polygon'
-      || f.geometry.type === 'MultiPolygon'
-    )
-  )
-}
-
-function clipAndEnvelope(
-  features: GeoJSON.Feature[],
-  bbox: BBox,
-): GeoJSON.Feature<GeoJSON.Polygon> | null {
-  const clipped = features
-    .map((f) => {
-      if (!f.geometry)
-        return null
-
-      if (f.geometry.type === 'Point' || f.geometry.type === 'MultiPoint') {
-        return turfBooleanContains(turfBboxPolygon(bbox), f) ? f : null
-      }
-      else if (isPolygonOrLine(f)) {
-        return turfBboxClip(f, bbox)
-      }
-
-      return null
-    })
-    .filter((f): f is GeoJSON.Feature => f !== null)
-
-  if (clipped.length === 0)
-    return null
-
-  const fc = turfFeatureCollection(clipped)
-
-  return turfEnvelope(fc)
-}
-
-function normalizeBbox(
-  bbox: GeoJSON.BBox,
-): [number, number, number, number] {
-  let minX = bbox[0]
-  let minY = bbox[1]
-  let maxX = bbox[2]
-  let maxY = bbox[3]
-
-  if (Math.abs(minX) <= 90 && Math.abs(maxX) <= 90) {
-    [minX, minY] = [minY, minX];
-    [maxX, maxY] = [maxY, maxX]
-  }
-
-  return [minX, minY, maxX, maxY]
-}
-
 function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
@@ -348,8 +128,6 @@ function handleMapOnLoad(): void {
       features: props.features,
     },
   })
-
-  source.value = map.value.getSource(SOURCE_ID)
 
   setupMapLayers()
   setEventListeners()
