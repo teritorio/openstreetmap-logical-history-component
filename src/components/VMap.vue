@@ -12,6 +12,7 @@ import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
 import { shallowRef, watch } from 'vue'
 import { loChaColors } from '@/composables/useLoCha'
+import { MAP_STYLE_URL, NO_GEOM_COLOR } from '@/constants/map'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
@@ -28,7 +29,6 @@ type MapMouseEventWithFeatures = MapMouseEvent & {
 
 const BBOX_SOURCE_ID = 'bbox'
 const SOURCE_ID = 'lochas'
-const MAP_STYLE_URL = 'https://maps.cartoway.com/styles/positron/style.json'
 const LAYERS = {
   Bbox: {
     id: 'bbox-layer',
@@ -69,7 +69,7 @@ const LAYERS = {
       'fill-color': [
         'case',
         ['==', ['get', 'geom'], false],
-        '#f4f4f5',
+        NO_GEOM_COLOR,
         ['==', ['get', 'is_new'], true],
         loChaColors.new,
         ['==', ['get', 'deleted'], true],
@@ -90,7 +90,7 @@ const LAYERS = {
       'line-color': [
         'case',
         ['==', ['get', 'geom'], false],
-        '#f4f4f5',
+        NO_GEOM_COLOR,
         ['==', ['get', 'is_new'], true],
         loChaColors.new,
         ['==', ['get', 'deleted'], true],
@@ -169,7 +169,7 @@ const LAYERS = {
       'circle-color': [
         'case',
         ['==', ['get', 'geom'], false],
-        '#f4f4f5',
+        NO_GEOM_COLOR,
         ['==', ['get', 'is_new'], true],
         loChaColors.new,
         ['==', ['get', 'deleted'], true],
