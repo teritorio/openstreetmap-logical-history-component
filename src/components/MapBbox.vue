@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import maplibre from 'maplibre-gl'
 import { onMounted, shallowRef, watch } from 'vue'
+import { MAP_STYLE_URL } from '@/constants/map'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
@@ -13,8 +14,6 @@ const emit = defineEmits<{
 
 const map = shallowRef<maplibre.Map | null>(null)
 let ignoreNextPropUpdate = false
-
-const MAP_STYLE_URL = 'https://maps.cartoway.com/styles/positron/style.json'
 
 function fitMapToBbox(bbox: string): void {
   if (!map.value)
