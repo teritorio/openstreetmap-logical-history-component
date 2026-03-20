@@ -3,6 +3,7 @@ import type { ApiResponse } from '@/composables/useApi'
 import { provide, watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
+import { REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
 
 const props = withDefaults(defineProps<{
   data?: ApiResponse
@@ -11,7 +12,7 @@ const props = withDefaults(defineProps<{
   reasonCollapsed: true,
 })
 
-provide('reasonCollapsed', props.reasonCollapsed)
+provide(REASON_COLLAPSED_KEY, props.reasonCollapsed)
 
 const {
   featureCount,
