@@ -1,8 +1,7 @@
 import type { Reactive, Ref } from 'vue'
 import type { Error } from '@/types'
-import { area } from '@turf/area'
-import booleanEqual from '@turf/boolean-equal'
 import { reactive, ref } from 'vue'
+import { transformFeatures } from '@/utils/feature-transform'
 
 /**
  * Interface representing the reactive state and methods for handling API interactions.
@@ -212,88 +211,6 @@ export function useApiConfig(): ApiComposable {
         return undefined
       })
       .finally(() => loading.value = false)
-  }
-
-  /**
-   * Transforms the features of the API response to include additional metadata.
-   *
-   * @param data - The API response containing features and metadata.
-   * @returns The transformed features with additional properties.
-   * @throws If a feature is missing a link in the metadata.
-   */
-  function transformFeatures(data: ApiResponse): ApiResponse['features'] {
-    return data.features.map((feature) => {
-      const group = data.metadata.links[feature.properties.links]
-
-      if (!group)
-        throw new Error(`Feature ${feature.id} has no group.`)
-
-      const link = group.find(link => link.before === feature.id || link.after === feature.id)
-
-      if (!link)
-        throw new Error(`Feature ${feature.id} has no link.`)
-
-      const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
-
-      if (linkedFeature?.geometry && feature.geometry) {
-        feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)
-      }
-
-      if (feature.id === link.before) {
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            is_before: true,
-          },
-        }
-      }
-
-      if (feature.id === link.after) {
-        const hasBefore = group.filter(link => 'before' in link)
-
-        if (!hasBefore.length) {
-          return {
-            ...feature,
-            properties: {
-              ...feature.properties,
-              is_new: true,
-            },
-          }
-        }
-      }
-
-      if (
-        (feature.id === link.after)
-        || (link.before === undefined && link.after !== undefined)
-      ) {
-        return {
-          ...feature,
-          properties: {
-            ...feature.properties,
-            is_after: true,
-          },
-        }
-      }
-
-      return feature
-    })
-      .filter(f => f !== undefined)
-      .sort((a, b) => {
-        const aGeom = a.geometry
-        const bGeom = b.geometry
-
-        if (!aGeom && !bGeom)
-          return 0
-
-        if (!aGeom)
-          return 1
-
-        if (!bGeom)
-          return -1
-
-        return area(b) - area(a)
-      }) // Sort by area surface in order to have bigger geometries before smaller ones.
   }
 
   function setError(err: Error): void {
