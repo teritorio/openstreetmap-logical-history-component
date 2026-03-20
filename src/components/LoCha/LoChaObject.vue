@@ -2,6 +2,7 @@
 import type { IFeature } from '@/composables/useApi'
 import { computed } from 'vue'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
+import { getDeepHistoryUrl, getJosmUrl, getOsmHistoryUrl, getOsmHistoryViewerUrl, getOsmUserUrl } from '@/utils/osm-links'
 
 const props = defineProps<{
   feature: IFeature
@@ -30,7 +31,7 @@ const color = computed(() => loChaColors[status.value])
     <header>
       <div class="wrap">
         <a
-          :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"
+          :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
           title="OSM History"
           target="_blank"
           @click.stop
@@ -53,7 +54,7 @@ const color = computed(() => loChaColors[status.value])
         📅 {{ props.feature.properties.created }}
       </p>
       <a
-        :href="`https://www.openstreetmap.org/user/${feature.properties.username}`"
+        :href="getOsmUserUrl(feature.properties.username)"
         :title="`View ${feature.properties.username} OSM profile`"
         target="_blank"
         @click.stop
@@ -64,7 +65,7 @@ const color = computed(() => loChaColors[status.value])
     <slot name="tags-diff" />
     <div class="actions">
       <a
-        :href="`https://www.openstreetmap.org/${feature.properties.objtype}/${feature.properties.id}/history`"
+        :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
         type="button"
         title="Edit in OSM iD"
         target="_blank"
@@ -73,7 +74,7 @@ const color = computed(() => loChaColors[status.value])
         OSM iD
       </a>
       <a
-        :href="`http://127.0.0.1:8111/load_object?objects=${feature.properties.objtype[0]}${feature.properties.id}`"
+        :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
         type="button"
         title="Edit in JOSM"
         target="hidden_josm_target"
@@ -82,7 +83,7 @@ const color = computed(() => loChaColors[status.value])
         JOSM
       </a>
       <a
-        :href="`https://osmlab.github.io/osm-deep-history/#/${feature.properties.objtype}/${feature.properties.id}`"
+        :href="getDeepHistoryUrl(feature.properties.objtype, feature.properties.id)"
         type="button"
         title="OSM Deep History"
         target="_blank"
@@ -91,7 +92,7 @@ const color = computed(() => loChaColors[status.value])
         Deep H
       </a>
       <a
-        :href="`https://pewu.github.io/osm-history/#/${feature.properties.objtype}/${feature.properties.id}`"
+        :href="getOsmHistoryViewerUrl(feature.properties.objtype, feature.properties.id)"
         type="button"
         title="OSM History Viewer"
         target="_blank"
