@@ -10,18 +10,10 @@ defineProps<{
   features: LoChaGroup
 }>()
 
-const { loCha } = useLoCha()
+const { loCha, getBeforeFeatures, getAfterFeatures } = useLoCha()
 
 if (!loCha.value)
   throw new Error('LoCha is empty.')
-
-function getBeforeFeatures(features: IFeature[]) {
-  return features.filter(feature => feature.properties.is_before)
-}
-
-function getAfterFeatures(features: IFeature[]) {
-  return features.filter(feature => feature.properties.is_after || feature.properties.is_new)
-}
 
 function getDiffs(
   feature: IFeature,
