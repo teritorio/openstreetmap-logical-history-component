@@ -57,6 +57,8 @@ export interface LoCha {
   loCha: Ref<ApiResponse | undefined>
   setLoCha: (loCha: ApiResponse) => void
   getStatus: (feature: IFeature) => Status
+  getBeforeFeatures: (features: IFeature[]) => IFeature[]
+  getAfterFeatures: (features: IFeature[]) => IFeature[]
 }
 
 // Internal state variables
@@ -97,6 +99,14 @@ export function useLoCha(): LoCha {
     groups.value = groupFeaturesByLinks(data.features)
   }
 
+  function getBeforeFeatures(features: IFeature[]): IFeature[] {
+    return features.filter(feature => feature.properties.is_before)
+  }
+
+  function getAfterFeatures(features: IFeature[]): IFeature[] {
+    return features.filter(feature => feature.properties.is_after || feature.properties.is_new)
+  }
+
   function getStatus(feature: IFeature): Status {
     if (feature.properties.is_new) {
       return loChaStatus.new
@@ -126,5 +136,7 @@ export function useLoCha(): LoCha {
     groups,
     setLoCha,
     getStatus,
+    getBeforeFeatures,
+    getAfterFeatures,
   }
 }
