@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Reason } from '@/composables/useApi'
 import { computed, inject, ref } from 'vue'
+import { REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
 
 const props = defineProps<{
   reason: Reason
@@ -24,8 +25,8 @@ function formatNumericValue(key: string, val: number | string): number | string 
   }
 }
 
-const defaultCollapsedState = inject<boolean>('reasonCollapsed')
-const isReasonCollapsed = ref<boolean>(defaultCollapsedState!)
+const defaultCollapsedState = inject(REASON_COLLAPSED_KEY, true)
+const isReasonCollapsed = ref(defaultCollapsedState)
 
 function toggleReason() {
   isReasonCollapsed.value = !isReasonCollapsed.value
