@@ -2,10 +2,11 @@
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
-import { useLoCha } from '@/composables/useLoCha'
+import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { formatDate } from '@/utils/date-format'
 
 const { groups } = useLoCha()
+const selectedBorderColor = loChaColors.delete
 const route = useRoute()
 const currentHash = ref<string>()
 
@@ -124,7 +125,7 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
 }
 
 .locha-group-list > ul > li.selected .locha-group {
-  border-color: red;
+  border-color: v-bind(selectedBorderColor);
 }
 
 .locha-group {
