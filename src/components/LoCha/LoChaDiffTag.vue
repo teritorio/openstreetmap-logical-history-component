@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Action } from '@/composables/useApi'
+import type { Action } from '@/types'
 import { loChaColors } from '@/composables/useLoCha'
 
 defineProps<{

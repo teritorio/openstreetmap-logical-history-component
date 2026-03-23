@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApiResponse } from '@/composables/useApi'
+import type { ApiResponse } from '@/types'
 import { provide, watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
