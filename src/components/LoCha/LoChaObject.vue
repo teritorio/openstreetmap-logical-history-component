@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { IFeature } from '@/composables/useApi'
+import type { IFeature } from '@/types'
 import { computed } from 'vue'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { getDeepHistoryUrl, getJosmUrl, getOsmHistoryUrl, getOsmHistoryViewerUrl, getOsmUserUrl } from '@/utils/osm-links'

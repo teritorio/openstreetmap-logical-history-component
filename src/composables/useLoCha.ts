@@ -1,33 +1,7 @@
-import type { ComputedRef, Ref } from 'vue'
-import type { ApiResponse, IFeature } from '@/composables/useApi'
+import type { ApiResponse, Color, IFeature, LoChaGroup, LoCha as LoChaInterface, Status } from '@/types'
 import { computed, ref } from 'vue'
 
-/**
- * The possible statuses for features in the system.
- * - 'new': New features.
- * - 'delete': Deleted features.
- * - 'update': Updated features.
- */
-export type Status = 'new' | 'delete' | 'updateBefore' | 'updateAfter'
-
-/**
- * The Color type defines colors based on feature status.
- * - 'new' maps to '#52c41a'
- * - 'delete' maps to '#FF0000'
- * - 'updateBefore' maps to '#FFA479'
- * - 'updateAfter' maps to '#F2BE00'
- */
-export type Color = {
-  [key in Status]: key extends 'new'
-    ? '#52c41a'
-    : key extends 'delete'
-      ? '#FF0000'
-      : key extends 'updateBefore'
-        ? '#FFA479'
-        : '#F2BE00'
-}
-
-export type LoChaGroup = IFeature[]
+export type { Color, LoCha, LoChaGroup, Status } from '@/types'
 
 /**
  * A predefined object that maps status types to corresponding color codes.
@@ -47,20 +21,6 @@ export const loChaStatus = Object.fromEntries(
   ['new', 'delete', 'updateAfter', 'updateBefore'].map(key => [key, key]),
 ) as Record<Status, Status>
 
-/**
- * The LoCha interface defines the structure of the LoCha state,
- * which includes various references and computed values to track the features and metadata.
- */
-export interface LoCha {
-  featureCount: ComputedRef<number | undefined>
-  groups: Ref<LoChaGroup[]>
-  loCha: Ref<ApiResponse | undefined>
-  setLoCha: (loCha: ApiResponse) => void
-  getStatus: (feature: IFeature) => Status
-  getBeforeFeatures: (features: IFeature[]) => IFeature[]
-  getAfterFeatures: (features: IFeature[]) => IFeature[]
-}
-
 // Internal state variables
 const loCha = ref<ApiResponse>()
 const groups = ref<LoChaGroup[]>([])
@@ -70,7 +30,7 @@ const groups = ref<LoChaGroup[]>([])
  * This includes tracking features, metadata, and updating state based on new data.
  * @returns An object containing reactive references and functions for working with LoCha data.
  */
-export function useLoCha(): LoCha {
+export function useLoCha(): LoChaInterface {
   /**
    * A computed reference to count the number of features in the LoCha response.
    * @returns The number of features in the LoCha response, or undefined if no data is available.

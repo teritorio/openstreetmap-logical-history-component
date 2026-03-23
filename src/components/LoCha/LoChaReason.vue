@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Reason } from '@/composables/useApi'
+import type { Reason } from '@/types'
 import { computed, inject, ref } from 'vue'
 import { REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
 

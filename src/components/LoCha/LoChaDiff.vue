@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Change } from 'diff'
-import type { ApiLink, IFeature } from '@/composables/useApi'
+import type { ApiLink, IFeature } from '@/types'
 import { diffChars } from 'diff'
 import { groupBy, sortBy, uniq } from 'underscore'
 import { computed } from 'vue'
