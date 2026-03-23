@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { ApiResponse } from '@/composables/useApi'
-import type { FormData } from '@/types'
+import type { ApiResponse, FormData } from '@/types'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LoCha from '@/components/LoCha/LoCha.vue'

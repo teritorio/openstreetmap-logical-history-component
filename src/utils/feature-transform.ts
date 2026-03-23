@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/composables/useApi'
+import type { ApiResponse } from '@/types'
 import { area } from '@turf/area'
 import booleanEqual from '@turf/boolean-equal'
 

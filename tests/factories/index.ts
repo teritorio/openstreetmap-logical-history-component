@@ -1,4 +1,4 @@
-import type { ActionType, ApiLink, ApiLinkGroups, ApiResponse, IFeature } from '@/composables/useApi'
+import type { ActionType, ApiLink, ApiLinkGroups, ApiResponse, IFeature } from '@/types'
 
 export function createFeature(overrides: Partial<IFeature> & { id: number }): IFeature {
   const { properties: propOverrides, ...rest } = overrides

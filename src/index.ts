@@ -12,4 +12,4 @@ export type {
   Reason,
   ReasonGeom,
   ReasonTags,
-} from './composables/useApi'
+} from './types'

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { ApiLink, IFeature } from '@/composables/useApi'
-import type { LoChaGroup } from '@/composables/useLoCha'
+import type { ApiLink, IFeature, LoChaGroup } from '@/types'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
