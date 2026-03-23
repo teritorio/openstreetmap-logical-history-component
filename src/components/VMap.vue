@@ -33,6 +33,7 @@ const map = shallowRef<maplibre.Map>()
 const isVisible = shallowRef(false)
 const popup = shallowRef<maplibre.Popup>()
 const hoveredStateFeature = shallowRef<maplibre.MapGeoJSONFeature>()
+
 watch(isVisible, (newState) => {
   if (newState) {
     initMap()
