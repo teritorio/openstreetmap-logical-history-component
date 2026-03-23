@@ -78,6 +78,19 @@ function backgroundClass(key: string): string | undefined {
   )
 }
 
+function isRejected(key: string): boolean {
+  const actions = props.diff?.[key]
+  if (!actions || !actions[0])
+    return false
+  return actions[0][0] === 'reject'
+}
+
+function getRowClass(key: string): string | undefined {
+  if (props.src && !props.dst)
+    return 'no_changes'
+  return isRejected(key) ? undefined : 'no_changes'
+}
+
 function showTextDiff(before: string, after: string): boolean {
   const d = diffText(before, after)
   return d.length <= 2
@@ -99,37 +112,18 @@ function diffText(before: string, after: string): Change[] {
           <template v-for="key in groupedKey" :key="key">
             <tr
               v-if="!exclude.includes(key)"
-              :class="
-                (src && !dst && 'no_changes')
-                  || (diff?.[key] === undefined
-                    || diff[key][0] === undefined
-                    || diff[key][0][0]) !== 'reject' && 'no_changes'
-              "
+              :class="getRowClass(key)"
             >
               <td class="key" :class="[backgroundClass(key)]">
                 {{ actionIcon(key) }}
               </td>
               <td
-                :class="
-                  (diff?.[key] === undefined
-                    || diff[key][0] === undefined
-                    || diff[key][0][0]) !== 'reject' || [
-                    backgroundClass(key),
-                    'key',
-                  ]
-                "
+                :class="isRejected(key) && [backgroundClass(key), 'key']"
               >
                 {{ key }}
               </td>
               <td
-                :class="
-                  (diff?.[key] === undefined
-                    || diff[key][0] === undefined
-                    || diff[key][0][0]) !== 'reject' || [
-                    backgroundClass(key),
-                    'value',
-                  ]
-                "
+                :class="isRejected(key) && [backgroundClass(key), 'value']"
               >
                 <template v-if="clear.includes(key)">
                   [...]
