@@ -3,7 +3,7 @@ export function getOsmHistoryUrl(objtype: string, id: number): string {
 }
 
 export function getOsmUserUrl(username: string): string {
-  return `https://www.openstreetmap.org/user/${username}`
+  return `https://www.openstreetmap.org/user/${encodeURIComponent(username)}`
 }
 
 export function getJosmUrl(objtype: string, id: number): string {
