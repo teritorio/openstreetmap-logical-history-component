@@ -6,7 +6,7 @@ import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { formatDate } from '@/utils/date-format'
 
 const { groups } = useLoCha()
-const selectedBorderColor = loChaColors.delete
+const highlightBorderColor = loChaColors.delete
 const route = useRoute()
 const currentHash = ref<string>()
 
@@ -125,7 +125,7 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
 }
 
 .locha-group-list > ul > li.selected .locha-group {
-  border-color: v-bind(selectedBorderColor);
+  border-color: v-bind(highlightBorderColor);
 }
 
 .locha-group {
