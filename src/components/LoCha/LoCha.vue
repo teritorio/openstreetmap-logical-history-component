@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApiResponse } from '@/types'
+import type { ApiResponse, TagsDiffSlotProps } from '@/types'
 import { provide, watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
@@ -11,6 +11,8 @@ const props = withDefaults(defineProps<{
 }>(), {
   reasonCollapsed: true,
 })
+
+defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
 
 provide(REASON_COLLAPSED_KEY, props.reasonCollapsed)
 

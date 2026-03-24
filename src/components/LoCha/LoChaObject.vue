@@ -8,6 +8,8 @@ const props = defineProps<{
   feature: IFeature
 }>()
 
+defineSlots<{ 'tags-diff': () => void }>()
+
 const { getStatus } = useLoCha()
 
 const status = computed(() => getStatus(props.feature))
