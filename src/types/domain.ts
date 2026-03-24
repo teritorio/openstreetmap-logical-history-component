@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { ApiResponse, IFeature } from './api'
+import type { Actions, ApiResponse, IFeature, Reason } from './api'
 
 /**
  * The possible statuses for features in the system.
@@ -27,6 +27,18 @@ export type Color = {
 }
 
 export type LoChaGroup = IFeature[]
+
+/**
+ * Props passed through the `tags-diff` slot across the LoCha component hierarchy.
+ */
+export interface TagsDiffSlotProps {
+  date: string
+  diff: Actions | undefined
+  src?: IFeature['properties']
+  dst?: IFeature['properties']
+  reason: Reason
+  title?: string
+}
 
 /**
  * The LoCha interface defines the structure of the LoCha state,

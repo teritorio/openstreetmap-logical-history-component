@@ -12,4 +12,5 @@ export type {
   Reason,
   ReasonGeom,
   ReasonTags,
+  TagsDiffSlotProps,
 } from './types'
