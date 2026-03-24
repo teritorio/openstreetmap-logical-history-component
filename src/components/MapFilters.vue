@@ -95,7 +95,7 @@ function handleSubmit(): void {
           id="bbox"
           v-model="formValues.bbox"
           type="text"
-          placeholder="lat1, lon1, lat2, lon2"
+          placeholder="west, south, east, north"
           pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
           required
         >
