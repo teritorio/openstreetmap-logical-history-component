@@ -26,7 +26,10 @@ export type Color = {
         : '#F2BE00'
 }
 
-export type LoChaGroup = IFeature[]
+export interface LoChaGroup {
+  linkId: number
+  features: IFeature[]
+}
 
 /**
  * Props passed through the `tags-diff` slot across the LoCha component hierarchy.

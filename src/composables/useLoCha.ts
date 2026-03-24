@@ -38,14 +38,17 @@ export function useLoCha(): LoChaInterface {
   const featureCount = computed(() => loCha.value?.features.length)
 
   function groupFeaturesByLinks(features: IFeature[]): LoChaGroup[] {
-    return features.reduce((groups, feature) => {
+    const map = new Map<number, IFeature[]>()
+    for (const feature of features) {
       const linkId = feature.properties.links
-      if (!groups[linkId]) {
-        groups[linkId] = []
+      let group = map.get(linkId)
+      if (!group) {
+        group = []
+        map.set(linkId, group)
       }
-      groups[linkId].push(feature)
-      return groups
-    }, [] as LoChaGroup[])
+      group.push(feature)
+    }
+    return Array.from(map, ([linkId, features]) => ({ linkId, features }))
   }
 
   /**

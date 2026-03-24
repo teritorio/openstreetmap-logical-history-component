@@ -25,7 +25,8 @@ export function transformFeatures(data: ApiResponse): ApiResponse['features'] {
     if (!link)
       throw new Error(`Feature ${feature.id} has no link.`)
 
-    const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
+    const linkedFeatureId = feature.id === link.before ? link.after : link.before
+    const linkedFeature = data.features.find(f => f.id === linkedFeatureId)
 
     if (linkedFeature?.geometry && feature.geometry) {
       feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)

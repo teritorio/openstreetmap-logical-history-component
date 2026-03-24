@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { BBox } from 'geojson'
 import type { LngLatLike, MapMouseEvent } from 'maplibre-gl'
-import type { LoChaGroup } from '@/types'
+import type { IFeature } from '@/types'
 import turfBbox from '@turf/bbox'
 import { featureCollection as turfFeatureCollection } from '@turf/helpers'
 import { vIntersectionObserver } from '@vueuse/components'
@@ -14,7 +14,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
   id: number
-  features: LoChaGroup
+  features: IFeature[]
   bbox?: GeoJSON.BBox
 }>()
 

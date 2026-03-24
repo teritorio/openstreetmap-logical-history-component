@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { ApiLink, IFeature, LoChaGroup, TagsDiffSlotProps } from '@/types'
+import type { ApiLink, IFeature, TagsDiffSlotProps } from '@/types'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
 
-defineProps<{
-  index: number
-  features: LoChaGroup
+const props = defineProps<{
+  linkId: number
+  features: IFeature[]
 }>()
 
 defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
@@ -18,14 +18,13 @@ if (!loCha.value)
 
 function getDiffs(
   feature: IFeature,
-  index: number,
 ): ApiLink[] | undefined {
   if (feature.properties.is_before) {
-    const link = loCha.value!.metadata.links[index].find(link => link.before === feature.id || link.after === feature.id)
+    const link = loCha.value!.metadata.links[props.linkId].find(link => link.before === feature.id || link.after === feature.id)
     return link && [link]
   }
 
-  return loCha.value!.metadata.links[index].filter(link => link.before === feature.id || link.after === feature.id)
+  return loCha.value!.metadata.links[props.linkId].filter(link => link.before === feature.id || link.after === feature.id)
 }
 
 function getBeforeProperties(link: ApiLink): IFeature['properties'] | undefined {
@@ -54,7 +53,7 @@ function getTagsTitle(link: ApiLink): string {
         >
           <LoChaObject :feature="feature">
             <template #tags-diff>
-              <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
+              <template v-for="(link, i) in getDiffs(feature)" :key="i">
                 <slot
                   name="tags-diff"
                   :date="feature.properties.created"
@@ -76,7 +75,7 @@ function getTagsTitle(link: ApiLink): string {
         >
           <LoChaObject :feature="feature">
             <template #tags-diff>
-              <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
+              <template v-for="(link, i) in getDiffs(feature)" :key="i">
                 <slot
                   name="tags-diff"
                   :date="feature.properties.created"
@@ -92,7 +91,7 @@ function getTagsTitle(link: ApiLink): string {
         </li>
       </ul>
     </div>
-    <VMap :id="index" :features="features" :bbox="loCha?.bbox" />
+    <VMap :id="linkId" :features="features" :bbox="loCha?.bbox" />
   </div>
 </template>
 
