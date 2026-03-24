@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApiLink, IFeature, LoChaGroup } from '@/types'
+import type { ApiLink, IFeature, LoChaGroup, TagsDiffSlotProps } from '@/types'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { useLoCha } from '@/composables/useLoCha'
@@ -8,6 +8,8 @@ defineProps<{
   index: number
   features: LoChaGroup
 }>()
+
+defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
 
 const { loCha, getBeforeFeatures, getAfterFeatures } = useLoCha()
 
@@ -52,15 +54,15 @@ function getTagsTitle(link: ApiLink): string {
         >
           <LoChaObject :feature="feature">
             <template #tags-diff>
-              <slot
-                v-for="(link, i) in getDiffs(feature, index)"
-                :key="i"
-                name="tags-diff"
-                :date="feature.properties.created"
-                :diff="link.diff_tags"
-                :src="feature.properties"
-                :reason="link.conflation_reason"
-              />
+              <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
+                <slot
+                  name="tags-diff"
+                  :date="feature.properties.created"
+                  :diff="link.diff_tags"
+                  :src="feature.properties"
+                  :reason="link.conflation_reason"
+                />
+              </template>
             </template>
           </LoChaObject>
         </li>
@@ -74,17 +76,17 @@ function getTagsTitle(link: ApiLink): string {
         >
           <LoChaObject :feature="feature">
             <template #tags-diff>
-              <slot
-                v-for="(link, i) in getDiffs(feature, index)"
-                :key="i"
-                name="tags-diff"
-                :date="feature.properties.created"
-                :title="getTagsTitle(link)"
-                :diff="link.diff_tags"
-                :reason="link.conflation_reason"
-                :dst="feature.properties"
-                :src="getBeforeProperties(link)"
-              />
+              <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
+                <slot
+                  name="tags-diff"
+                  :date="feature.properties.created"
+                  :title="getTagsTitle(link)"
+                  :diff="link.diff_tags"
+                  :reason="link.conflation_reason"
+                  :dst="feature.properties"
+                  :src="getBeforeProperties(link)"
+                />
+              </template>
             </template>
           </LoChaObject>
         </li>

@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import type { TagsDiffSlotProps } from '@/types'
 import { computed, nextTick, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { formatDate } from '@/utils/date-format'
+
+defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
 
 const { groups } = useLoCha()
 const highlightBorderColor = loChaColors.delete
