@@ -9,7 +9,7 @@ import { loChaColors } from '@/composables/useLoCha'
 const props = withDefaults(
   defineProps<{
     clear?: string[]
-    diff: ApiLink['diff_tags']
+    diff?: ApiLink['diff_tags']
     dst?: IFeature['properties']
     exclude?: string[]
     src?: IFeature['properties']
