@@ -1,0 +1,12 @@
+services:
+  osm-lh:
+    build: .
+    image: ghcr.io/teritorio/openstreetmap-logical-history-component:develop
+    ports:
+      - 4173:4173
+    environment:
+      NODE_ENV: development
+      PORT: "4173"
+      VITE_API_DENPOINT: ${VITE_API_DENPOINT}
+    command: yarn dev
+    restart: unless-stopped
