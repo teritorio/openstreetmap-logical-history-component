@@ -1,6 +1,0 @@
-services:
-  osm-lh:
-    volumes:
-      - .:/app
-    healthcheck:
-      disable: true
