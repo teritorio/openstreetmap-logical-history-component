@@ -107,12 +107,15 @@ export function useApiConfig(): ApiComposable {
           throw new Error(message || res.statusText)
         }
 
-        return await res.json() as ApiResponse
+        return await res.json()
       })
-      .then(data => ({
-        ...data,
-        features: transformFeatures(data),
-      }))
+      .then((data) => {
+        const entry: ApiResponse = Array.isArray(data) ? data[0] : data
+        return {
+          ...entry,
+          features: transformFeatures(entry),
+        }
+      })
       .catch((err) => {
         setError({
           message: err.message,
