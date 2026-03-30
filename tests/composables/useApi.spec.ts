@@ -121,6 +121,22 @@ describe('useApi', () => {
       expect(error.message).toBeUndefined()
     })
 
+    it('unwraps array response and uses the first entry', async () => {
+      const mockResponse = createApiResponse([], {})
+
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([mockResponse]),
+      }))
+
+      const { useApiConfig } = await import('@/composables/useApi')
+      const { fetchData } = useApiConfig()
+
+      const result = await fetchData({ date_start: '2024-01-01' })
+      expect(result).toBeDefined()
+      expect(result?.features).toEqual([])
+    })
+
     it('filters out undefined and empty params from the URL', async () => {
       const fetchSpy = vi.fn().mockResolvedValue({
         ok: true,

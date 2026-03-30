@@ -107,10 +107,10 @@ export function useApiConfig(): ApiComposable {
           throw new Error(message || res.statusText)
         }
 
-        return await res.json()
+        return await res.json() as ApiResponse | ApiResponse[]
       })
       .then((data) => {
-        const entry: ApiResponse = Array.isArray(data) ? data[0] : data
+        const entry = Array.isArray(data) ? data[0] : data
         return {
           ...entry,
           features: transformFeatures(entry),
