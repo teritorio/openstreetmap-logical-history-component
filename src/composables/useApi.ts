@@ -111,6 +111,8 @@ export function useApiConfig(): ApiComposable {
       })
       .then((data) => {
         const entry = Array.isArray(data) ? data[0] : data
+        if (!entry)
+          throw new Error('Empty response from API')
         return {
           ...entry,
           features: transformFeatures(entry),

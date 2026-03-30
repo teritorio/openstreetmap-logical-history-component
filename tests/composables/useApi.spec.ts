@@ -122,11 +122,13 @@ describe('useApi', () => {
     })
 
     it('unwraps array response and uses the first entry', async () => {
-      const mockResponse = createApiResponse([], {})
+      const feature = createFeature({ id: 10, properties: { links: 1 } as any })
+      const first = createApiResponse([feature], { 1: [createLink({ after: 10 })] })
+      const second = createApiResponse([], {})
 
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: true,
-        json: () => Promise.resolve([mockResponse]),
+        json: () => Promise.resolve([first, second]),
       }))
 
       const { useApiConfig } = await import('@/composables/useApi')
@@ -134,7 +136,23 @@ describe('useApi', () => {
 
       const result = await fetchData({ date_start: '2024-01-01' })
       expect(result).toBeDefined()
-      expect(result?.features).toEqual([])
+      expect(result?.features).toHaveLength(1)
+      expect(result?.features[0].id).toBe(10)
+    })
+
+    it('returns undefined and sets error on empty array response', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve([]),
+      }))
+
+      const { useApiConfig } = await import('@/composables/useApi')
+      const { fetchData, error } = useApiConfig()
+
+      const result = await fetchData({ date_start: '2024-01-01' })
+      expect(result).toBeUndefined()
+      expect(error.message).toBe('Empty response from API')
+      expect(error.type).toBe('error')
     })
 
     it('filters out undefined and empty params from the URL', async () => {
