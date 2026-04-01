@@ -17,13 +17,20 @@ describe('clipAndEnvelope', () => {
     expect(clipAndEnvelope(features, bbox)).toBeNull()
   })
 
-  it('returns envelope for point inside bbox', () => {
+  it('returns envelope with correct bounds for point inside bbox', () => {
     const features: GeoJSON.Feature[] = [
       { type: 'Feature', geometry: { type: 'Point', coordinates: [5, 5] }, properties: {} },
     ]
     const result = clipAndEnvelope(features, bbox)
     expect(result).not.toBeNull()
     expect(result!.geometry.type).toBe('Polygon')
+    const coords = result!.geometry.coordinates[0]
+    const xs = coords.map(c => c[0])
+    const ys = coords.map(c => c[1])
+    expect(Math.min(...xs)).toBe(5)
+    expect(Math.max(...xs)).toBe(5)
+    expect(Math.min(...ys)).toBe(5)
+    expect(Math.max(...ys)).toBe(5)
   })
 
   it('returns null for point outside bbox', () => {
@@ -43,13 +50,20 @@ describe('clipAndEnvelope', () => {
     expect(result!.geometry.type).toBe('Polygon')
   })
 
-  it('returns envelope for LineString inside bbox', () => {
+  it('returns envelope with correct bounds for LineString inside bbox', () => {
     const features: GeoJSON.Feature[] = [
       { type: 'Feature', geometry: { type: 'LineString', coordinates: [[1, 1], [5, 5]] }, properties: {} },
     ]
     const result = clipAndEnvelope(features, bbox)
     expect(result).not.toBeNull()
     expect(result!.geometry.type).toBe('Polygon')
+    const coords = result!.geometry.coordinates[0]
+    const xs = coords.map(c => c[0])
+    const ys = coords.map(c => c[1])
+    expect(Math.min(...xs)).toBe(1)
+    expect(Math.max(...xs)).toBe(5)
+    expect(Math.min(...ys)).toBe(1)
+    expect(Math.max(...ys)).toBe(5)
   })
 
   it('returns envelope for Polygon inside bbox', () => {
