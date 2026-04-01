@@ -42,7 +42,7 @@ export interface Changeset {
   tags: Record<string, string>
 }
 
-export type ApiLinkGroups = Record<number, ApiLink[]>
+export type ApiLinkGroups = ApiLink[][]
 
 /**
  * Interface representing a link in the API metadata.
@@ -50,15 +50,15 @@ export type ApiLinkGroups = Record<number, ApiLink[]>
  */
 export interface ApiLink {
   action: ActionType
-  before?: number
-  after?: number
+  before?: string
+  after?: string
   diff_attribs?: Actions
   diff_tags?: Actions
   conflation_reason: Reason
 }
 
 export interface IFeature extends GeoJSON.Feature {
-  id: number
+  id: string
   properties: {
     objtype: ObjectType
     id: number

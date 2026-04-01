@@ -14,8 +14,8 @@ describe('useLoCha', () => {
     it('returns "new" for features with is_new flag', () => {
       const { getStatus } = useLoCha()
       const feature = createFeature({
-        id: 1,
-        properties: { is_new: true } as any,
+        id: 'n1',
+        properties: { is_new: true },
       })
       expect(getStatus(feature)).toBe('new')
     })
@@ -23,8 +23,8 @@ describe('useLoCha', () => {
     it('returns "delete" for deleted features', () => {
       const { getStatus } = useLoCha()
       const feature = createFeature({
-        id: 1,
-        properties: { deleted: true } as any,
+        id: 'n1',
+        properties: { deleted: true },
       })
       expect(getStatus(feature)).toBe('delete')
     })
@@ -32,23 +32,23 @@ describe('useLoCha', () => {
     it('returns "updateBefore" for is_before features', () => {
       const { getStatus } = useLoCha()
       const feature = createFeature({
-        id: 1,
-        properties: { is_before: true } as any,
+        id: 'n1',
+        properties: { is_before: true },
       })
       expect(getStatus(feature)).toBe('updateBefore')
     })
 
     it('returns "updateAfter" as the default status', () => {
       const { getStatus } = useLoCha()
-      const feature = createFeature({ id: 1 })
+      const feature = createFeature({ id: 'n1' })
       expect(getStatus(feature)).toBe('updateAfter')
     })
 
     it('prioritizes is_new over other flags', () => {
       const { getStatus } = useLoCha()
       const feature = createFeature({
-        id: 1,
-        properties: { is_new: true, is_before: true } as any,
+        id: 'n1',
+        properties: { is_new: true, is_before: true },
       })
       expect(getStatus(feature)).toBe('new')
     })
@@ -56,8 +56,8 @@ describe('useLoCha', () => {
     it('prioritizes deleted over is_before', () => {
       const { getStatus } = useLoCha()
       const feature = createFeature({
-        id: 1,
-        properties: { deleted: true, is_before: true } as any,
+        id: 'n1',
+        properties: { deleted: true, is_before: true },
       })
       expect(getStatus(feature)).toBe('delete')
     })
@@ -67,11 +67,11 @@ describe('useLoCha', () => {
     it('sets loCha data and populates groups', () => {
       const { setLoCha, loCha, groups } = useLoCha()
 
-      const feature1 = createFeature({ id: 1, properties: { links: 1 } as any })
-      const feature2 = createFeature({ id: 2, properties: { links: 1 } as any })
+      const feature1 = createFeature({ id: 'n1', properties: { links: 0 } })
+      const feature2 = createFeature({ id: 'n2', properties: { links: 0 } })
       const data = createApiResponse(
         [feature1, feature2],
-        { 1: [createLink({ before: 1, after: 2 })] },
+        [[createLink({ before: 'n1', after: 'n2' })]],
       )
 
       setLoCha(data)
@@ -84,15 +84,15 @@ describe('useLoCha', () => {
     it('groups features by link ID', () => {
       const { setLoCha, groups } = useLoCha()
 
-      const feature1 = createFeature({ id: 1, properties: { links: 1 } as any })
-      const feature2 = createFeature({ id: 2, properties: { links: 1 } as any })
-      const feature3 = createFeature({ id: 3, properties: { links: 2 } as any })
+      const feature1 = createFeature({ id: 'n1', properties: { links: 0 } })
+      const feature2 = createFeature({ id: 'n2', properties: { links: 0 } })
+      const feature3 = createFeature({ id: 'n3', properties: { links: 1 } })
       const data = createApiResponse(
         [feature1, feature2, feature3],
-        {
-          1: [createLink({ before: 1, after: 2 })],
-          2: [createLink({ after: 3 })],
-        },
+        [
+          [createLink({ before: 'n1', after: 'n2' })],
+          [createLink({ after: 'n3' })],
+        ],
       )
 
       setLoCha(data)
@@ -105,19 +105,19 @@ describe('useLoCha', () => {
     it('resets state before setting new data', () => {
       const { setLoCha, loCha } = useLoCha()
 
-      const feature1 = createFeature({ id: 1, properties: { links: 1 } as any })
+      const feature1 = createFeature({ id: 'n1', properties: { links: 0 } })
       const data1 = createApiResponse(
         [feature1],
-        { 1: [createLink({ after: 1 })] },
+        [[createLink({ after: 'n1' })]],
       )
       setLoCha(data1)
       expect(loCha.value?.features).toHaveLength(1)
 
-      const feature2 = createFeature({ id: 2, properties: { links: 2 } as any })
-      const feature3 = createFeature({ id: 3, properties: { links: 2 } as any })
+      const feature2 = createFeature({ id: 'n2', properties: { links: 0 } })
+      const feature3 = createFeature({ id: 'n3', properties: { links: 0 } })
       const data2 = createApiResponse(
         [feature2, feature3],
-        { 2: [createLink({ before: 2, after: 3 })] },
+        [[createLink({ before: 'n2', after: 'n3' })]],
       )
       setLoCha(data2)
       expect(loCha.value?.features).toHaveLength(2)
@@ -134,14 +134,14 @@ describe('useLoCha', () => {
       const { featureCount, setLoCha } = useLoCha()
 
       const features = [
-        createFeature({ id: 1, properties: { links: 1 } as any }),
-        createFeature({ id: 2, properties: { links: 1 } as any }),
-        createFeature({ id: 3, properties: { links: 2 } as any }),
+        createFeature({ id: 'n1', properties: { links: 0 } }),
+        createFeature({ id: 'n2', properties: { links: 0 } }),
+        createFeature({ id: 'n3', properties: { links: 1 } }),
       ]
-      const data = createApiResponse(features, {
-        1: [createLink({ before: 1, after: 2 })],
-        2: [createLink({ after: 3 })],
-      })
+      const data = createApiResponse(features, [
+        [createLink({ before: 'n1', after: 'n2' })],
+        [createLink({ after: 'n3' })],
+      ])
 
       setLoCha(data)
       expect(featureCount.value).toBe(3)
