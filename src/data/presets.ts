@@ -8,12 +8,12 @@ export const presets: Preset[] = [{
 }, {
   title: 'Bridge Construction Ends - (Lines)',
   dateStart: new Date('2024-01-01').toISOString().slice(0, 16),
-  dateEnd: new Date('2025-01-01').toISOString().slice(0, 16),
+  dateEnd: new Date('2024-12-31').toISOString().slice(0, 16),
   bbox: '-0.5420824675324966,44.82039347351967,-0.5393090634110976,44.82208861548204',
 }, {
   title: 'Remap Buildings - (Surfaces)',
   dateStart: new Date('2024-01-01').toISOString().slice(0, 16),
-  dateEnd: new Date('2025-01-01').toISOString().slice(0, 16),
+  dateEnd: new Date('2024-12-31').toISOString().slice(0, 16),
   bbox: '-1.6537454710167148,42.685107065011486,-1.6509720668953156,42.68686379572838',
 }, {
   title: 'Move Node Tags to Way',
@@ -23,6 +23,6 @@ export const presets: Preset[] = [{
 }, {
   title: 'Split highway + Refs',
   dateStart: new Date('2024-01-01').toISOString().slice(0, 16),
-  dateEnd: new Date('2025-01-01').toISOString().slice(0, 16),
+  dateEnd: new Date('2024-12-31').toISOString().slice(0, 16),
   bbox: '-1.405801462176413,43.33124243726789,-1.3963476233167,43.33767765881896',
 }]
