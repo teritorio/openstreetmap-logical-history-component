@@ -10,6 +10,7 @@ import { shallowRef, watch } from 'vue'
 import { MAP_STYLE_URL } from '@/constants/map'
 import { BBOX_SOURCE_ID, LAYERS, SOURCE_ID } from '@/constants/mapLayers'
 import { clipAndEnvelope, normalizeBbox } from '@/utils/geom'
+import { OBJTYPE_FULL } from '@/utils/osm-links'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
@@ -208,7 +209,7 @@ function openPopup(coords: LngLatLike, feature: maplibre.MapGeoJSONFeature): voi
 
   popup.value = new maplibre.Popup()
     .setLngLat(coords)
-    .setHTML(`${feature.properties.objtype}-${feature.properties.id}-v${feature.properties.version}`)
+    .setHTML(`${OBJTYPE_FULL[feature.properties.objtype as keyof typeof OBJTYPE_FULL]}-${feature.properties.id}-v${feature.properties.version}`)
     .addTo(map.value)
 }
 

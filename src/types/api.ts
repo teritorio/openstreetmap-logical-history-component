@@ -1,4 +1,4 @@
-export type ObjectType = 'node' | 'way' | 'relation'
+export type ObjectType = 'n' | 'w' | 'r'
 
 export type ActionType = 'accept' | 'reject'
 

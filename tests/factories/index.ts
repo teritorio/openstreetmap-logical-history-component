@@ -17,7 +17,7 @@ export function createFeature(options: CreateFeatureOptions): IFeature {
     },
     id: options.id,
     properties: {
-      objtype: 'node',
+      objtype: 'n',
       id: Number.parseInt(options.id.replace(NON_DIGIT_RE, '')) || 0,
       geom_distance: null,
       geom: false,
