@@ -1,5 +1,86 @@
+import type { BBox } from 'geojson'
 import { describe, expect, it } from 'vitest'
-import { normalizeBbox } from '@/utils/geom'
+import { clipAndEnvelope, normalizeBbox } from '@/utils/geom'
+
+describe('clipAndEnvelope', () => {
+  const bbox: BBox = [-1, -1, 10, 10]
+
+  it('returns null for empty feature array', () => {
+    expect(clipAndEnvelope([], bbox)).toBeNull()
+  })
+
+  it('returns null when all features have null geometry', () => {
+    const features: GeoJSON.Feature[] = [
+      { type: 'Feature', geometry: null as any, properties: {} },
+      { type: 'Feature', geometry: null as any, properties: {} },
+    ]
+    expect(clipAndEnvelope(features, bbox)).toBeNull()
+  })
+
+  it('returns envelope for point inside bbox', () => {
+    const features: GeoJSON.Feature[] = [
+      { type: 'Feature', geometry: { type: 'Point', coordinates: [5, 5] }, properties: {} },
+    ]
+    const result = clipAndEnvelope(features, bbox)
+    expect(result).not.toBeNull()
+    expect(result!.geometry.type).toBe('Polygon')
+  })
+
+  it('returns null for point outside bbox', () => {
+    const features: GeoJSON.Feature[] = [
+      { type: 'Feature', geometry: { type: 'Point', coordinates: [20, 20] }, properties: {} },
+    ]
+    expect(clipAndEnvelope(features, bbox)).toBeNull()
+  })
+
+  it('handles mixed points with some inside and some outside bbox', () => {
+    const features: GeoJSON.Feature[] = [
+      { type: 'Feature', geometry: { type: 'Point', coordinates: [5, 5] }, properties: {} },
+      { type: 'Feature', geometry: { type: 'Point', coordinates: [20, 20] }, properties: {} },
+    ]
+    const result = clipAndEnvelope(features, bbox)
+    expect(result).not.toBeNull()
+    expect(result!.geometry.type).toBe('Polygon')
+  })
+
+  it('returns envelope for LineString inside bbox', () => {
+    const features: GeoJSON.Feature[] = [
+      { type: 'Feature', geometry: { type: 'LineString', coordinates: [[1, 1], [5, 5]] }, properties: {} },
+    ]
+    const result = clipAndEnvelope(features, bbox)
+    expect(result).not.toBeNull()
+    expect(result!.geometry.type).toBe('Polygon')
+  })
+
+  it('returns envelope for Polygon inside bbox', () => {
+    const features: GeoJSON.Feature[] = [
+      { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[1, 1], [5, 1], [5, 5], [1, 5], [1, 1]]] }, properties: {} },
+    ]
+    const result = clipAndEnvelope(features, bbox)
+    expect(result).not.toBeNull()
+    expect(result!.geometry.type).toBe('Polygon')
+  })
+
+  it('returns envelope for mixed feature types', () => {
+    const features: GeoJSON.Feature[] = [
+      { type: 'Feature', geometry: { type: 'Point', coordinates: [2, 2] }, properties: {} },
+      { type: 'Feature', geometry: { type: 'LineString', coordinates: [[3, 3], [7, 7]] }, properties: {} },
+      { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[1, 1], [4, 1], [4, 4], [1, 4], [1, 1]]] }, properties: {} },
+    ]
+    const result = clipAndEnvelope(features, bbox)
+    expect(result).not.toBeNull()
+    expect(result!.geometry.type).toBe('Polygon')
+  })
+
+  it('filters out null-geometry features and processes the rest', () => {
+    const features: GeoJSON.Feature[] = [
+      { type: 'Feature', geometry: null as any, properties: {} },
+      { type: 'Feature', geometry: { type: 'Point', coordinates: [5, 5] }, properties: {} },
+    ]
+    const result = clipAndEnvelope(features, bbox)
+    expect(result).not.toBeNull()
+  })
+})
 
 describe('normalizeBbox', () => {
   it('returns bbox unchanged when non-degenerate and no swap needed', () => {

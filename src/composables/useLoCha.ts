@@ -88,6 +88,7 @@ export function useLoCha(): LoChaInterface {
    */
   function _resetState(): void {
     loCha.value = undefined
+    groups.value = []
   }
 
   return {
