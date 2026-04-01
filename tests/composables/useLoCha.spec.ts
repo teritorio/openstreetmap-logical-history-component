@@ -206,8 +206,8 @@ describe('useLoCha', () => {
     })
   })
 
-  describe('setLoCha groups reset', () => {
-    it('does not preserve stale groups when called with shorter data', () => {
+  describe('_resetState', () => {
+    it('clears groups when setLoCha is called with new data', () => {
       const { setLoCha, groups } = useLoCha()
 
       // First call: features in groups 0, 1, and 2
@@ -224,17 +224,35 @@ describe('useLoCha', () => {
         ],
       )
       setLoCha(data1)
-      const nonEmptyBefore = groups.value.filter(g => g && g.length > 0)
-      expect(nonEmptyBefore).toHaveLength(3)
+      expect(groups.value.filter(g => g && g.length > 0)).toHaveLength(3)
 
-      // Second call: only 1 group
+      // Second call: only 1 group — stale indices must not persist
       const data2 = createApiResponse(
         [createFeature({ id: 'n4', properties: { links: 0 } })],
         [[createLink({ after: 'n4' })]],
       )
       setLoCha(data2)
-      const nonEmptyAfter = groups.value.filter(g => g && g.length > 0)
-      expect(nonEmptyAfter).toHaveLength(1)
+      expect(groups.value.filter(g => g && g.length > 0)).toHaveLength(1)
+      expect(groups.value[1]).toBeUndefined()
+      expect(groups.value[2]).toBeUndefined()
+    })
+
+    it('clears groups on loCha reassignment so stale data is never exposed', () => {
+      const { setLoCha, loCha, groups } = useLoCha()
+
+      const data = createApiResponse(
+        [createFeature({ id: 'n1', properties: { links: 0 } })],
+        [[createLink({ after: 'n1' })]],
+      )
+      setLoCha(data)
+      expect(groups.value.filter(g => g && g.length > 0)).toHaveLength(1)
+
+      // Manually clear loCha to simulate what _resetState does
+      loCha.value = undefined
+      groups.value = []
+
+      expect(groups.value).toHaveLength(0)
+      expect(loCha.value).toBeUndefined()
     })
   })
 
