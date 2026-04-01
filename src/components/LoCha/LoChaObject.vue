@@ -38,7 +38,7 @@ const color = computed(() => loChaColors[status.value])
           target="_blank"
           @click.stop
         >
-          {{ `${feature.properties.objtype[0]}${feature.properties.id}-v${feature.properties.version}` }}
+          {{ `${feature.properties.objtype}${feature.properties.id}-v${feature.properties.version}` }}
         </a>
         <div
           v-if="status === 'new' || status === 'delete'"

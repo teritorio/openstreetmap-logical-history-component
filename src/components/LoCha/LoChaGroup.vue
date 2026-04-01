@@ -38,7 +38,7 @@ function getTagsTitle(link: ApiLink): string {
   const beforeFeature = loCha.value!.features.find(feature => feature.id === link!.before)
 
   if (beforeFeature)
-    title = `${beforeFeature.properties.objtype[0]}${beforeFeature.properties.id}-v${beforeFeature.properties.version}`
+    title = `${beforeFeature.properties.objtype}${beforeFeature.properties.id}-v${beforeFeature.properties.version}`
 
   return title
 }
