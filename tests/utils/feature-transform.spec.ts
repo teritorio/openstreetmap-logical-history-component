@@ -119,9 +119,8 @@ describe('transformFeatures', () => {
 
   describe('sorting', () => {
     function createFeatureWithoutGeometry(id: string, links: number) {
-      const f = createFeature({ id, properties: { links } })
-      ;(f as any).geometry = null
-      return f
+      const { geometry: _, ...rest } = createFeature({ id, properties: { links } })
+      return { ...rest, geometry: null } as ReturnType<typeof createFeature>
     }
 
     it('sorts features with null geometry after features with geometry', async () => {
