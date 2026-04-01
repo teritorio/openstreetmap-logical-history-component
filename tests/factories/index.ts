@@ -1,19 +1,24 @@
 import type { ActionType, ApiLink, ApiLinkGroups, ApiResponse, IFeature } from '@/types'
 
-export function createFeature(overrides: Partial<IFeature> & { id: number }): IFeature {
-  const { properties: propOverrides, ...rest } = overrides
+const NON_DIGIT_RE = /\D/g
 
+interface CreateFeatureOptions {
+  id: string
+  geometry?: GeoJSON.Geometry
+  properties?: Partial<IFeature['properties']>
+}
+
+export function createFeature(options: CreateFeatureOptions): IFeature {
   return {
     type: 'Feature',
-    geometry: {
+    geometry: options.geometry ?? {
       type: 'Point',
       coordinates: [2.35, 48.85],
     },
-    id: overrides.id,
-    ...rest,
+    id: options.id,
     properties: {
       objtype: 'node',
-      id: overrides.id,
+      id: Number.parseInt(options.id.replace(NON_DIGIT_RE, '')) || 0,
       geom_distance: null,
       geom: false,
       deleted: false,
@@ -23,9 +28,9 @@ export function createFeature(overrides: Partial<IFeature> & { id: number }): IF
       username: 'testuser',
       created: '2024-01-01T00:00:00Z',
       tags: { name: 'Test' },
-      ...propOverrides,
+      ...options.properties,
     },
-  } as IFeature
+  }
 }
 
 export function createLink(overrides: Partial<ApiLink> = {}): ApiLink {
@@ -46,7 +51,7 @@ export function createLink(overrides: Partial<ApiLink> = {}): ApiLink {
 
 export function createApiResponse(
   features: IFeature[],
-  links: ApiLinkGroups = {},
+  links: ApiLinkGroups = [],
 ): ApiResponse {
   return {
     type: 'FeatureCollection',
