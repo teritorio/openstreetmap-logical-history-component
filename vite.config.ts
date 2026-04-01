@@ -83,7 +83,7 @@ export default defineConfig(({ command, mode }) => {
     server: {
       proxy: {
         '/api': {
-          target: env.VITE_API_DENPOINT || process.env.VITE_API_DENPOINT,
+          target: env.VITE_API_ENDPOINT,
           changeOrigin: true,
         },
       },

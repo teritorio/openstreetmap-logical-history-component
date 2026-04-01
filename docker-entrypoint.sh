@@ -3,7 +3,7 @@ set -eu
 
 if [ ! -d /app/node_modules ] || [ -z "$(ls -A /app/node_modules 2>/dev/null || true)" ]; then
   echo "Installing dependencies in /app (bind mount detected or empty node_modules)..."
-  yarn install --immutable || yarn install
+  yarn install --immutable
 fi
 
 if [ "${1:-}" = "yarn" ] && [ "${2:-}" = "dev" ]; then
@@ -22,7 +22,7 @@ if [ "${1:-}" = "yarn" ] && [ "${2:-}" = "dev" ]; then
     set -- "$@" --host 0.0.0.0
   fi
   if [ "$has_port" -eq 0 ]; then
-    set -- "$@" --port "${PORT:-4173}"
+    set -- "$@" --port "${PORT:-5173}"
   fi
 fi
 
