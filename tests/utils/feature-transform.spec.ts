@@ -1,20 +1,6 @@
-import { describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { createApiResponse, createFeature, createLink } from '../factories'
-
-vi.mock('@turf/boolean-equal', () => ({
-  default: vi.fn((a: any, b: any) => {
-    return JSON.stringify(a) === JSON.stringify(b)
-  }),
-}))
-
-vi.mock('@turf/area', () => ({
-  area: vi.fn((feature: any) => {
-    if (feature.geometry?.type === 'Polygon') {
-      return feature.geometry.coordinates[0]?.length * 100 || 0
-    }
-    return 0
-  }),
-}))
+import '../mocks/turf'
 
 describe('transformFeatures', () => {
   async function importTransform() {
