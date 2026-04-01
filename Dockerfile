@@ -12,13 +12,13 @@ COPY .yarn/ ./.yarn/
 RUN yarn install --immutable
 
 ENV NODE_ENV=development
-ENV PORT=4173
+ENV PORT=5173
 
 # Install entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
-EXPOSE 4173
+EXPOSE 5173
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["yarn", "dev"]
 
