@@ -124,6 +124,120 @@ describe('useLoCha', () => {
     })
   })
 
+  describe('getBeforeFeatures', () => {
+    it('returns only features with is_before flag', () => {
+      const { getBeforeFeatures } = useLoCha()
+      const features = [
+        createFeature({ id: 'n1', properties: { is_before: true } }),
+        createFeature({ id: 'n2', properties: { is_after: true } }),
+        createFeature({ id: 'n3', properties: { is_new: true } }),
+        createFeature({ id: 'n4' }),
+      ]
+
+      const result = getBeforeFeatures(features)
+      expect(result).toHaveLength(1)
+      expect(result[0].id).toBe('n1')
+    })
+
+    it('returns empty array when no before features exist', () => {
+      const { getBeforeFeatures } = useLoCha()
+      const features = [
+        createFeature({ id: 'n1', properties: { is_after: true } }),
+        createFeature({ id: 'n2', properties: { is_new: true } }),
+      ]
+
+      expect(getBeforeFeatures(features)).toHaveLength(0)
+    })
+
+    it('returns empty array for empty input', () => {
+      const { getBeforeFeatures } = useLoCha()
+      expect(getBeforeFeatures([])).toHaveLength(0)
+    })
+  })
+
+  describe('getAfterFeatures', () => {
+    it('returns features with is_after flag', () => {
+      const { getAfterFeatures } = useLoCha()
+      const features = [
+        createFeature({ id: 'n1', properties: { is_before: true } }),
+        createFeature({ id: 'n2', properties: { is_after: true } }),
+      ]
+
+      const result = getAfterFeatures(features)
+      expect(result).toHaveLength(1)
+      expect(result[0].id).toBe('n2')
+    })
+
+    it('returns features with is_new flag', () => {
+      const { getAfterFeatures } = useLoCha()
+      const features = [
+        createFeature({ id: 'n1', properties: { is_new: true } }),
+        createFeature({ id: 'n2', properties: { is_before: true } }),
+      ]
+
+      const result = getAfterFeatures(features)
+      expect(result).toHaveLength(1)
+      expect(result[0].id).toBe('n1')
+    })
+
+    it('returns both is_after and is_new features', () => {
+      const { getAfterFeatures } = useLoCha()
+      const features = [
+        createFeature({ id: 'n1', properties: { is_after: true } }),
+        createFeature({ id: 'n2', properties: { is_new: true } }),
+        createFeature({ id: 'n3', properties: { is_before: true } }),
+      ]
+
+      const result = getAfterFeatures(features)
+      expect(result).toHaveLength(2)
+      expect(result.map(f => f.id)).toEqual(['n1', 'n2'])
+    })
+
+    it('excludes features with no flags', () => {
+      const { getAfterFeatures } = useLoCha()
+      const features = [createFeature({ id: 'n1' })]
+
+      expect(getAfterFeatures(features)).toHaveLength(0)
+    })
+
+    it('returns empty array for empty input', () => {
+      const { getAfterFeatures } = useLoCha()
+      expect(getAfterFeatures([])).toHaveLength(0)
+    })
+  })
+
+  describe('setLoCha groups reset', () => {
+    it('does not preserve stale groups when called with shorter data', () => {
+      const { setLoCha, groups } = useLoCha()
+
+      // First call: features in groups 0, 1, and 2
+      const data1 = createApiResponse(
+        [
+          createFeature({ id: 'n1', properties: { links: 0 } }),
+          createFeature({ id: 'n2', properties: { links: 1 } }),
+          createFeature({ id: 'n3', properties: { links: 2 } }),
+        ],
+        [
+          [createLink({ after: 'n1' })],
+          [createLink({ after: 'n2' })],
+          [createLink({ after: 'n3' })],
+        ],
+      )
+      setLoCha(data1)
+      const nonEmptyBefore = groups.value.filter(g => g && g.length > 0)
+      expect(nonEmptyBefore).toHaveLength(3)
+
+      // Second call: only 1 group
+      const data2 = createApiResponse(
+        [createFeature({ id: 'n4', properties: { links: 0 } })],
+        [[createLink({ after: 'n4' })]],
+      )
+      setLoCha(data2)
+      const nonEmptyAfter = groups.value.filter(g => g && g.length > 0)
+      expect(nonEmptyAfter).toHaveLength(1)
+    })
+  })
+
   describe('featureCount', () => {
     it('returns undefined when no data is set', () => {
       const { featureCount } = useLoCha()
