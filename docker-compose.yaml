@@ -5,12 +5,12 @@ services:
     volumes:
       - .:/app
     ports:
-      - 4173:4173
+      - 5173:5173
     env_file:
       - .env
     environment:
       NODE_ENV: development
-      PORT: 4173
+      PORT: 5173
     command: yarn dev
     healthcheck:
       disable: true
