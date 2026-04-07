@@ -8,6 +8,9 @@ import { REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
 const props = withDefaults(defineProps<{
   data?: ApiResponse
   reasonCollapsed?: boolean
+  hash?: string
+  dateStart?: string
+  dateEnd?: string
 }>(), {
   reasonCollapsed: true,
 })
@@ -33,7 +36,7 @@ watch(() => props.data, (newValue) => {
     <p v-if="!featureCount" class="user-feedback">
       ⚠️ No data
     </p>
-    <LoChaGroupList v-else>
+    <LoChaGroupList v-else :hash="hash" :date-start="dateStart" :date-end="dateEnd">
       <template #tags-diff="slotProps">
         <slot name="tags-diff" v-bind="slotProps" />
       </template>
