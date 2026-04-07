@@ -25,7 +25,7 @@ watch(() => props.data, (newValue) => {
   if (newValue) {
     setLoCha(newValue)
   }
-})
+}, { immediate: true })
 </script>
 
 <template>
