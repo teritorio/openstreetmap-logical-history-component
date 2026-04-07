@@ -17,17 +17,6 @@ export default defineConfig(({ command, mode }) => {
     },
     plugins: [
       vue(),
-      sentryVitePlugin({
-        authToken: env.VITE_SENTRY_AUTH_TOKEN,
-        sourcemaps: {
-          filesToDeleteAfterUpload: [
-            './**/*.map',
-            '.*/**/public/**/*.map',
-            './dist/**/client/**/*.map',
-          ],
-        },
-        telemetry: false,
-      }),
     ],
   } satisfies UserConfig
 
@@ -40,6 +29,13 @@ export default defineConfig(({ command, mode }) => {
         sourcemap: true,
       },
       ...baseConfig,
+      plugins: [
+        ...baseConfig.plugins,
+        sentryVitePlugin({
+          authToken: env.VITE_SENTRY_AUTH_TOKEN,
+          telemetry: false,
+        }),
+      ],
     }
   }
 
@@ -80,6 +76,13 @@ export default defineConfig(({ command, mode }) => {
     build: {
       sourcemap: true,
     },
+    plugins: [
+      ...baseConfig.plugins,
+      sentryVitePlugin({
+        authToken: env.VITE_SENTRY_AUTH_TOKEN,
+        telemetry: false,
+      }),
+    ],
     server: {
       proxy: {
         '/api': {
