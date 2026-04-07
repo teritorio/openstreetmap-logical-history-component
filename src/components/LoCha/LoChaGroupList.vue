@@ -1,19 +1,23 @@
 <script setup lang="ts">
 import type { TagsDiffSlotProps } from '@/types'
 import { computed, nextTick, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors, useLoCha } from '@/composables/useLoCha'
 import { formatDate } from '@/utils/date-format'
+
+const props = defineProps<{
+  hash?: string
+  dateStart?: string
+  dateEnd?: string
+}>()
 
 defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
 
 const { groups } = useLoCha()
 const highlightBorderColor = loChaColors.delete
-const route = useRoute()
 const currentHash = ref<string>()
 
-watch(() => route.hash, (newValue) => {
+watch(() => props.hash, (newValue) => {
   currentHash.value = newValue
   if (newValue) {
     nextTick(() => scrollToSection(newValue))
@@ -23,15 +27,15 @@ watch(() => route.hash, (newValue) => {
 })
 
 const dateFrom = computed(() => {
-  if (route.query.date_start) {
-    return formatDate(route.query.date_start.toString())
+  if (props.dateStart) {
+    return formatDate(props.dateStart)
   }
 
   return undefined
 })
 const dateTo = computed(() => {
-  if (route.query.date_end) {
-    return formatDate(route.query.date_end.toString())
+  if (props.dateEnd) {
+    return formatDate(props.dateEnd)
   }
 
   return undefined
