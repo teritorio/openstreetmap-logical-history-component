@@ -7,9 +7,9 @@ const props = defineProps<{
   reason: Reason
 }>()
 
-const nonEmptyEntries = computed(() => Object.entries(props.reason).filter(([_key, values]) => !!values) as Array<[keyof Reason, Reason[keyof Reason]]>)
+const nonEmptyEntries = computed(() => Object.entries(props.reason).filter(([_key, values]) => !!values) as Array<[keyof Reason, NonNullable<Reason[keyof Reason]>]>)
 
-function isObject(entry?: Reason[keyof Reason]): boolean {
+function isObject(entry?: NonNullable<Reason[keyof Reason]>): boolean {
   return !!entry && typeof entry === 'object' && !Array.isArray(entry)
 }
 
