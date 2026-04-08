@@ -46,6 +46,16 @@ describe('transformFeatures', () => {
     expect(result[0].properties.is_new).toBe(true)
   })
 
+  it('handles partial conflation_reason without geom and tags', async () => {
+    const transformFeatures = await importTransform()
+    const f1 = createFeature({ id: 'n1', properties: { links: 0 } })
+    const f2 = createFeature({ id: 'n2', properties: { links: 0 } })
+    const data = createApiResponse([f1, f2], [[createLink({ before: 'n1', after: 'n2', conflation_reason: { conflate: 'remeaning only after object' } })]])
+
+    const result = transformFeatures(data)
+    expect(result).toHaveLength(2)
+  })
+
   it('sets is_after when link.before is undefined but link.after is defined', async () => {
     const transformFeatures = await importTransform()
     const f1 = createFeature({ id: 'n1', properties: { links: 0 } })

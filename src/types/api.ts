@@ -21,8 +21,8 @@ export interface ReasonTags {
 }
 
 export interface Reason {
-  geom: ReasonGeom
-  tags: ReasonTags
+  geom?: ReasonGeom
+  tags?: ReasonTags
   conflate: string
 }
 
