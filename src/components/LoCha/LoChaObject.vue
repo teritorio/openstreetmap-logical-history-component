@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import type { IFeature } from '@/types'
-import { computed } from 'vue'
-import { loChaColors, useLoCha } from '@/composables/useLoCha'
+import { computed, inject } from 'vue'
+import { loChaColors } from '@/composables/useLoCha'
+import { LOCHA_KEY } from '@/constants/injectionKeys'
 import { getDeepHistoryUrl, getJosmUrl, getOsmHistoryUrl, getOsmHistoryViewerUrl, getOsmUserUrl } from '@/utils/osm-links'
 
 const props = defineProps<{
   feature: IFeature
+  josmTarget?: string
 }>()
 
 defineSlots<{ 'tags-diff': () => void }>()
 
-const { getStatus } = useLoCha()
+const { getStatus } = inject(LOCHA_KEY)!
 
 const status = computed(() => getStatus(props.feature))
 
@@ -79,7 +81,7 @@ const color = computed(() => loChaColors[status.value])
         :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
         type="button"
         title="Edit in JOSM"
-        target="hidden_josm_target"
+        :target="josmTarget || 'hidden_josm_target'"
         @click.stop
       >
         JOSM
