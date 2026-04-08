@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { TagsDiffSlotProps } from '@/types'
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, inject, nextTick, ref, useTemplateRef, watch } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
-import { loChaColors, useLoCha } from '@/composables/useLoCha'
+import { loChaColors } from '@/composables/useLoCha'
+import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
 import { formatDate } from '@/utils/date-format'
 
 const props = defineProps<{
@@ -13,9 +14,19 @@ const props = defineProps<{
 
 defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
 
-const { groups } = useLoCha()
+const { groups } = inject(LOCHA_KEY)!
+const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 const highlightBorderColor = loChaColors.delete
 const currentHash = ref<string>()
+const listRef = useTemplateRef<HTMLElement>('listRef')
+
+function groupId(index: number): string {
+  return `locha-${instanceId}-group-${index}`
+}
+
+function josmTargetName(): string {
+  return `hidden_josm_target_${instanceId}`
+}
 
 watch(() => props.hash, (newValue) => {
   currentHash.value = newValue
@@ -42,7 +53,8 @@ const dateTo = computed(() => {
 })
 
 function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {}): boolean {
-  const element = document.getElementById(sectionId.split('#')[1])
+  const id = sectionId.startsWith('#') ? sectionId.slice(1) : sectionId
+  const element = listRef.value?.querySelector(`#${CSS.escape(id)}`) as HTMLElement | null
 
   if (!element) {
     console.warn(`Element with ID "${sectionId}" not found`)
@@ -66,22 +78,22 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
 </script>
 
 <template>
-  <div class="locha-group-list">
+  <div ref="listRef" class="locha-group-list">
     <header>
       <h2>Before : {{ dateFrom }}</h2>
       <h2>After : {{ dateTo }}</h2>
     </header>
     <ul>
-      <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#group-${index}` }">
-        <a class="anchor-button" :href="`#group-${index}`">🔗</a>
-        <LoChaGroup :id="`group-${index}`" :features="group" :index="index">
+      <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
+        <a class="anchor-button" :href="`#${groupId(index)}`">🔗</a>
+        <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()">
           <template #tags-diff="slotProps">
             <slot name="tags-diff" v-bind="slotProps" />
           </template>
         </LoChaGroup>
       </li>
     </ul>
-    <iframe name="hidden_josm_target" style="display: none" />
+    <iframe :name="josmTargetName()" style="display: none" />
   </div>
 </template>
 

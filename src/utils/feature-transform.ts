@@ -15,15 +15,24 @@ import booleanEqual from '@turf/boolean-equal'
  */
 export function transformFeatures(data: ApiResponse): ApiResponse['features'] {
   return data.features.map((feature) => {
+    if (feature.id == null) {
+      console.warn('Skipping feature with null id')
+      return undefined
+    }
+
     const group = data.metadata.links[feature.properties.links]
 
-    if (!group)
-      throw new Error(`Feature ${feature.id} has no group.`)
+    if (!group) {
+      console.warn(`Feature ${feature.id} has no group, skipping.`)
+      return undefined
+    }
 
     const link = group.find(link => link.before === feature.id || link.after === feature.id)
 
-    if (!link)
-      throw new Error(`Feature ${feature.id} has no link.`)
+    if (!link) {
+      console.warn(`Feature ${feature.id} has no link, skipping.`)
+      return undefined
+    }
 
     const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
 

@@ -1,5 +1,6 @@
 import type { ApiResponse, Color, IFeature, LoChaGroup, LoCha as LoChaInterface, Status } from '@/types'
 import { computed, ref } from 'vue'
+import { transformFeatures } from '@/utils/feature-transform'
 
 export type { Color, LoCha, LoChaGroup, Status } from '@/types'
 
@@ -21,16 +22,15 @@ export const loChaStatus = Object.fromEntries(
   ['new', 'delete', 'updateAfter', 'updateBefore'].map(key => [key, key]),
 ) as Record<Status, Status>
 
-// Internal state variables
-const loCha = ref<ApiResponse>()
-const groups = ref<LoChaGroup[]>([])
-
 /**
  * The `useLoCha` composable provides reactive state and functions for managing and manipulating LoCha data.
  * This includes tracking features, metadata, and updating state based on new data.
  * @returns An object containing reactive references and functions for working with LoCha data.
  */
 export function useLoCha(): LoChaInterface {
+  const loCha = ref<ApiResponse>()
+  const groups = ref<LoChaGroup[]>([])
+
   /**
    * A computed reference to count the number of features in the LoCha response.
    * @returns The number of features in the LoCha response, or undefined if no data is available.
@@ -55,8 +55,12 @@ export function useLoCha(): LoChaInterface {
   function setLoCha(data: ApiResponse): void {
     _resetState()
 
-    loCha.value = data
-    groups.value = groupFeaturesByLinks(data.features)
+    const transformedData = {
+      ...data,
+      features: transformFeatures(data),
+    }
+    loCha.value = transformedData
+    groups.value = groupFeaturesByLinks(transformedData.features)
   }
 
   function getBeforeFeatures(features: IFeature[]): IFeature[] {

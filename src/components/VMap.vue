@@ -14,7 +14,7 @@ import { OBJTYPE_FULL } from '@/utils/osm-links'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = defineProps<{
-  id: number
+  id: string | number
   features: LoChaGroup
   bbox?: GeoJSON.BBox
 }>()

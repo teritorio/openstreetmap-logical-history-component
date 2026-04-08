@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import type { ApiLink, IFeature, LoChaGroup, TagsDiffSlotProps } from '@/types'
+import { inject } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
-import { useLoCha } from '@/composables/useLoCha'
+import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
 
-defineProps<{
+const props = defineProps<{
   index: number
   features: LoChaGroup
+  josmTarget?: string
 }>()
 
 defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
 
-const { loCha, getBeforeFeatures, getAfterFeatures } = useLoCha()
+const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
+
+const { loCha, getBeforeFeatures, getAfterFeatures } = inject(LOCHA_KEY)!
 
 if (!loCha.value)
   throw new Error('LoCha is empty.')
@@ -52,7 +56,7 @@ function getTagsTitle(link: ApiLink): string {
           v-for="feature in getBeforeFeatures(features)"
           :key="feature.id"
         >
-          <LoChaObject :feature="feature">
+          <LoChaObject :feature="feature" :josm-target="josmTarget">
             <template #tags-diff>
               <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
                 <slot
@@ -74,7 +78,7 @@ function getTagsTitle(link: ApiLink): string {
           v-for="feature in getAfterFeatures(features)"
           :key="feature.id"
         >
-          <LoChaObject :feature="feature">
+          <LoChaObject :feature="feature" :josm-target="josmTarget">
             <template #tags-diff>
               <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
                 <slot
@@ -92,7 +96,7 @@ function getTagsTitle(link: ApiLink): string {
         </li>
       </ul>
     </div>
-    <VMap :id="index" :features="features" :bbox="loCha?.bbox" />
+    <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" />
   </div>
 </template>
 
