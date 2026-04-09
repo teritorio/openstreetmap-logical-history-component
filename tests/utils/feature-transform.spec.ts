@@ -97,20 +97,22 @@ describe('transformFeatures', () => {
     expect(before?.properties.geom).toBe(false)
   })
 
-  it('throws when feature has no matching group', async () => {
+  it('skips feature with no matching group', async () => {
     const transformFeatures = await importTransform()
     const f1 = createFeature({ id: 'n1', properties: { links: 999 } })
     const data = createApiResponse([f1], [[createLink({ before: 'n1' })]])
 
-    expect(() => transformFeatures(data)).toThrow('has no group')
+    const result = transformFeatures(data)
+    expect(result).toEqual([])
   })
 
-  it('throws when feature has no matching link', async () => {
+  it('skips feature with no matching link', async () => {
     const transformFeatures = await importTransform()
     const f1 = createFeature({ id: 'n1', properties: { links: 0 } })
     const data = createApiResponse([f1], [[createLink({ before: 'n999', after: 'n888' })]])
 
-    expect(() => transformFeatures(data)).toThrow('has no link')
+    const result = transformFeatures(data)
+    expect(result).toEqual([])
   })
 
   describe('sorting', () => {
