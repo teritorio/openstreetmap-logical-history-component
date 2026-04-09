@@ -85,7 +85,7 @@ function handleSubmit(data: FormData) {
       :is-open="mapFiltersIsOpen"
       @submit="handleSubmit"
     />
-    <LoCha :data="geojson" :reason-collapsed="false">
+    <LoCha :data="geojson" :reason-collapsed="false" :date-start="route.query.date_start as string" :date-end="route.query.date_end as string">
       <template #tags-diff="{ title, date, diff, dst, src, reason }">
         <div class="infos">
           <span v-if="title" class="title">🔗 {{ title }}</span>
