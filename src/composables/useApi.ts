@@ -109,18 +109,10 @@ export function useApiConfig(): ApiComposable {
 
         return await res.json() as ApiResponse
       })
-      .then((data) => {
-        // Temporary: normalize API bbox from [south,west,north,east] to GeoJSON [west,south,east,north]
-        // Remove once teritorio/clearance#33 is resolved
-        if (data.bbox && data.bbox.length >= 4) {
-          data.bbox = [data.bbox[1], data.bbox[0], data.bbox[3], data.bbox[2]]
-        }
-
-        return {
-          ...data,
-          features: transformFeatures(data),
-        }
-      })
+      .then(data => ({
+        ...data,
+        features: transformFeatures(data),
+      }))
       .catch((err) => {
         setError({
           message: err.message,
