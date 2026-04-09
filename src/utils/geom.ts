@@ -57,11 +57,6 @@ export function normalizeBbox(
   let maxX = bbox[2]
   let maxY = bbox[3]
 
-  if (Math.abs(minX) <= 90 && Math.abs(maxX) <= 90) {
-    [minX, minY] = [minY, minX];
-    [maxX, maxY] = [maxY, maxX]
-  }
-
   if (minX === maxX) {
     minX -= BBOX_PADDING
     maxX += BBOX_PADDING
