@@ -9,6 +9,7 @@ export type {
   ApiLinkGroups,
   ApiResponse,
   IFeature,
+  LinkMetadataSlotProps,
   Reason,
   ReasonGeom,
   ReasonTags,

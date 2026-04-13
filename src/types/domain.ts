@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { Actions, ApiResponse, IFeature, Reason } from './api'
+import type { Actions, ApiLink, ApiResponse, IFeature, Reason } from './api'
 
 /**
  * The possible statuses for features in the system.
@@ -38,6 +38,14 @@ export interface TagsDiffSlotProps {
   dst?: IFeature['properties']
   reason: Reason
   title?: string
+}
+
+/**
+ * Props passed through the `link-metadata` slot across the LoCha component hierarchy.
+ */
+export interface LinkMetadataSlotProps {
+  links: ApiLink[]
+  index: number
 }
 
 /**

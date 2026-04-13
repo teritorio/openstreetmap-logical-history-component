@@ -10,7 +10,7 @@ import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
-import { fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
+import { formatDate, fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
 
 const $api = useApiConfig()
 const { error, loading, resetError } = $api
@@ -20,6 +20,16 @@ const mapFiltersIsOpen = ref(true)
 
 const route = useRoute()
 const router = useRouter()
+
+const dateFrom = computed(() => {
+  const dateStart = route.query.date_start as string | undefined
+  return dateStart ? formatDate(dateStart) : undefined
+})
+
+const dateTo = computed(() => {
+  const dateEnd = route.query.date_end as string | undefined
+  return dateEnd ? formatDate(dateEnd) : undefined
+})
 
 const initialFormValues = computed<FormData>(() => ({
   dateStart: route.query.date_start ? toDatetimeLocal(String(route.query.date_start)) : '',
@@ -85,7 +95,11 @@ function handleSubmit(data: FormData) {
       :is-open="mapFiltersIsOpen"
       @submit="handleSubmit"
     />
-    <LoCha :data="geojson" :reason-collapsed="false" :date-start="route.query.date_start as string" :date-end="route.query.date_end as string">
+    <div class="locha-header">
+      <h2>Before : {{ dateFrom }}</h2>
+      <h2>After : {{ dateTo }}</h2>
+    </div>
+    <LoCha :data="geojson" :reason-collapsed="false">
       <template #tags-diff="{ title, date, diff, dst, src, reason }">
         <div class="infos">
           <span v-if="title" class="title">🔗 {{ title }}</span>
@@ -106,8 +120,20 @@ function handleSubmit(data: FormData) {
 <style lang="css" scoped>
 main {
   display: grid;
-  grid-template-rows: 1fr;
+  grid-template-rows: auto 1fr;
   height: calc(100vh - 64px);
   transition: grid-template-columns 0.3s ease;
+}
+
+.locha-header {
+  grid-column: 2;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1rem 0;
+}
+
+.locha-header h2 {
+  flex: 1;
+  text-align: center;
 }
 </style>
