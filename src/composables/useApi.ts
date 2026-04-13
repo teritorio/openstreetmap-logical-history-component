@@ -1,9 +1,9 @@
 import type { Reactive, Ref } from 'vue'
-import type { ApiResponse, Error } from '@/types'
+import type { Error, LoChaData } from '@/types'
 import { reactive, ref } from 'vue'
 import { transformFeatures } from '@/utils/feature-transform'
 
-export type { Action, Actions, ActionType, ActionTypeOptions, ApiLink, ApiLinkGroups, ApiResponse, IFeature, Reason, ReasonGeom, ReasonTags } from '@/types'
+export type { Action, Actions, ActionType, ActionTypeOptions, ApiLink, ApiLinkGroups, IFeature, LoChaData, Reason, ReasonGeom, ReasonTags } from '@/types'
 
 /**
  * Interface representing the reactive state and methods for handling API interactions.
@@ -20,9 +20,9 @@ interface ApiComposable {
   /**
    * Fetches data from the API. This function can accept query parameters via the `params` argument.
    * @param params - Optional URLSearchParams object that can be used to append query parameters to the API request.
-   * @returns A Promise resolving to an `ApiResponse` or `undefined` if there was an issue.
+   * @returns A Promise resolving to an `LoChaData` or `undefined` if there was an issue.
    */
-  fetchData: (params: Record<string, string | undefined>) => Promise<ApiResponse | undefined>
+  fetchData: (params: Record<string, string | undefined>) => Promise<LoChaData | undefined>
 
   /**
    * A reactive reference indicating whether the API request is currently loading.
@@ -93,7 +93,7 @@ export function useApiConfig(): ApiComposable {
    * @param params - Optional query parameters to include in the API request.
    * @returns The API response with transformed features, or undefined if an error occurred.
    */
-  async function fetchData(params: Record<string, string | undefined>): Promise<ApiResponse | undefined> {
+  async function fetchData(params: Record<string, string | undefined>): Promise<LoChaData | undefined> {
     resetError()
     loading.value = true
 
@@ -107,7 +107,7 @@ export function useApiConfig(): ApiComposable {
           throw new Error(message || res.statusText)
         }
 
-        return await res.json() as ApiResponse
+        return await res.json() as LoChaData
       })
       .then(data => ({
         ...data,

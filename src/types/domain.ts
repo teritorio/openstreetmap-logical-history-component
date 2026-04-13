@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { Actions, ApiLink, ApiResponse, IFeature, Reason } from './api'
+import type { Actions, ApiLink, IFeature, LoChaData, Reason } from './api'
 
 /**
  * The possible statuses for features in the system.
@@ -55,8 +55,8 @@ export interface LinkMetadataSlotProps {
 export interface LoCha {
   featureCount: ComputedRef<number | undefined>
   groups: Ref<LoChaGroup[]>
-  loCha: Ref<ApiResponse | undefined>
-  setLoCha: (loCha: ApiResponse) => void
+  loCha: Ref<LoChaData | undefined>
+  setLoCha: (loCha: LoChaData) => void
   getStatus: (feature: IFeature) => Status
   getBeforeFeatures: (features: IFeature[]) => IFeature[]
   getAfterFeatures: (features: IFeature[]) => IFeature[]

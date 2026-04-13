@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { ApiResponse, LinkMetadataSlotProps, TagsDiffSlotProps } from '@/types'
+import type { LinkMetadataSlotProps, LoChaData, TagsDiffSlotProps } from '@/types'
 import { provide, useId, watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY, REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
 
 const props = withDefaults(defineProps<{
-  data?: ApiResponse
+  data?: LoChaData
   reasonCollapsed?: boolean
   hash?: string
 }>(), {

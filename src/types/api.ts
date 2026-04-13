@@ -78,10 +78,10 @@ export interface IFeature extends GeoJSON.Feature {
 }
 
 /**
- * Interface representing the API response.
+ * Interface representing the LoCha data structure.
  * Extends `GeoJSON.FeatureCollection` to represent geographic data and includes additional metadata.
  */
-export interface ApiResponse extends GeoJSON.FeatureCollection {
+export interface LoChaData extends GeoJSON.FeatureCollection {
   features: IFeature[]
   metadata: {
     links: ApiLinkGroups

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApiResponse, FormData } from '@/types'
+import type { FormData, LoChaData } from '@/types'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LoCha from '@/components/LoCha/LoCha.vue'
@@ -14,7 +14,7 @@ import { formatDate, fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-for
 
 const $api = useApiConfig()
 const { error, loading, resetError } = $api
-const geojson = ref<ApiResponse>()
+const geojson = ref<LoChaData>()
 const mapFiltersRef = ref<InstanceType<typeof MapFilters>>()
 const mapFiltersIsOpen = ref(true)
 
