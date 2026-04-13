@@ -136,4 +136,8 @@ main {
   flex: 1;
   text-align: center;
 }
+
+.locha {
+  grid-column: 2;
+}
 </style>
