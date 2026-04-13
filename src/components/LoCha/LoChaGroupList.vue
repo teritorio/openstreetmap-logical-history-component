@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import type { TagsDiffSlotProps } from '@/types'
-import { computed, inject, nextTick, ref, useTemplateRef, watch } from 'vue'
+import type { LinkMetadataSlotProps, TagsDiffSlotProps } from '@/types'
+import { inject, nextTick, ref, useTemplateRef, watch } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
-import { formatDate } from '@/utils/date-format'
 
 const props = defineProps<{
   hash?: string
-  dateStart?: string
-  dateEnd?: string
 }>()
 
-defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
+defineSlots<{
+  'tags-diff': (props: TagsDiffSlotProps) => void
+  'link-metadata': (props: LinkMetadataSlotProps) => void
+}>()
 
 const { groups } = inject(LOCHA_KEY)!
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
@@ -35,21 +35,6 @@ watch(() => props.hash, (newValue) => {
   }
 }, {
   immediate: true,
-})
-
-const dateFrom = computed(() => {
-  if (props.dateStart) {
-    return formatDate(props.dateStart)
-  }
-
-  return undefined
-})
-const dateTo = computed(() => {
-  if (props.dateEnd) {
-    return formatDate(props.dateEnd)
-  }
-
-  return undefined
 })
 
 function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {}): boolean {
@@ -79,16 +64,15 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
 
 <template>
   <div ref="listRef" class="locha-group-list">
-    <header>
-      <h2>Before : {{ dateFrom }}</h2>
-      <h2>After : {{ dateTo }}</h2>
-    </header>
     <ul>
       <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
         <a class="anchor-button" :href="`#${groupId(index)}`">🔗</a>
         <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()">
           <template #tags-diff="slotProps">
             <slot name="tags-diff" v-bind="slotProps" />
+          </template>
+          <template #link-metadata="slotProps">
+            <slot name="link-metadata" v-bind="slotProps" />
           </template>
         </LoChaGroup>
       </li>
@@ -99,28 +83,13 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
 
 <style lang="css" scoped>
 .locha-group-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   padding: 1rem;
 }
 
-.locha-group-list header {
-  grid-row: 1;
-  grid-column: 1 / 3;
-  display: flex;
-  gap: 1rem;
-}
-
-.locha-group-list header h2 {
-  flex: 50%;
-  text-align: center;
-}
-
 .locha-group-list > ul {
-  grid-row: 2;
-  grid-column: 1 / 4;
   overflow-y: auto;
   margin-right: -12px;
 }
