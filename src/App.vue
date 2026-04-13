@@ -127,9 +127,14 @@ main {
 
 .locha-header {
   grid-column: 2;
+  grid-row: 1;
   display: flex;
   gap: 1rem;
   padding: 1rem 1rem 0;
+}
+
+aside {
+  grid-row: 1 / -1;
 }
 
 .locha-header h2 {

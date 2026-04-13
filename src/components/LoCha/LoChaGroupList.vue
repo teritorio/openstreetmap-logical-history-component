@@ -116,8 +116,9 @@ function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {})
   border-color: v-bind(highlightBorderColor);
 }
 
-.locha-group {
-  width: 100%;
+.locha-group-list > ul > li > div {
+  flex: 1;
+  min-width: 0;
 }
 
 .anchor-button {
