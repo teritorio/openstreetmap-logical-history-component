@@ -42,7 +42,7 @@
     "test": "vitest"
   },
   "peerDependencies": {
-    "maplibre-gl": "^4.7.1",
+    "maplibre-gl": "^5.0.0",
     "vue": "^3.5.13"
   },
   "dependencies": {
