@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/types'
+import type { LoChaData } from '@/types'
 import { area } from '@turf/area'
 import booleanEqual from '@turf/boolean-equal'
 
@@ -13,7 +13,7 @@ import booleanEqual from '@turf/boolean-equal'
  * @returns The transformed features with additional properties.
  * @throws If a feature is missing a link in the metadata.
  */
-export function transformFeatures(data: ApiResponse): ApiResponse['features'] {
+export function transformFeatures(data: LoChaData): LoChaData['features'] {
   return data.features.map((feature) => {
     if (feature.id == null) {
       console.warn('Skipping feature with null id')

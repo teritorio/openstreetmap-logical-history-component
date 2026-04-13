@@ -1,4 +1,4 @@
-import type { ApiResponse, Color, IFeature, LoChaGroup, LoCha as LoChaInterface, Status } from '@/types'
+import type { Color, IFeature, LoChaData, LoChaGroup, LoCha as LoChaInterface, Status } from '@/types'
 import { computed, ref } from 'vue'
 import { transformFeatures } from '@/utils/feature-transform'
 
@@ -28,7 +28,7 @@ export const loChaStatus = Object.fromEntries(
  * @returns An object containing reactive references and functions for working with LoCha data.
  */
 export function useLoCha(): LoChaInterface {
-  const loCha = ref<ApiResponse>()
+  const loCha = ref<LoChaData>()
   const groups = ref<LoChaGroup[]>([])
 
   /**
@@ -52,7 +52,7 @@ export function useLoCha(): LoChaInterface {
    * Sets the LoCha data and populates the before and after features.
    * @param data - The LoCha API response data to set.
    */
-  function setLoCha(data: ApiResponse): void {
+  function setLoCha(data: LoChaData): void {
     _resetState()
 
     const transformedData = {
