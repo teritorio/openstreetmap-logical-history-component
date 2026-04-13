@@ -95,7 +95,7 @@ function handleSubmit(data: FormData) {
       :is-open="mapFiltersIsOpen"
       @submit="handleSubmit"
     />
-    <div class="locha-header">
+    <div v-if="dateFrom || dateTo" class="locha-header">
       <h2>Before : {{ dateFrom }}</h2>
       <h2>After : {{ dateTo }}</h2>
     </div>
