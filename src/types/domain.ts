@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { Actions, ApiResponse, IFeature, Reason } from './api'
+import type { Actions, ApiLink, IFeature, LoChaData, Reason } from './api'
 
 /**
  * The possible statuses for features in the system.
@@ -41,14 +41,22 @@ export interface TagsDiffSlotProps {
 }
 
 /**
+ * Props passed through the `link-metadata` slot across the LoCha component hierarchy.
+ */
+export interface LinkMetadataSlotProps {
+  links: ApiLink[]
+  index: number
+}
+
+/**
  * The LoCha interface defines the structure of the LoCha state,
  * which includes various references and computed values to track the features and metadata.
  */
 export interface LoCha {
   featureCount: ComputedRef<number | undefined>
   groups: Ref<LoChaGroup[]>
-  loCha: Ref<ApiResponse | undefined>
-  setLoCha: (loCha: ApiResponse) => void
+  loCha: Ref<LoChaData | undefined>
+  setLoCha: (loCha: LoChaData) => void
   getStatus: (feature: IFeature) => Status
   getBeforeFeatures: (features: IFeature[]) => IFeature[]
   getAfterFeatures: (features: IFeature[]) => IFeature[]

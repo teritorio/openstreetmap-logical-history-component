@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApiLink, IFeature, LoChaGroup, TagsDiffSlotProps } from '@/types'
+import type { ApiLink, IFeature, LinkMetadataSlotProps, LoChaGroup, TagsDiffSlotProps } from '@/types'
 import { inject } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
@@ -11,7 +11,10 @@ const props = defineProps<{
   josmTarget?: string
 }>()
 
-defineSlots<{ 'tags-diff': (props: TagsDiffSlotProps) => void }>()
+defineSlots<{
+  'tags-diff': (props: TagsDiffSlotProps) => void
+  'link-metadata': (props: LinkMetadataSlotProps) => void
+}>()
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
@@ -50,6 +53,9 @@ function getTagsTitle(link: ApiLink): string {
 
 <template>
   <div class="locha-group">
+    <div class="link-metadata">
+      <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
+    </div>
     <div class="before-list">
       <ul>
         <li
@@ -108,6 +114,10 @@ function getTagsTitle(link: ApiLink): string {
   border: 2px solid #cecece;
   background-color: #ffffff;
   padding: 8px;
+}
+
+.link-metadata {
+  grid-column: 1 / -1;
 }
 
 .before-list {
