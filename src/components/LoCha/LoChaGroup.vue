@@ -52,57 +52,57 @@ function getTagsTitle(link: ApiLink): string {
 </script>
 
 <template>
-  <div>
-    <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
-    <div class="locha-group">
-      <div class="before-list">
-        <ul>
-          <li
-            v-for="feature in getBeforeFeatures(features)"
-            :key="feature.id"
-          >
-            <LoChaObject :feature="feature" :josm-target="josmTarget">
-              <template #tags-diff>
-                <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
-                  <slot
-                    name="tags-diff"
-                    :date="feature.properties.created"
-                    :diff="link.diff_tags"
-                    :src="feature.properties"
-                    :reason="link.conflation_reason"
-                  />
-                </template>
-              </template>
-            </LoChaObject>
-          </li>
-        </ul>
-      </div>
-      <div class="after-list">
-        <ul>
-          <li
-            v-for="feature in getAfterFeatures(features)"
-            :key="feature.id"
-          >
-            <LoChaObject :feature="feature" :josm-target="josmTarget">
-              <template #tags-diff>
-                <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
-                  <slot
-                    name="tags-diff"
-                    :date="feature.properties.created"
-                    :title="getTagsTitle(link)"
-                    :diff="link.diff_tags"
-                    :reason="link.conflation_reason"
-                    :dst="feature.properties"
-                    :src="getBeforeProperties(link)"
-                  />
-                </template>
-              </template>
-            </LoChaObject>
-          </li>
-        </ul>
-      </div>
-      <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" />
+  <div class="locha-group">
+    <div class="link-metadata">
+      <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
     </div>
+    <div class="before-list">
+      <ul>
+        <li
+          v-for="feature in getBeforeFeatures(features)"
+          :key="feature.id"
+        >
+          <LoChaObject :feature="feature" :josm-target="josmTarget">
+            <template #tags-diff>
+              <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
+                <slot
+                  name="tags-diff"
+                  :date="feature.properties.created"
+                  :diff="link.diff_tags"
+                  :src="feature.properties"
+                  :reason="link.conflation_reason"
+                />
+              </template>
+            </template>
+          </LoChaObject>
+        </li>
+      </ul>
+    </div>
+    <div class="after-list">
+      <ul>
+        <li
+          v-for="feature in getAfterFeatures(features)"
+          :key="feature.id"
+        >
+          <LoChaObject :feature="feature" :josm-target="josmTarget">
+            <template #tags-diff>
+              <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
+                <slot
+                  name="tags-diff"
+                  :date="feature.properties.created"
+                  :title="getTagsTitle(link)"
+                  :diff="link.diff_tags"
+                  :reason="link.conflation_reason"
+                  :dst="feature.properties"
+                  :src="getBeforeProperties(link)"
+                />
+              </template>
+            </template>
+          </LoChaObject>
+        </li>
+      </ul>
+    </div>
+    <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" />
   </div>
 </template>
 
@@ -114,6 +114,10 @@ function getTagsTitle(link: ApiLink): string {
   border: 2px solid #cecece;
   background-color: #ffffff;
   padding: 8px;
+}
+
+.link-metadata {
+  grid-column: 1 / -1;
 }
 
 .before-list {
