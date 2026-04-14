@@ -4,3 +4,4 @@ import type { LoCha } from '@/types'
 export const REASON_COLLAPSED_KEY: InjectionKey<boolean> = Symbol('reasonCollapsed')
 export const LOCHA_KEY: InjectionKey<LoCha> = Symbol('loCha')
 export const LOCHA_INSTANCE_ID_KEY: InjectionKey<string> = Symbol('loChaInstanceId')
+export const MAP_STYLE_URL_KEY: InjectionKey<string> = Symbol('mapStyleUrl')
