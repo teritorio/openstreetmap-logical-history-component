@@ -6,7 +6,8 @@ import turfBbox from '@turf/bbox'
 import { featureCollection as turfFeatureCollection } from '@turf/helpers'
 import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
-import { shallowRef, watch } from 'vue'
+import { inject, shallowRef, watch } from 'vue'
+import { MAP_STYLE_URL_KEY } from '@/constants/injectionKeys'
 import { MAP_STYLE_URL } from '@/constants/map'
 import { BBOX_SOURCE_ID, LAYERS, SOURCE_ID } from '@/constants/mapLayers'
 import { clipAndEnvelope, normalizeBbox } from '@/utils/geom'
@@ -18,6 +19,8 @@ const props = defineProps<{
   features: LoChaGroup
   bbox?: GeoJSON.BBox
 }>()
+
+const mapStyleUrl = inject(MAP_STYLE_URL_KEY, MAP_STYLE_URL)
 
 type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
@@ -78,7 +81,7 @@ function initMap() {
           animate: false,
           maxZoom: 17,
         },
-        style: MAP_STYLE_URL,
+        style: mapStyleUrl,
         attributionControl: {
           compact: false,
         },

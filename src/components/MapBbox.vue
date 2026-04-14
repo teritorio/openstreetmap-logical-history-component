@@ -4,9 +4,12 @@ import { onMounted, shallowRef, watch } from 'vue'
 import { MAP_STYLE_URL } from '@/constants/map'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   bbox?: string
-}>()
+  mapStyleUrl?: string
+}>(), {
+  mapStyleUrl: MAP_STYLE_URL,
+})
 
 const emit = defineEmits<{
   (e: 'updateBbox', bbox: string): void
@@ -66,7 +69,7 @@ watch(
 onMounted(() => {
   map.value = new maplibre.Map({
     container: 'bbox-selector',
-    style: MAP_STYLE_URL,
+    style: props.mapStyleUrl,
     attributionControl: {
       compact: false,
     },

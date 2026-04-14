@@ -3,13 +3,16 @@ import type { LinkMetadataSlotProps, LoChaData, TagsDiffSlotProps } from '@/type
 import { provide, useId, watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY, REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
+import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY, MAP_STYLE_URL_KEY, REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
+import { MAP_STYLE_URL } from '@/constants/map'
 
 const props = withDefaults(defineProps<{
   data?: LoChaData
+  mapStyleUrl?: string
   reasonCollapsed?: boolean
   hash?: string
 }>(), {
+  mapStyleUrl: MAP_STYLE_URL,
   reasonCollapsed: true,
 })
 
@@ -22,6 +25,7 @@ const instanceId = useId()
 
 provide(REASON_COLLAPSED_KEY, props.reasonCollapsed)
 provide(LOCHA_INSTANCE_ID_KEY, instanceId)
+provide(MAP_STYLE_URL_KEY, props.mapStyleUrl)
 
 const loChaInstance = useLoCha()
 provide(LOCHA_KEY, loChaInstance)
