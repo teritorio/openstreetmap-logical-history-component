@@ -13,10 +13,8 @@ export function scrollToSection(sectionId: string, options: ScrollToSectionOptio
   const id = sectionId.startsWith('#') ? sectionId.slice(1) : sectionId
   const element = container.querySelector(`#${CSS.escape(id)}`) as HTMLElement | null
 
-  if (!element) {
-    console.warn(`Element with ID "${sectionId}" not found`)
+  if (!element)
     return false
-  }
 
   element.scrollIntoView({
     behavior,
