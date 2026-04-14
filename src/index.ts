@@ -16,5 +16,4 @@ export type {
   TagsDiffSlotProps,
 } from './types'
 
-export { scrollToSection } from './utils/scrollToSection'
-export type { ScrollToSectionOptions } from './utils/scrollToSection'
+export { scrollToSection, type ScrollToSectionOptions } from './utils/scrollToSection'
