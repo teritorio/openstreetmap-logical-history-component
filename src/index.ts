@@ -15,3 +15,6 @@ export type {
   ReasonTags,
   TagsDiffSlotProps,
 } from './types'
+
+export { scrollToSection } from './utils/scrollToSection'
+export type { ScrollToSectionOptions } from './utils/scrollToSection'

@@ -4,6 +4,7 @@ import { inject, nextTick, ref, useTemplateRef, watch } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
+import { scrollToSection } from '@/utils/scrollToSection'
 
 const props = defineProps<{
   hash?: string
@@ -31,35 +32,11 @@ function josmTargetName(): string {
 watch(() => props.hash, (newValue) => {
   currentHash.value = newValue
   if (newValue) {
-    nextTick(() => scrollToSection(newValue))
+    nextTick(() => scrollToSection(newValue, { container: listRef.value ?? undefined }))
   }
 }, {
   immediate: true,
 })
-
-function scrollToSection(sectionId: string, options: ScrollIntoViewOptions = {}): boolean {
-  const id = sectionId.startsWith('#') ? sectionId.slice(1) : sectionId
-  const element = listRef.value?.querySelector(`#${CSS.escape(id)}`) as HTMLElement | null
-
-  if (!element) {
-    console.warn(`Element with ID "${sectionId}" not found`)
-    return false
-  }
-
-  const {
-    behavior = 'smooth',
-    block = 'start',
-    inline = 'nearest',
-  } = options
-
-  element.scrollIntoView({
-    behavior,
-    block,
-    inline,
-  })
-
-  return true
-}
 </script>
 
 <template>
