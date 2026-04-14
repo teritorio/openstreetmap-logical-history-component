@@ -143,7 +143,7 @@ const tagDiffs = computed(() => {
                     class="attribute-changed"
                   >
                     <span
-                      v-for="(part, i) in tagDiffs.get(key)!.parts"
+                      v-for="(part, i) in tagDiffs.get(key)?.parts ?? []"
                       :key="i"
                     >
                       <span
