@@ -91,14 +91,21 @@ function getRowClass(key: string): string | undefined {
   return isRejected(key) ? undefined : 'no_changes'
 }
 
-function showTextDiff(before: string, after: string): boolean {
-  const d = diffText(before, after)
-  return d.length <= 2
-}
+const tagDiffs = computed(() => {
+  const result = new Map<string, { parts: Change[], isInline: boolean }>()
+  if (!props.src?.tags || !props.dst?.tags)
+    return result
 
-function diffText(before: string, after: string): Change[] {
-  return diffChars(before, after)
-}
+  for (const keys of groupedTagKeys.value) {
+    for (const key of keys) {
+      if (props.diff?.[key] && typeof props.src.tags[key] === 'string' && key in props.dst.tags) {
+        const parts = diffChars(props.src.tags[key], props.dst.tags[key] || '')
+        result.set(key, { parts, isInline: parts.length <= 2 })
+      }
+    }
+  }
+  return result
+})
 </script>
 
 <template>
@@ -107,7 +114,7 @@ function diffText(before: string, after: string): Change[] {
       v-for="(groupedKey, groupIndex) in groupedTagKeys"
       :key="groupIndex"
     >
-      <table v-if="groupedTagKeys.length">
+      <table>
         <tbody>
           <template v-for="key in groupedKey" :key="key">
             <tr
@@ -132,13 +139,11 @@ function diffText(before: string, after: string): Change[] {
                   <span v-if="!src?.tags || !(key in src.tags)">{{ dst?.tags?.[key] }} </span>
                   <span v-else-if="!(key in (dst?.tags || {}))">{{ src.tags[key] }} </span>
                   <span
-                    v-else-if="typeof src.tags[key] === 'string'
-                      && showTextDiff(src.tags[key], dst?.tags?.[key] || '')
-                    "
+                    v-else-if="tagDiffs.get(key)?.isInline"
                     class="attribute-changed"
                   >
                     <span
-                      v-for="(part, i) in diffText(src.tags[key], dst?.tags?.[key] || '')"
+                      v-for="(part, i) in tagDiffs.get(key)!.parts"
                       :key="i"
                     >
                       <span
