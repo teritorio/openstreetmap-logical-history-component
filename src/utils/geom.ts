@@ -46,25 +46,16 @@ export function clipAndEnvelope(
   return turfEnvelope(fc)
 }
 
-// ~100m padding in degrees, used to expand degenerate (zero-area) bboxes
+// ~100m epsilon padding in degrees, ensures features on bbox edges are not excluded
 const BBOX_PADDING = 0.001
 
 export function normalizeBbox(
   bbox: GeoJSON.BBox,
 ): [number, number, number, number] {
-  let minX = bbox[0]
-  let minY = bbox[1]
-  let maxX = bbox[2]
-  let maxY = bbox[3]
-
-  if (minX === maxX) {
-    minX -= BBOX_PADDING
-    maxX += BBOX_PADDING
-  }
-  if (minY === maxY) {
-    minY -= BBOX_PADDING
-    maxY += BBOX_PADDING
-  }
-
-  return [minX, minY, maxX, maxY]
+  return [
+    bbox[0] - BBOX_PADDING,
+    bbox[1] - BBOX_PADDING,
+    bbox[2] + BBOX_PADDING,
+    bbox[3] + BBOX_PADDING,
+  ]
 }
