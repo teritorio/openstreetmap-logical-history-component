@@ -97,15 +97,22 @@ describe('clipAndEnvelope', () => {
 })
 
 describe('normalizeBbox', () => {
-  it('returns bbox unchanged when non-degenerate and no swap needed', () => {
-    // minX and maxX outside [-90, 90] → no swap
+  it('always adds epsilon padding to non-degenerate bbox', () => {
     const bbox = [-122.5, 37.7, -122.4, 37.8] as [number, number, number, number]
-    expect(normalizeBbox(bbox)).toEqual([-122.5, 37.7, -122.4, 37.8])
+    const result = normalizeBbox(bbox)
+    expect(result[0]).toBeLessThan(-122.5)
+    expect(result[1]).toBeLessThan(37.7)
+    expect(result[2]).toBeGreaterThan(-122.4)
+    expect(result[3]).toBeGreaterThan(37.8)
   })
 
-  it('returns bbox unchanged when already in standard GeoJSON format', () => {
+  it('adds epsilon padding in standard GeoJSON format', () => {
     const bbox = [43.4, -1.6, 43.5, -1.5] as [number, number, number, number]
-    expect(normalizeBbox(bbox)).toEqual([43.4, -1.6, 43.5, -1.5])
+    const result = normalizeBbox(bbox)
+    expect(result[0]).toBeLessThan(43.4)
+    expect(result[1]).toBeLessThan(-1.6)
+    expect(result[2]).toBeGreaterThan(43.5)
+    expect(result[3]).toBeGreaterThan(-1.5)
   })
 
   it('pads degenerate bbox where minX === maxX', () => {
@@ -113,17 +120,17 @@ describe('normalizeBbox', () => {
     const result = normalizeBbox(bbox)
     expect(result[0]).toBeLessThan(-122.5)
     expect(result[2]).toBeGreaterThan(-122.5)
-    expect(result[1]).toBe(37.7)
-    expect(result[3]).toBe(37.8)
+    expect(result[1]).toBeLessThan(37.7)
+    expect(result[3]).toBeGreaterThan(37.8)
   })
 
   it('pads degenerate bbox where minY === maxY', () => {
     const bbox = [-122.5, 37.7, -122.4, 37.7] as [number, number, number, number]
     const result = normalizeBbox(bbox)
+    expect(result[0]).toBeLessThan(-122.5)
     expect(result[1]).toBeLessThan(37.7)
+    expect(result[2]).toBeGreaterThan(-122.4)
     expect(result[3]).toBeGreaterThan(37.7)
-    expect(result[0]).toBe(-122.5)
-    expect(result[2]).toBe(-122.4)
   })
 
   it('pads fully degenerate bbox (single point)', () => {
@@ -133,5 +140,10 @@ describe('normalizeBbox', () => {
     expect(result[2]).toBeGreaterThan(-1.572)
     expect(result[1]).toBeLessThan(43.457)
     expect(result[3]).toBeGreaterThan(43.457)
+  })
+
+  it('applies exact BBOX_PADDING of 0.001', () => {
+    const bbox = [0, 0, 10, 10] as [number, number, number, number]
+    expect(normalizeBbox(bbox)).toEqual([-0.001, -0.001, 10.001, 10.001])
   })
 })
