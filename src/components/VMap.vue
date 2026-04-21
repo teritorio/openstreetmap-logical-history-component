@@ -65,7 +65,7 @@ function initMap() {
       : turfFeatureCollection(props.features)
 
     if (clipped) {
-      const boundsArray = turfBbox(clipped)
+      const boundsArray = normalizeBbox(turfBbox(clipped))
 
       const bounds: [[number, number], [number, number]] = [
         [boundsArray[0], boundsArray[1]],
@@ -123,7 +123,7 @@ function handleMapOnLoad(): void {
     throw new Error('Call initMap() function first.')
 
   if (props.bbox) {
-    displayBbox(props.bbox)
+    displayBbox(normalizeBbox(props.bbox))
   }
 
   map.value!.addSource(SOURCE_ID, {
