@@ -85,6 +85,7 @@ function initMap() {
           maxZoom: 17,
         },
         style: mapStyleUrl,
+        cooperativeGestures: true,
         attributionControl: {
           compact: false,
         },
