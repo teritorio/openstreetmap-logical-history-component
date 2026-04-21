@@ -37,6 +37,7 @@ const map = shallowRef<maplibre.Map>()
 const isVisible = shallowRef(false)
 const popup = shallowRef<maplibre.Popup>()
 const hoveredStateFeature = shallowRef<maplibre.MapGeoJSONFeature>()
+let normalizedBbox: [number, number, number, number] | undefined
 
 watch(isVisible, (newState) => {
   if (newState) {
@@ -60,8 +61,10 @@ watch(() => props.features, (newValue) => {
 
 function initMap() {
   if (!map.value) {
-    const clipped = props.bbox
-      ? clipAndEnvelope(props.features, normalizeBbox(props.bbox))
+    normalizedBbox = props.bbox ? normalizeBbox(props.bbox) : undefined
+
+    const clipped = normalizedBbox
+      ? clipAndEnvelope(props.features, normalizedBbox)
       : turfFeatureCollection(props.features)
 
     if (clipped) {
@@ -122,8 +125,8 @@ function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
 
-  if (props.bbox) {
-    displayBbox(normalizeBbox(props.bbox))
+  if (normalizedBbox) {
+    displayBbox(normalizedBbox)
   }
 
   map.value!.addSource(SOURCE_ID, {
