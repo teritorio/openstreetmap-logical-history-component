@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<{
 defineSlots<{
   'tags-diff': (props: TagsDiffSlotProps) => void
   'link-metadata': (props: LinkMetadataSlotProps) => void
+  'group-actions': (props: LinkMetadataSlotProps) => void
 }>()
 
 const instanceId = useId()
@@ -53,6 +54,9 @@ watch(() => props.data, (newValue) => {
       </template>
       <template #link-metadata="slotProps">
         <slot name="link-metadata" v-bind="slotProps" />
+      </template>
+      <template #group-actions="slotProps">
+        <slot name="group-actions" v-bind="slotProps" />
       </template>
     </LoChaGroupList>
   </section>
