@@ -14,6 +14,7 @@ const props = defineProps<{
 defineSlots<{
   'tags-diff': (props: TagsDiffSlotProps) => void
   'link-metadata': (props: LinkMetadataSlotProps) => void
+  'group-actions': (props: LinkMetadataSlotProps) => void
 }>()
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
@@ -53,8 +54,13 @@ function getTagsTitle(link: ApiLink): string {
 
 <template>
   <div class="locha-group">
-    <div class="link-metadata">
-      <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
+    <div class="group-header">
+      <div class="link-metadata">
+        <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
+      </div>
+      <div class="group-actions">
+        <slot name="group-actions" :links="loCha!.metadata.links[index]" :index="index" />
+      </div>
     </div>
     <div class="before-list">
       <ul>
@@ -116,8 +122,17 @@ function getTagsTitle(link: ApiLink): string {
   padding: 8px;
 }
 
-.link-metadata {
+.group-header {
   grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.link-metadata {
+  flex: 1;
+  min-width: 0;
 }
 
 .before-list {
