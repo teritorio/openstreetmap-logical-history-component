@@ -47,10 +47,11 @@ const data = ref<ApiResponse>()
 
 ### Props
 
-| Prop              | Type          | Default     | Description                                                   |
-| ----------------- | ------------- | ----------- | ------------------------------------------------------------- |
-| `data`            | `ApiResponse` | `undefined` | The API response containing features and metadata to display. |
-| `reasonCollapsed` | `boolean`     | `true`      | Whether conflation reason details are collapsed by default.   |
+| Prop              | Type          | Default     | Description                                                                    |
+| ----------------- | ------------- | ----------- | ------------------------------------------------------------------------------ |
+| `id`              | `string`      | —           | **Required.** A unique, deterministic identifier used to build anchor targets. |
+| `data`            | `ApiResponse` | `undefined` | The API response containing features and metadata to display.                  |
+| `reasonCollapsed` | `boolean`     | `true`      | Whether conflation reason details are collapsed by default.                    |
 
 ### Slots
 
