@@ -74,6 +74,34 @@ Additional slot props on "after" features only:
 | `title` | `string`                 | A label for the tag diff.               |
 | `dst`   | `IFeature['properties']` | Destination (after) feature properties. |
 
+#### `#link-metadata`
+
+A scoped slot rendered once per group in the full-width header area, allowing custom rendering of link metadata.
+
+| Prop    | Type        | Description                                    |
+| ------- | ----------- | ---------------------------------------------- |
+| `index` | `number`    | The group index.                               |
+| `links` | `ApiLink[]` | The array of links associated with this group. |
+
+#### `#group-actions`
+
+A scoped slot rendered once per group, positioned to the right of the link metadata header. Useful for injecting per-group action buttons (e.g. accept/reject validation).
+
+| Prop    | Type        | Description                                    |
+| ------- | ----------- | ---------------------------------------------- |
+| `index` | `number`    | The group index.                               |
+| `links` | `ApiLink[]` | The array of links associated with this group. |
+
+Example usage:
+
+```vue
+<LoCha :data="data" map-style-url="...">
+  <template #group-actions="{ index, links }">
+    <button @click="acceptGroup(index)">Accept</button>
+  </template>
+</LoCha>
+```
+
 ### Types
 
 All consumer-facing types are exported from the package entry point:
