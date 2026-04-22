@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { LinkMetadataSlotProps, TagsDiffSlotProps } from '@/types'
-import { inject, nextTick, ref, useTemplateRef, watch } from 'vue'
+import { inject, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
@@ -30,6 +30,17 @@ function josmTargetName(): string {
   return `hidden_josm_target_${instanceId}`
 }
 
+function navigateToHash(hash: string) {
+  currentHash.value = hash
+  history.replaceState(null, '', hash)
+  nextTick(() => scrollToSection(hash, { container: listRef.value ?? undefined }))
+}
+
+function onAnchorClick(event: Event, index: number) {
+  event.preventDefault()
+  navigateToHash(`#${groupId(index)}`)
+}
+
 watch(() => props.hash, (newValue) => {
   currentHash.value = newValue
   if (newValue) {
@@ -38,13 +49,20 @@ watch(() => props.hash, (newValue) => {
 }, {
   immediate: true,
 })
+
+onMounted(() => {
+  const hash = window.location.hash
+  if (hash && !props.hash) {
+    navigateToHash(hash)
+  }
+})
 </script>
 
 <template>
   <div ref="listRef" class="locha-group-list">
     <ul>
       <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
-        <a class="anchor-button" :href="`#${groupId(index)}`">🔗</a>
+        <a class="anchor-button" :href="`#${groupId(index)}`" @click="onAnchorClick($event, index)">🔗</a>
         <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()">
           <template #tags-diff="slotProps">
             <slot name="tags-diff" v-bind="slotProps" />
