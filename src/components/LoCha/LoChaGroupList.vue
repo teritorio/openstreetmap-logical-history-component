@@ -13,6 +13,7 @@ const props = defineProps<{
 defineSlots<{
   'tags-diff': (props: TagsDiffSlotProps) => void
   'link-metadata': (props: LinkMetadataSlotProps) => void
+  'group-actions': (props: LinkMetadataSlotProps) => void
 }>()
 
 const { groups } = inject(LOCHA_KEY)!
@@ -50,6 +51,9 @@ watch(() => props.hash, (newValue) => {
           </template>
           <template #link-metadata="slotProps">
             <slot name="link-metadata" v-bind="slotProps" />
+          </template>
+          <template #group-actions="slotProps">
+            <slot name="group-actions" v-bind="slotProps" />
           </template>
         </LoChaGroup>
       </li>
