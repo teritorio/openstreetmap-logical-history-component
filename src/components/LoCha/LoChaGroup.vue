@@ -58,7 +58,7 @@ function getTagsTitle(link: ApiLink): string {
       <div class="link-metadata">
         <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
       </div>
-      <div class="group-actions">
+      <div v-if="$slots['group-actions']" class="group-actions">
         <slot name="group-actions" :links="loCha!.metadata.links[index]" :index="index" />
       </div>
     </div>
