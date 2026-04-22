@@ -36,11 +36,6 @@ function navigateToHash(hash: string) {
   nextTick(() => scrollToSection(hash, { container: listRef.value ?? undefined }))
 }
 
-function onAnchorClick(event: Event, index: number) {
-  event.preventDefault()
-  navigateToHash(`#${groupId(index)}`)
-}
-
 watch(() => props.hash, (newValue) => {
   currentHash.value = newValue
   if (newValue) {
@@ -62,7 +57,7 @@ onMounted(() => {
   <div ref="listRef" class="locha-group-list">
     <ul>
       <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
-        <a class="anchor-button" :href="`#${groupId(index)}`" @click="onAnchorClick($event, index)">🔗</a>
+        <a class="anchor-button" :href="`#${groupId(index)}`" @click.prevent="navigateToHash(`#${groupId(index)}`)">🔗</a>
         <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()">
           <template #tags-diff="slotProps">
             <slot name="tags-diff" v-bind="slotProps" />
