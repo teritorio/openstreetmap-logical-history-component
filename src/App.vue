@@ -99,7 +99,7 @@ function handleSubmit(data: FormData) {
       <h2>Before : {{ dateFrom }}</h2>
       <h2>After : {{ dateTo }}</h2>
     </div>
-    <LoCha :data="geojson" :reason-collapsed="false">
+    <LoCha id="demo" :data="geojson" :reason-collapsed="false">
       <template #tags-diff="{ title, date, diff, dst, src, reason }">
         <div class="infos">
           <span v-if="title" class="title">🔗 {{ title }}</span>
