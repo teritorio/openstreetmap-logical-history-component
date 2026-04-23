@@ -156,6 +156,9 @@ function getTagsTitle(link: ApiLink): string {
   grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 0.5rem;
+  background-color: #f0f0f2;
+  padding: 0.5rem;
+  border-bottom: 1px solid #cecece;
 }
 
 .group-name {
