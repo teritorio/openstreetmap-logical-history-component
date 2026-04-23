@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ApiLink, ChangesetsSlotProps, IFeature, LinkMetadataSlotProps, LoChaGroup, TagsDiffSlotProps } from '@/types'
-import { computed, inject } from 'vue'
+import { computed, inject, useSlots } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
@@ -16,14 +16,15 @@ defineEmits<{
   navigate: [hash: string]
 }>()
 
-const slots = defineSlots<{
+defineSlots<{
   'tags-diff': (props: TagsDiffSlotProps) => void
   'link-metadata': (props: LinkMetadataSlotProps) => void
   'group-actions': (props: LinkMetadataSlotProps) => void
   'changesets': (props: ChangesetsSlotProps) => void
 }>()
 
-const gridColumns = computed(() => slots.changesets ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)')
+const runtimeSlots = useSlots()
+const gridColumns = computed(() => runtimeSlots.changesets ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)')
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
