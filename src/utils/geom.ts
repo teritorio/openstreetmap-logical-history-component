@@ -46,16 +46,25 @@ export function clipAndEnvelope(
   return turfEnvelope(fc)
 }
 
-// ~100m epsilon padding in degrees, ensures features on bbox edges are not excluded
-const BBOX_PADDING = 0.001
+// ~100m padding in degrees, ensures features on bbox edges are not excluded during clipping
+const CLIPPING_PADDING = 0.001
 
-export function normalizeBbox(
-  bbox: GeoJSON.BBox,
-): [number, number, number, number] {
+// ~10m padding in degrees, used for map display bounds (smaller to avoid over-zooming on degenerate bboxes)
+const DISPLAY_PADDING = 0.0001
+
+function padBbox(bbox: GeoJSON.BBox, padding: number): [number, number, number, number] {
   return [
-    bbox[0] - BBOX_PADDING,
-    bbox[1] - BBOX_PADDING,
-    bbox[2] + BBOX_PADDING,
-    bbox[3] + BBOX_PADDING,
+    bbox[0] - padding,
+    bbox[1] - padding,
+    bbox[2] + padding,
+    bbox[3] + padding,
   ]
+}
+
+export function normalizeBboxForClipping(bbox: GeoJSON.BBox): [number, number, number, number] {
+  return padBbox(bbox, CLIPPING_PADDING)
+}
+
+export function normalizeBboxForDisplay(bbox: GeoJSON.BBox): [number, number, number, number] {
+  return padBbox(bbox, DISPLAY_PADDING)
 }
