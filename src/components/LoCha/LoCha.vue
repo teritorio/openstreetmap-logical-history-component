@@ -58,7 +58,7 @@ watch(() => props.data, (newValue) => {
       <template #group-actions="slotProps">
         <slot name="group-actions" v-bind="slotProps" />
       </template>
-      <template #changesets="slotProps">
+      <template v-if="$slots.changesets" #changesets="slotProps">
         <slot name="changesets" v-bind="slotProps" />
       </template>
     </LoChaGroupList>
