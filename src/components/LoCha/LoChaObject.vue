@@ -52,43 +52,48 @@ const color = computed(() => loChaColors[status.value])
         >
           {{ statusContent }}
         </div>
-        <div class="actions">
-          <a
-            :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
-            class="action-btn"
-            title="Edit in OSM iD"
-            target="_blank"
-            @click.stop
-          >
-            OSM iD
-          </a>
-          <a
-            :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
-            class="action-btn"
-            title="Edit in JOSM"
-            :target="josmTarget || 'hidden_josm_target'"
-            @click.stop
-          >
-            JOSM
-          </a>
-          <a
-            :href="getDeepHistoryUrl(feature.properties.objtype, feature.properties.id)"
-            class="action-btn"
-            title="OSM Deep History"
-            target="_blank"
-            @click.stop
-          >
-            Deep H
-          </a>
-          <a
-            :href="getOsmHistoryViewerUrl(feature.properties.objtype, feature.properties.id)"
-            class="action-btn"
-            title="OSM History Viewer"
-            target="_blank"
-            @click.stop
-          >
-            OSM H
-          </a>
+        <div class="fab">
+          <button class="fab-toggle" type="button" title="Actions">
+            ⋯
+          </button>
+          <div class="fab-menu">
+            <a
+              :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
+              class="action-btn"
+              title="Edit in OSM iD"
+              target="_blank"
+              @click.stop
+            >
+              OSM iD
+            </a>
+            <a
+              :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
+              class="action-btn"
+              title="Edit in JOSM"
+              :target="josmTarget || 'hidden_josm_target'"
+              @click.stop
+            >
+              JOSM
+            </a>
+            <a
+              :href="getDeepHistoryUrl(feature.properties.objtype, feature.properties.id)"
+              class="action-btn"
+              title="OSM Deep History"
+              target="_blank"
+              @click.stop
+            >
+              Deep H
+            </a>
+            <a
+              :href="getOsmHistoryViewerUrl(feature.properties.objtype, feature.properties.id)"
+              class="action-btn"
+              title="OSM History Viewer"
+              target="_blank"
+              @click.stop
+            >
+              OSM H
+            </a>
+          </div>
         </div>
       </div>
       <p class="date">
@@ -129,10 +134,52 @@ header > a {
   gap: 0.25rem;
 }
 
-.actions {
-  display: flex;
+.fab {
+  position: relative;
   margin-left: auto;
   flex-shrink: 0;
+}
+
+.fab-toggle {
+  background: none;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0.15em 0.4em;
+  color: #333333;
+}
+
+.fab-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 5;
+  flex-direction: column;
+  background-color: #ffffff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: max-content;
+}
+
+.fab:hover .fab-menu,
+.fab:focus-within .fab-menu {
+  display: flex;
+}
+
+.action-btn {
+  color: #000000;
+  padding: 0.4em 0.75em;
+  font-size: 0.75em;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.action-btn:hover {
+  background-color: #f0f0f2;
 }
 
 :deep(.date),
@@ -144,16 +191,6 @@ header > a {
 :deep(.infos) {
   display: flex;
   gap: 0.5rem;
-}
-
-.action-btn {
-  flex-grow: 1;
-  color: #000000;
-  padding: 0.5em 1em;
-  font-size: 0.75em;
-  border: 1px solid #dcdfe6;
-  background-color: #ffffff;
-  text-align: center;
 }
 
 .status-content {
