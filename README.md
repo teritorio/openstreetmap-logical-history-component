@@ -55,68 +55,53 @@ const data = ref<ApiResponse>()
 
 ### Slots
 
-#### `#tags-diff`
+All slots are optional and receive generic, position-based props. The LoCha component does not perform domain-specific data lookups — consumers are responsible for their own data processing.
 
-A scoped slot exposed on each feature group, allowing custom rendering of tag diffs.
+#### `#object-detail`
 
-Slot props (always present):
+A scoped slot rendered once per feature inside each object card. Use it to display tag diffs, validation status, or any per-feature content.
 
-| Prop     | Type                     | Description                                                                                                               |
-| -------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| `date`   | `string`                 | The feature's creation date.                                                                                              |
-| `diff`   | `Actions`                | The tag diff actions.                                                                                                     |
-| `reason` | `Reason`                 | The conflation reason.                                                                                                    |
-| `src`    | `IFeature['properties']` | Source feature properties. On "before" features this is the feature itself; on "after" it is the linked "before" feature. |
+| Prop      | Type       | Description              |
+| --------- | ---------- | ------------------------ |
+| `feature` | `IFeature` | The feature being shown. |
+| `index`   | `number`   | The group index.         |
 
-Additional slot props on "after" features only:
+#### `#header-center`
 
-| Prop    | Type                     | Description                             |
-| ------- | ------------------------ | --------------------------------------- |
-| `title` | `string`                 | A label for the tag diff.               |
-| `dst`   | `IFeature['properties']` | Destination (after) feature properties. |
+A scoped slot rendered once per group in the center of the group header (between the group name and the end slot).
 
-#### `#link-metadata`
+| Prop    | Type     | Description      |
+| ------- | -------- | ---------------- |
+| `index` | `number` | The group index. |
 
-A scoped slot rendered once per group in the full-width header area, allowing custom rendering of link metadata.
+#### `#header-end`
 
-| Prop    | Type        | Description                                    |
-| ------- | ----------- | ---------------------------------------------- |
-| `index` | `number`    | The group index.                               |
-| `links` | `ApiLink[]` | The array of links associated with this group. |
+A scoped slot rendered once per group at the right end of the group header. Useful for injecting per-group action buttons (e.g. accept/reject validation).
 
-#### `#group-actions`
+| Prop    | Type     | Description      |
+| ------- | -------- | ---------------- |
+| `index` | `number` | The group index. |
 
-A scoped slot rendered once per group, positioned to the right of the link metadata header. Useful for injecting per-group action buttons (e.g. accept/reject validation).
-
-| Prop    | Type        | Description                                    |
-| ------- | ----------- | ---------------------------------------------- |
-| `index` | `number`    | The group index.                               |
-| `links` | `ApiLink[]` | The array of links associated with this group. |
-
-#### `#changesets`
+#### `#content-start`
 
 A scoped slot rendered once per group as the first column (before the "before" column). When provided, the grid switches from 3 to 4 columns. When omitted, the layout remains unchanged at 3 columns.
 
-| Prop         | Type          | Description                                         |
-| ------------ | ------------- | --------------------------------------------------- |
-| `index`      | `number`      | The group index.                                    |
-| `changesets` | `Changeset[]` | The full array of changesets from the API response. |
-
-> **Note:** The `changesets` array contains all changesets from the response, not filtered per group. The consumer is responsible for filtering relevant changesets (e.g. by matching `changeset_id` from feature properties against `Changeset.id`).
+| Prop    | Type     | Description      |
+| ------- | -------- | ---------------- |
+| `index` | `number` | The group index. |
 
 Example usage:
 
 ```vue
 <LoCha :data="data" map-style-url="...">
-  <template #group-actions="{ index, links }">
+  <template #object-detail="{ feature, index }">
+    <!-- Custom per-feature rendering -->
+  </template>
+  <template #header-end="{ index }">
     <button @click="acceptGroup(index)">Accept</button>
   </template>
-  <template #changesets="{ changesets, index }">
-    <ul>
-      <li v-for="cs in changesets" :key="cs.id">
-        {{ cs.user }} — {{ cs.tags?.comment }}
-      </li>
-    </ul>
+  <template #content-start="{ index }">
+    <!-- Custom first-column content (e.g. changesets) -->
   </template>
 </LoCha>
 ```
@@ -134,13 +119,12 @@ import type {
   ApiLinkGroups,
   ApiResponse,
   Changeset,
-  ChangesetsSlotProps,
+  GroupSlotProps,
   IFeature,
-  LinkMetadataSlotProps,
+  ObjectDetailSlotProps,
   Reason,
   ReasonGeom,
   ReasonTags,
-  TagsDiffSlotProps,
 } from '@teritorio/openstreetmap-logical-history-component'
 ```
 

@@ -8,14 +8,13 @@ export type {
   ApiLink,
   ApiLinkGroups,
   Changeset,
-  ChangesetsSlotProps,
+  GroupSlotProps,
   IFeature,
-  LinkMetadataSlotProps,
   LoChaData,
+  ObjectDetailSlotProps,
   Reason,
   ReasonGeom,
   ReasonTags,
-  TagsDiffSlotProps,
 } from './types'
 
 export { scrollToSection, type ScrollToSectionOptions } from './utils/scrollToSection'
