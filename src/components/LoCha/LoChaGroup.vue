@@ -48,6 +48,19 @@ function getBeforeProperties(link: ApiLink): IFeature['properties'] | undefined 
   return loCha.value!.features.find(feature => feature.id === link!.before)?.properties
 }
 
+const groupName = computed(() => {
+  const beforeNames = [...new Set(getBeforeFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
+  const afterNames = [...new Set(getAfterFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
+
+  const beforeLabel = beforeNames.length > 0 ? beforeNames.join(', ') : '(unnamed)'
+  const afterLabel = afterNames.length > 0 ? afterNames.join(', ') : '(unnamed)'
+
+  if (beforeLabel === afterLabel)
+    return beforeLabel
+
+  return `${beforeLabel} → ${afterLabel}`
+})
+
 function getTagsTitle(link: ApiLink): string {
   let title = ''
 
@@ -64,6 +77,9 @@ function getTagsTitle(link: ApiLink): string {
   <div :id="id" class="locha-group">
     <div class="group-header">
       <a class="anchor-button" :href="`#${id}`" @click.prevent="$emit('navigate', `#${id}`)">🔗</a>
+      <h3 class="group-name">
+        {{ groupName }}
+      </h3>
       <div class="link-metadata">
         <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
       </div>
@@ -134,7 +150,7 @@ function getTagsTitle(link: ApiLink): string {
 .group-header {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 0.5rem;
 }
