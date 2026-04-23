@@ -141,13 +141,14 @@ header > a {
 }
 
 .fab-toggle {
-  background: none;
-  border: 1px solid #dcdfe6;
+  background-color: #e8e8ea;
+  border: 1px solid #c0c0c2;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
   line-height: 1;
-  padding: 0.15em 0.4em;
+  padding: 0.3em 0.5em;
   color: #333333;
 }
 
