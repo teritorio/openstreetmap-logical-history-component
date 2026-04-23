@@ -57,8 +57,7 @@ onMounted(() => {
   <div ref="listRef" class="locha-group-list">
     <ul>
       <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
-        <a class="anchor-button" :href="`#${groupId(index)}`" @click.prevent="navigateToHash(`#${groupId(index)}`)">🔗</a>
-        <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()">
+        <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" @navigate="navigateToHash">
           <template #tags-diff="slotProps">
             <slot name="tags-diff" v-bind="slotProps" />
           </template>
@@ -100,26 +99,8 @@ onMounted(() => {
   background-clip: content-box;
 }
 
-.locha-group-list > ul > li {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
-
 .locha-group-list > ul > li.selected .locha-group {
   border-color: v-bind(highlightBorderColor);
-}
-
-.locha-group-list > ul > li > div {
-  flex: 1;
-  min-width: 0;
-}
-
-.anchor-button {
-  border: 2px solid #cecece;
-  background-color: #ffffff;
-  text-decoration: none;
-  padding: 0.25rem;
 }
 
 ul {
