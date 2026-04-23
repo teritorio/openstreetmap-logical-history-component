@@ -14,7 +14,7 @@ defineSlots<{
   'tags-diff': (props: TagsDiffSlotProps) => void
   'link-metadata': (props: LinkMetadataSlotProps) => void
   'group-actions': (props: LinkMetadataSlotProps) => void
-  'changesets': (props: ChangesetsSlotProps) => void
+  'changesets'?: (props: ChangesetsSlotProps) => void
 }>()
 
 const { groups } = inject(LOCHA_KEY)!

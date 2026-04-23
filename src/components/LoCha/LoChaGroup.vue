@@ -19,8 +19,8 @@ defineEmits<{
 defineSlots<{
   'tags-diff': (props: TagsDiffSlotProps) => void
   'link-metadata': (props: LinkMetadataSlotProps) => void
-  'group-actions': (props: LinkMetadataSlotProps) => void
-  'changesets': (props: ChangesetsSlotProps) => void
+  'group-actions'?: (props: LinkMetadataSlotProps) => void
+  'changesets'?: (props: ChangesetsSlotProps) => void
 }>()
 
 const runtimeSlots = useSlots()
