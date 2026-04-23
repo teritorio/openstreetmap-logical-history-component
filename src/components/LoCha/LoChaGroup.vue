@@ -147,7 +147,6 @@ function getTagsTitle(link: ApiLink): string {
   gap: 1rem;
   border: 2px solid #cecece;
   background-color: #ffffff;
-  padding: 8px;
 }
 
 .group-header {
