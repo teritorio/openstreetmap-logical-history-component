@@ -23,8 +23,6 @@ const slots = defineSlots<{
   'changesets': (props: ChangesetsSlotProps) => void
 }>()
 
-const groupBackgroundPalette = ['#e0e0e2', '#e8e8ea', '#f0f0f2', '#f8f8fa']
-const groupBackground = computed(() => groupBackgroundPalette[props.index % groupBackgroundPalette.length])
 const gridColumns = computed(() => slots.changesets ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)')
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
@@ -148,7 +146,7 @@ function getTagsTitle(link: ApiLink): string {
   grid-template-columns: v-bind(gridColumns);
   gap: 1rem;
   border: 2px solid #cecece;
-  background-color: v-bind(groupBackground);
+  background-color: #ffffff;
   padding: 8px;
 }
 
