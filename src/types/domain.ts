@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { Actions, ApiLink, IFeature, LoChaData, Reason } from './api'
+import type { Actions, ApiLink, Changeset, IFeature, LoChaData, Reason } from './api'
 
 /**
  * The possible statuses for features in the system.
@@ -45,6 +45,14 @@ export interface TagsDiffSlotProps {
  */
 export interface LinkMetadataSlotProps {
   links: ApiLink[]
+  index: number
+}
+
+/**
+ * Props passed through the `changesets` slot across the LoCha component hierarchy.
+ */
+export interface ChangesetsSlotProps {
+  changesets: Changeset[]
   index: number
 }
 
