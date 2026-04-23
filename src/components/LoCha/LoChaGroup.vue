@@ -160,15 +160,16 @@ function getTagsTitle(link: ApiLink): string {
   grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 0.5rem;
-  background-color: #f0f0f2;
-  padding: 0.5rem;
-  border-bottom: 1px solid #cecece;
+  background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
+  padding: 0.75rem;
+  border-bottom: 1px solid #d0d0d2;
 }
 
 .group-name {
   margin: 0;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: #333333;
 }
 
 .anchor-button {
