@@ -93,12 +93,30 @@ A scoped slot rendered once per group, positioned to the right of the link metad
 | `index` | `number`    | The group index.                               |
 | `links` | `ApiLink[]` | The array of links associated with this group. |
 
+#### `#changesets`
+
+A scoped slot rendered once per group as the first column (before the "before" column). When provided, the grid switches from 3 to 4 columns. When omitted, the layout remains unchanged at 3 columns.
+
+| Prop         | Type          | Description                                         |
+| ------------ | ------------- | --------------------------------------------------- |
+| `index`      | `number`      | The group index.                                    |
+| `changesets` | `Changeset[]` | The full array of changesets from the API response. |
+
+> **Note:** The `changesets` array contains all changesets from the response, not filtered per group. The consumer is responsible for filtering relevant changesets (e.g. by matching `changeset_id` from feature properties against `Changeset.id`).
+
 Example usage:
 
 ```vue
 <LoCha :data="data" map-style-url="...">
   <template #group-actions="{ index, links }">
     <button @click="acceptGroup(index)">Accept</button>
+  </template>
+  <template #changesets="{ changesets, index }">
+    <ul>
+      <li v-for="cs in changesets" :key="cs.id">
+        {{ cs.user }} — {{ cs.tags?.comment }}
+      </li>
+    </ul>
   </template>
 </LoCha>
 ```
@@ -115,10 +133,14 @@ import type {
   ApiLink,
   ApiLinkGroups,
   ApiResponse,
+  Changeset,
+  ChangesetsSlotProps,
   IFeature,
+  LinkMetadataSlotProps,
   Reason,
   ReasonGeom,
   ReasonTags,
+  TagsDiffSlotProps,
 } from '@teritorio/openstreetmap-logical-history-component'
 ```
 
