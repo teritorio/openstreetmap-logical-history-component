@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ApiLink, IFeature, LinkMetadataSlotProps, LoChaGroup, TagsDiffSlotProps } from '@/types'
-import { inject } from 'vue'
+import { computed, inject } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
@@ -21,6 +21,9 @@ defineSlots<{
   'link-metadata': (props: LinkMetadataSlotProps) => void
   'group-actions': (props: LinkMetadataSlotProps) => void
 }>()
+
+const groupBackgroundPalette = ['#ededee', '#f0f0f1', '#f4f4f6', '#fafbfd']
+const groupBackground = computed(() => groupBackgroundPalette[props.index % groupBackgroundPalette.length])
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
@@ -124,7 +127,7 @@ function getTagsTitle(link: ApiLink): string {
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   border: 2px solid #cecece;
-  background-color: #ffffff;
+  background-color: v-bind(groupBackground);
   padding: 8px;
 }
 
