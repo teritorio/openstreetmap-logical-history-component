@@ -130,7 +130,9 @@ main {
   grid-row: 1;
   display: flex;
   gap: 1rem;
-  padding: 1rem 1rem 0;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
+  border-bottom: 1px solid #d0d0d2;
 }
 
 aside {
@@ -140,6 +142,10 @@ aside {
 .locha-header h2 {
   flex: 1;
   text-align: center;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333333;
 }
 
 .locha {
