@@ -86,11 +86,9 @@ function initMap() {
         },
         style: mapStyleUrl,
         cooperativeGestures: true,
-        attributionControl: {
-          compact: false,
-        },
+        attributionControl: false,
       })
-      map.value.addControl(new maplibre.NavigationControl())
+      map.value.addControl(new maplibre.FullscreenControl())
 
       map.value.on('load', handleMapOnLoad)
     }
