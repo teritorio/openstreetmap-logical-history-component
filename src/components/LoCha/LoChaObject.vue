@@ -10,7 +10,7 @@ const props = defineProps<{
   josmTarget?: string
 }>()
 
-defineSlots<{ 'tags-diff': () => void }>()
+defineSlots<{ 'object-detail'?: () => void }>()
 
 const { getStatus } = inject(LOCHA_KEY)!
 
@@ -108,7 +108,7 @@ const color = computed(() => loChaColors[status.value])
         👤{{ feature.properties.username }}
       </a>
     </header>
-    <slot name="tags-diff" />
+    <slot name="object-detail" />
   </article>
 </template>
 

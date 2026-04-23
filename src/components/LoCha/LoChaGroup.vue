@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApiLink, ChangesetsSlotProps, IFeature, LinkMetadataSlotProps, LoChaGroup, TagsDiffSlotProps } from '@/types'
+import type { GroupSlotProps, LoChaGroup, ObjectDetailSlotProps } from '@/types'
 import { computed, inject, useSlots } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
@@ -17,14 +17,14 @@ defineEmits<{
 }>()
 
 defineSlots<{
-  'tags-diff': (props: TagsDiffSlotProps) => void
-  'link-metadata': (props: LinkMetadataSlotProps) => void
-  'group-actions'?: (props: LinkMetadataSlotProps) => void
-  'changesets'?: (props: ChangesetsSlotProps) => void
+  'object-detail'?: (props: ObjectDetailSlotProps) => void
+  'header-center'?: (props: GroupSlotProps) => void
+  'header-end'?: (props: GroupSlotProps) => void
+  'content-start'?: (props: GroupSlotProps) => void
 }>()
 
 const runtimeSlots = useSlots()
-const gridColumns = computed(() => runtimeSlots.changesets ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)')
+const gridColumns = computed(() => runtimeSlots['content-start'] ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)')
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
@@ -32,22 +32,6 @@ const { loCha, getBeforeFeatures, getAfterFeatures } = inject(LOCHA_KEY)!
 
 if (!loCha.value)
   throw new Error('LoCha is empty.')
-
-function getDiffs(
-  feature: IFeature,
-  index: number,
-): ApiLink[] | undefined {
-  if (feature.properties.is_before) {
-    const link = loCha.value!.metadata.links[index].find(link => link.before === feature.id || link.after === feature.id)
-    return link && [link]
-  }
-
-  return loCha.value!.metadata.links[index].filter(link => link.before === feature.id || link.after === feature.id)
-}
-
-function getBeforeProperties(link: ApiLink): IFeature['properties'] | undefined {
-  return loCha.value!.features.find(feature => feature.id === link!.before)?.properties
-}
 
 const groupName = computed(() => {
   const beforeNames = [...new Set(getBeforeFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
@@ -61,17 +45,6 @@ const groupName = computed(() => {
 
   return `${beforeLabel} → ${afterLabel}`
 })
-
-function getTagsTitle(link: ApiLink): string {
-  let title = ''
-
-  const beforeFeature = loCha.value!.features.find(feature => feature.id === link!.before)
-
-  if (beforeFeature)
-    title = `${beforeFeature.properties.objtype}${beforeFeature.properties.id}-v${beforeFeature.properties.version}`
-
-  return title
-}
 </script>
 
 <template>
@@ -81,16 +54,16 @@ function getTagsTitle(link: ApiLink): string {
       <h3 class="group-name">
         {{ groupName }}
       </h3>
-      <div class="link-metadata">
-        <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
+      <div class="header-center">
+        <slot name="header-center" :index="index" />
       </div>
-      <div v-if="$slots['group-actions']" class="group-actions">
-        <slot name="group-actions" :links="loCha!.metadata.links[index]" :index="index" />
+      <div v-if="$slots['header-end']" class="header-end">
+        <slot name="header-end" :index="index" />
       </div>
     </div>
     <div class="group-content">
-      <div v-if="$slots.changesets" class="changesets-list">
-        <slot name="changesets" :changesets="loCha!.metadata.changesets" :index="index" />
+      <div v-if="$slots['content-start']" class="content-start">
+        <slot name="content-start" :index="index" />
       </div>
       <div class="before-list">
         <ul>
@@ -99,16 +72,8 @@ function getTagsTitle(link: ApiLink): string {
             :key="feature.id"
           >
             <LoChaObject :feature="feature" :josm-target="josmTarget">
-              <template #tags-diff>
-                <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
-                  <slot
-                    name="tags-diff"
-                    :date="feature.properties.created"
-                    :diff="link.diff_tags"
-                    :src="feature.properties"
-                    :reason="link.conflation_reason"
-                  />
-                </template>
+              <template v-if="$slots['object-detail']" #object-detail>
+                <slot name="object-detail" :feature="feature" :index="index" />
               </template>
             </LoChaObject>
           </li>
@@ -121,18 +86,8 @@ function getTagsTitle(link: ApiLink): string {
             :key="feature.id"
           >
             <LoChaObject :feature="feature" :josm-target="josmTarget">
-              <template #tags-diff>
-                <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
-                  <slot
-                    name="tags-diff"
-                    :date="feature.properties.created"
-                    :title="getTagsTitle(link)"
-                    :diff="link.diff_tags"
-                    :reason="link.conflation_reason"
-                    :dst="feature.properties"
-                    :src="getBeforeProperties(link)"
-                  />
-                </template>
+              <template v-if="$slots['object-detail']" #object-detail>
+                <slot name="object-detail" :feature="feature" :index="index" />
               </template>
             </LoChaObject>
           </li>
@@ -179,7 +134,7 @@ function getTagsTitle(link: ApiLink): string {
   padding: 0.25rem;
 }
 
-.link-metadata {
+.header-center {
   min-width: 0;
   display: flex;
   flex-wrap: wrap;

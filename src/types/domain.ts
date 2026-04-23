@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { Actions, ApiLink, Changeset, IFeature, LoChaData, Reason } from './api'
+import type { IFeature, LoChaData } from './api'
 
 /**
  * The possible statuses for features in the system.
@@ -29,30 +29,17 @@ export type Color = {
 export type LoChaGroup = IFeature[]
 
 /**
- * Props passed through the `tags-diff` slot across the LoCha component hierarchy.
+ * Props passed through the `object-detail` slot (rendered once per feature inside each object card).
  */
-export interface TagsDiffSlotProps {
-  date: string
-  diff: Actions | undefined
-  src?: IFeature['properties']
-  dst?: IFeature['properties']
-  reason: Reason
-  title?: string
-}
-
-/**
- * Props passed through the `link-metadata` slot across the LoCha component hierarchy.
- */
-export interface LinkMetadataSlotProps {
-  links: ApiLink[]
+export interface ObjectDetailSlotProps {
+  feature: IFeature
   index: number
 }
 
 /**
- * Props passed through the `changesets` slot across the LoCha component hierarchy.
+ * Props passed through group-level slots (`header-center`, `header-end`, `content-start`).
  */
-export interface ChangesetsSlotProps {
-  changesets: Changeset[]
+export interface GroupSlotProps {
   index: number
 }
 
