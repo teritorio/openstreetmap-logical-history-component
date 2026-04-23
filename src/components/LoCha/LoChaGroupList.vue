@@ -103,10 +103,6 @@ onMounted(() => {
   background-clip: content-box;
 }
 
-.locha-group-list > ul > li {
-  padding: 8px;
-}
-
 .locha-group-list > ul > li.selected .locha-group {
   border-color: v-bind(highlightBorderColor);
 }
