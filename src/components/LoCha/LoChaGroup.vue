@@ -89,7 +89,7 @@ function getTagsTitle(link: ApiLink): string {
         <slot name="group-actions" :links="loCha!.metadata.links[index]" :index="index" />
       </div>
     </div>
-    <div v-if="slots.changesets" class="changesets-list">
+    <div v-if="$slots.changesets" class="changesets-list">
       <slot name="changesets" :changesets="loCha!.metadata.changesets" :index="index" />
     </div>
     <div class="before-list">
