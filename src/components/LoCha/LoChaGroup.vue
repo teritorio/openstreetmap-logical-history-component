@@ -22,7 +22,7 @@ defineSlots<{
   'group-actions': (props: LinkMetadataSlotProps) => void
 }>()
 
-const groupBackgroundPalette = ['#ededee', '#f0f0f1', '#f4f4f6', '#fafbfd']
+const groupBackgroundPalette = ['#e0e0e2', '#e8e8ea', '#f0f0f2', '#f8f8fa']
 const groupBackground = computed(() => groupBackgroundPalette[props.index % groupBackgroundPalette.length])
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
