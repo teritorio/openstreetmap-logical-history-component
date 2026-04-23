@@ -55,7 +55,7 @@ const color = computed(() => loChaColors[status.value])
         <div class="actions">
           <a
             :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
-            type="button"
+            class="action-btn"
             title="Edit in OSM iD"
             target="_blank"
             @click.stop
@@ -64,7 +64,7 @@ const color = computed(() => loChaColors[status.value])
           </a>
           <a
             :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
-            type="button"
+            class="action-btn"
             title="Edit in JOSM"
             :target="josmTarget || 'hidden_josm_target'"
             @click.stop
@@ -73,7 +73,7 @@ const color = computed(() => loChaColors[status.value])
           </a>
           <a
             :href="getDeepHistoryUrl(feature.properties.objtype, feature.properties.id)"
-            type="button"
+            class="action-btn"
             title="OSM Deep History"
             target="_blank"
             @click.stop
@@ -82,7 +82,7 @@ const color = computed(() => loChaColors[status.value])
           </a>
           <a
             :href="getOsmHistoryViewerUrl(feature.properties.objtype, feature.properties.id)"
-            type="button"
+            class="action-btn"
             title="OSM History Viewer"
             target="_blank"
             @click.stop
@@ -124,6 +124,7 @@ header > a {
 
 .wrap {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 0.25rem;
 }
@@ -131,6 +132,7 @@ header > a {
 .actions {
   display: flex;
   margin-left: auto;
+  flex-shrink: 0;
 }
 
 :deep(.date),
@@ -144,7 +146,7 @@ header > a {
   gap: 0.5rem;
 }
 
-[type='button'] {
+.action-btn {
   flex-grow: 1;
   color: #000000;
   padding: 0.5em 1em;
