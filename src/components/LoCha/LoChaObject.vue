@@ -52,6 +52,44 @@ const color = computed(() => loChaColors[status.value])
         >
           {{ statusContent }}
         </div>
+        <div class="actions">
+          <a
+            :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
+            type="button"
+            title="Edit in OSM iD"
+            target="_blank"
+            @click.stop
+          >
+            OSM iD
+          </a>
+          <a
+            :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
+            type="button"
+            title="Edit in JOSM"
+            :target="josmTarget || 'hidden_josm_target'"
+            @click.stop
+          >
+            JOSM
+          </a>
+          <a
+            :href="getDeepHistoryUrl(feature.properties.objtype, feature.properties.id)"
+            type="button"
+            title="OSM Deep History"
+            target="_blank"
+            @click.stop
+          >
+            Deep H
+          </a>
+          <a
+            :href="getOsmHistoryViewerUrl(feature.properties.objtype, feature.properties.id)"
+            type="button"
+            title="OSM History Viewer"
+            target="_blank"
+            @click.stop
+          >
+            OSM H
+          </a>
+        </div>
       </div>
       <p class="date">
         📅 {{ props.feature.properties.created }}
@@ -66,44 +104,6 @@ const color = computed(() => loChaColors[status.value])
       </a>
     </header>
     <slot name="tags-diff" />
-    <div class="actions">
-      <a
-        :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
-        type="button"
-        title="Edit in OSM iD"
-        target="_blank"
-        @click.stop
-      >
-        OSM iD
-      </a>
-      <a
-        :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
-        type="button"
-        title="Edit in JOSM"
-        :target="josmTarget || 'hidden_josm_target'"
-        @click.stop
-      >
-        JOSM
-      </a>
-      <a
-        :href="getDeepHistoryUrl(feature.properties.objtype, feature.properties.id)"
-        type="button"
-        title="OSM Deep History"
-        target="_blank"
-        @click.stop
-      >
-        Deep H
-      </a>
-      <a
-        :href="getOsmHistoryViewerUrl(feature.properties.objtype, feature.properties.id)"
-        type="button"
-        title="OSM History Viewer"
-        target="_blank"
-        @click.stop
-      >
-        OSM H
-      </a>
-    </div>
   </article>
 </template>
 
@@ -125,11 +125,12 @@ header > a {
 .wrap {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.25rem;
 }
 
 .actions {
   display: flex;
+  margin-left: auto;
 }
 
 :deep(.date),
