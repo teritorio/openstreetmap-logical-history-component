@@ -5,4 +5,5 @@ export default antfu({
   formatters: true,
   typescript: true,
   vue: true,
+  ignores: ['.claude/worktrees/**'],
 })
