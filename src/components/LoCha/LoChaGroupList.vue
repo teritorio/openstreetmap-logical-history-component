@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChangesetsSlotProps, LinkMetadataSlotProps, TagsDiffSlotProps } from '@/types'
+import type { GroupSlotProps, ObjectDetailSlotProps } from '@/types'
 import { inject, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
@@ -11,10 +11,10 @@ const props = defineProps<{
 }>()
 
 defineSlots<{
-  'tags-diff': (props: TagsDiffSlotProps) => void
-  'link-metadata': (props: LinkMetadataSlotProps) => void
-  'group-actions': (props: LinkMetadataSlotProps) => void
-  'changesets'?: (props: ChangesetsSlotProps) => void
+  'object-detail'?: (props: ObjectDetailSlotProps) => void
+  'header-center'?: (props: GroupSlotProps) => void
+  'header-end'?: (props: GroupSlotProps) => void
+  'content-start'?: (props: GroupSlotProps) => void
 }>()
 
 const { groups } = inject(LOCHA_KEY)!
@@ -59,17 +59,17 @@ onMounted(() => {
     <ul>
       <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
         <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" @navigate="navigateToHash">
-          <template #tags-diff="slotProps">
-            <slot name="tags-diff" v-bind="slotProps" />
+          <template v-if="$slots['object-detail']" #object-detail="slotProps">
+            <slot name="object-detail" v-bind="slotProps" />
           </template>
-          <template #link-metadata="slotProps">
-            <slot name="link-metadata" v-bind="slotProps" />
+          <template v-if="$slots['header-center']" #header-center="slotProps">
+            <slot name="header-center" v-bind="slotProps" />
           </template>
-          <template #group-actions="slotProps">
-            <slot name="group-actions" v-bind="slotProps" />
+          <template v-if="$slots['header-end']" #header-end="slotProps">
+            <slot name="header-end" v-bind="slotProps" />
           </template>
-          <template v-if="$slots.changesets" #changesets="slotProps">
-            <slot name="changesets" v-bind="slotProps" />
+          <template v-if="$slots['content-start']" #content-start="slotProps">
+            <slot name="content-start" v-bind="slotProps" />
           </template>
         </LoChaGroup>
       </li>

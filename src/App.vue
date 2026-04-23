@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FormData, LoChaData } from '@/types'
+import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import LoCha from '@/components/LoCha/LoCha.vue'
@@ -56,6 +56,30 @@ async function fetchData(query: Record<string, string | undefined>) {
   geojson.value = await $api.fetchData(query)
 }
 
+function getLinks(feature: IFeature, index: number): ApiLink[] {
+  if (!geojson.value)
+    return []
+
+  const links = geojson.value.metadata.links[index]
+  if (feature.properties.is_before) {
+    const link = links.find(l => l.before === feature.id || l.after === feature.id)
+    return link ? [link] : []
+  }
+
+  return links.filter(l => l.before === feature.id || l.after === feature.id)
+}
+
+function getBeforeProperties(link: ApiLink): IFeature['properties'] | undefined {
+  return geojson.value?.features.find(f => f.id === link.before)?.properties
+}
+
+function getTagsTitle(link: ApiLink): string {
+  const beforeFeature = geojson.value?.features.find(f => f.id === link.before)
+  if (beforeFeature)
+    return `${beforeFeature.properties.objtype}${beforeFeature.properties.id}-v${beforeFeature.properties.version}`
+  return ''
+}
+
 function handleSubmit(data: FormData) {
   if (!data.dateStart)
     throw new Error('Missing start date.')
@@ -100,18 +124,28 @@ function handleSubmit(data: FormData) {
       <h2>After : {{ dateTo }}</h2>
     </div>
     <LoCha id="demo" :data="geojson" :reason-collapsed="false">
-      <template #tags-diff="{ title, date, diff, dst, src, reason }">
-        <div class="infos">
-          <span v-if="title" class="title">🔗 {{ title }}</span>
-          <span v-if="dst?.is_after && src" class="date">📅 {{ date }}</span>
-        </div>
-        <LoChaReason v-if="dst" :reason="reason" />
-        <LoChaDiff
-          v-if="!dst?.deleted"
-          :diff="diff"
-          :dst="dst"
-          :src="src"
-        />
+      <template #object-detail="{ feature, index }">
+        <template v-for="(link, i) in getLinks(feature, index)" :key="i">
+          <template v-if="feature.properties.is_after">
+            <div class="infos">
+              <span v-if="getTagsTitle(link)" class="title">🔗 {{ getTagsTitle(link) }}</span>
+              <span v-if="getBeforeProperties(link)" class="date">📅 {{ feature.properties.created }}</span>
+            </div>
+            <LoChaReason :reason="link.conflation_reason" />
+            <LoChaDiff
+              v-if="!feature.properties.deleted"
+              :diff="link.diff_tags"
+              :dst="feature.properties"
+              :src="getBeforeProperties(link)"
+            />
+          </template>
+          <template v-else>
+            <LoChaDiff
+              :diff="link.diff_tags"
+              :src="feature.properties"
+            />
+          </template>
+        </template>
       </template>
     </LoCha>
   </main>

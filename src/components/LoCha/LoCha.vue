@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ChangesetsSlotProps, LinkMetadataSlotProps, LoChaData, TagsDiffSlotProps } from '@/types'
+import type { GroupSlotProps, LoChaData, ObjectDetailSlotProps } from '@/types'
 import { provide, watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
@@ -18,10 +18,10 @@ const props = withDefaults(defineProps<{
 })
 
 defineSlots<{
-  'tags-diff': (props: TagsDiffSlotProps) => void
-  'link-metadata': (props: LinkMetadataSlotProps) => void
-  'group-actions': (props: LinkMetadataSlotProps) => void
-  'changesets'?: (props: ChangesetsSlotProps) => void
+  'object-detail'?: (props: ObjectDetailSlotProps) => void
+  'header-center'?: (props: GroupSlotProps) => void
+  'header-end'?: (props: GroupSlotProps) => void
+  'content-start'?: (props: GroupSlotProps) => void
 }>()
 
 provide(REASON_COLLAPSED_KEY, props.reasonCollapsed)
@@ -49,17 +49,17 @@ watch(() => props.data, (newValue) => {
       ⚠️ No data
     </p>
     <LoChaGroupList v-else :hash="hash">
-      <template #tags-diff="slotProps">
-        <slot name="tags-diff" v-bind="slotProps" />
+      <template v-if="$slots['object-detail']" #object-detail="slotProps">
+        <slot name="object-detail" v-bind="slotProps" />
       </template>
-      <template #link-metadata="slotProps">
-        <slot name="link-metadata" v-bind="slotProps" />
+      <template v-if="$slots['header-center']" #header-center="slotProps">
+        <slot name="header-center" v-bind="slotProps" />
       </template>
-      <template #group-actions="slotProps">
-        <slot name="group-actions" v-bind="slotProps" />
+      <template v-if="$slots['header-end']" #header-end="slotProps">
+        <slot name="header-end" v-bind="slotProps" />
       </template>
-      <template v-if="$slots.changesets" #changesets="slotProps">
-        <slot name="changesets" v-bind="slotProps" />
+      <template v-if="$slots['content-start']" #content-start="slotProps">
+        <slot name="content-start" v-bind="slotProps" />
       </template>
     </LoChaGroupList>
   </section>
