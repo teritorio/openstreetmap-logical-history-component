@@ -130,8 +130,8 @@ function getTagsTitle(link: ApiLink): string {
 
 .group-header {
   grid-column: 1 / -1;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 0.5rem;
 }
@@ -144,8 +144,11 @@ function getTagsTitle(link: ApiLink): string {
 }
 
 .link-metadata {
-  flex: 1;
   min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  place-content: center;
+  gap: 0.3em;
 }
 
 .before-list {
