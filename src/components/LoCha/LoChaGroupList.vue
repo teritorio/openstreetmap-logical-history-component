@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { LinkMetadataSlotProps, TagsDiffSlotProps } from '@/types'
+import type { ChangesetsSlotProps, LinkMetadataSlotProps, TagsDiffSlotProps } from '@/types'
 import { inject, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
@@ -14,6 +14,7 @@ defineSlots<{
   'tags-diff': (props: TagsDiffSlotProps) => void
   'link-metadata': (props: LinkMetadataSlotProps) => void
   'group-actions': (props: LinkMetadataSlotProps) => void
+  'changesets': (props: ChangesetsSlotProps) => void
 }>()
 
 const { groups } = inject(LOCHA_KEY)!
@@ -66,6 +67,9 @@ onMounted(() => {
           </template>
           <template #group-actions="slotProps">
             <slot name="group-actions" v-bind="slotProps" />
+          </template>
+          <template #changesets="slotProps">
+            <slot name="changesets" v-bind="slotProps" />
           </template>
         </LoChaGroup>
       </li>
