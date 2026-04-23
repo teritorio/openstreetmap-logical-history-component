@@ -84,7 +84,8 @@ onMounted(() => {
 
 .locha-group-list > ul {
   overflow-y: auto;
-  margin-right: -12px;
+  margin: 0;
+  padding: 0;
 }
 
 .locha-group-list > ul::-webkit-scrollbar {
