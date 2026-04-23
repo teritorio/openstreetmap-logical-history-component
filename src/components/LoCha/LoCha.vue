@@ -69,7 +69,6 @@ watch(() => props.data, (newValue) => {
 .locha {
   display: flex;
   flex-direction: column;
-  background-color: #f4f4f4;
   height: inherit;
 }
 
