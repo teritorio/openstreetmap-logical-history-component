@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApiLink, IFeature, LinkMetadataSlotProps, LoChaGroup, TagsDiffSlotProps } from '@/types'
+import type { ApiLink, ChangesetsSlotProps, IFeature, LinkMetadataSlotProps, LoChaGroup, TagsDiffSlotProps } from '@/types'
 import { computed, inject } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
@@ -16,14 +16,16 @@ defineEmits<{
   navigate: [hash: string]
 }>()
 
-defineSlots<{
+const slots = defineSlots<{
   'tags-diff': (props: TagsDiffSlotProps) => void
   'link-metadata': (props: LinkMetadataSlotProps) => void
   'group-actions': (props: LinkMetadataSlotProps) => void
+  'changesets': (props: ChangesetsSlotProps) => void
 }>()
 
 const groupBackgroundPalette = ['#e0e0e2', '#e8e8ea', '#f0f0f2', '#f8f8fa']
 const groupBackground = computed(() => groupBackgroundPalette[props.index % groupBackgroundPalette.length])
+const gridColumns = computed(() => slots.changesets ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)')
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
@@ -87,6 +89,9 @@ function getTagsTitle(link: ApiLink): string {
         <slot name="group-actions" :links="loCha!.metadata.links[index]" :index="index" />
       </div>
     </div>
+    <div v-if="slots.changesets" class="changesets-list">
+      <slot name="changesets" :changesets="loCha!.metadata.changesets" :index="index" />
+    </div>
     <div class="before-list">
       <ul>
         <li
@@ -140,7 +145,7 @@ function getTagsTitle(link: ApiLink): string {
 <style lang="css" scoped>
 .locha-group {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: v-bind(gridColumns);
   gap: 1rem;
   border: 2px solid #cecece;
   background-color: v-bind(groupBackground);
@@ -176,16 +181,7 @@ function getTagsTitle(link: ApiLink): string {
   gap: 0.3em;
 }
 
-.before-list {
-  grid-column: 1;
-}
-
-.after-list {
-  grid-column: 2;
-}
-
 .v-map {
-  grid-column: 3;
   border: 1px solid #000000;
 }
 

@@ -7,6 +7,8 @@ export type {
   ActionTypeOptions,
   ApiLink,
   ApiLinkGroups,
+  Changeset,
+  ChangesetsSlotProps,
   IFeature,
   LinkMetadataSlotProps,
   LoChaData,
