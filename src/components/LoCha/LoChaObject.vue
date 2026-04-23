@@ -53,8 +53,8 @@ const color = computed(() => loChaColors[status.value])
           {{ statusContent }}
         </div>
         <div class="fab">
-          <button class="fab-toggle" type="button" title="Actions">
-            ⋯
+          <button class="fab-toggle" type="button" title="Tools">
+            🔧 Tools
           </button>
           <div class="fab-menu">
             <a
