@@ -70,6 +70,7 @@ watch(() => props.data, (newValue) => {
   display: flex;
   flex-direction: column;
   height: inherit;
+  padding: 1rem;
 }
 
 .locha-group-list {
