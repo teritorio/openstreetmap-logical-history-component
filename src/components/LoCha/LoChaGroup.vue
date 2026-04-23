@@ -145,7 +145,7 @@ function getTagsTitle(link: ApiLink): string {
 
 <style lang="css" scoped>
 .locha-group {
-  border: 2px solid #cecece;
+  border: 2px solid #c8c8cc;
   background-color: #ffffff;
 }
 
@@ -161,9 +161,9 @@ function getTagsTitle(link: ApiLink): string {
   grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 0.5rem;
-  background-color: #f0f0f2;
+  background-color: #e8e8ec;
   padding: 0.5rem;
-  border-bottom: 1px solid #cecece;
+  border-bottom: 1px solid #c8c8cc;
 }
 
 .group-name {
@@ -173,7 +173,7 @@ function getTagsTitle(link: ApiLink): string {
 }
 
 .anchor-button {
-  border: 2px solid #cecece;
+  border: 2px solid #c8c8cc;
   background-color: #ffffff;
   text-decoration: none;
   padding: 0.25rem;
@@ -188,7 +188,7 @@ function getTagsTitle(link: ApiLink): string {
 }
 
 .v-map {
-  border: 1px solid #000000;
+  border: 1px solid #4a4a4a;
 }
 
 ul {

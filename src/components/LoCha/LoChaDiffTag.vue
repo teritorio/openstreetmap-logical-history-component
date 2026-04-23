@@ -46,7 +46,7 @@ defineProps<{
 }
 
 .no_changes {
-  background-color: #f4f4f5;
+  background-color: #ebebee;
 }
 
 .attribute-changed {

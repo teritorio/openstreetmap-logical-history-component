@@ -96,7 +96,7 @@ defineExpose({ getZoom })
 
 <style scoped>
 .map-bbox {
-  border: 1px solid grey;
+  border: 1px solid #a0a0a4;
   height: 250px;
   width: 100%;
 }

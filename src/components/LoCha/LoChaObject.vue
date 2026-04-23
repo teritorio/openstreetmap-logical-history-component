@@ -124,7 +124,7 @@ article {
 
 header > a {
   font-size: 0.75em;
-  color: #333333;
+  color: #2c2c2c;
 }
 
 .wrap {
@@ -141,15 +141,15 @@ header > a {
 }
 
 .fab-toggle {
-  background-color: #e8e8ea;
-  border: 1px solid #c0c0c2;
+  background-color: #ffffff;
+  border: 1px solid #a0a0a4;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1;
   padding: 0.3em 0.5em;
-  color: #333333;
+  color: #2c2c2c;
 }
 
 .fab-menu {
@@ -160,7 +160,7 @@ header > a {
   z-index: 5;
   flex-direction: column;
   background-color: #ffffff;
-  border: 1px solid #dcdfe6;
+  border: 1px solid #a0a0a4;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   min-width: max-content;
@@ -172,7 +172,7 @@ header > a {
 }
 
 .action-btn {
-  color: #000000;
+  color: #2c2c2c;
   padding: 0.4em 0.75em;
   font-size: 0.75em;
   text-decoration: none;
@@ -180,13 +180,13 @@ header > a {
 }
 
 .action-btn:hover {
-  background-color: #f0f0f2;
+  background-color: #e8e8ec;
 }
 
 :deep(.date),
 :deep(.title) {
   font-size: 12px;
-  color: grey;
+  color: #636366;
 }
 
 :deep(.infos) {
