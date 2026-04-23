@@ -53,7 +53,6 @@ const color = computed(() => loChaColors[status.value])
           {{ statusContent }}
         </div>
       </div>
-      <h3>{{ props.feature.properties.tags.name }}</h3>
       <p class="date">
         📅 {{ props.feature.properties.created }}
       </p>
@@ -116,10 +115,6 @@ article {
   flex-direction: column;
   gap: 4px;
   padding: 0.25rem;
-}
-
-h3 {
-  font-weight: 400;
 }
 
 header > a {
