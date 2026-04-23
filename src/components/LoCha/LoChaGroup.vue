@@ -24,7 +24,7 @@ defineSlots<{
 }>()
 
 const runtimeSlots = useSlots()
-const gridColumns = computed(() => runtimeSlots['content-start'] ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)')
+const gridColumns = computed(() => runtimeSlots['content-start'] ? 'repeat(4, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
