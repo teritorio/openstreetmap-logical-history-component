@@ -87,70 +87,75 @@ function getTagsTitle(link: ApiLink): string {
         <slot name="group-actions" :links="loCha!.metadata.links[index]" :index="index" />
       </div>
     </div>
-    <div v-if="$slots.changesets" class="changesets-list">
-      <slot name="changesets" :changesets="loCha!.metadata.changesets" :index="index" />
-    </div>
-    <div class="before-list">
-      <ul>
-        <li
-          v-for="feature in getBeforeFeatures(features)"
-          :key="feature.id"
-        >
-          <LoChaObject :feature="feature" :josm-target="josmTarget">
-            <template #tags-diff>
-              <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
-                <slot
-                  name="tags-diff"
-                  :date="feature.properties.created"
-                  :diff="link.diff_tags"
-                  :src="feature.properties"
-                  :reason="link.conflation_reason"
-                />
+    <div class="group-content">
+      <div v-if="$slots.changesets" class="changesets-list">
+        <slot name="changesets" :changesets="loCha!.metadata.changesets" :index="index" />
+      </div>
+      <div class="before-list">
+        <ul>
+          <li
+            v-for="feature in getBeforeFeatures(features)"
+            :key="feature.id"
+          >
+            <LoChaObject :feature="feature" :josm-target="josmTarget">
+              <template #tags-diff>
+                <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
+                  <slot
+                    name="tags-diff"
+                    :date="feature.properties.created"
+                    :diff="link.diff_tags"
+                    :src="feature.properties"
+                    :reason="link.conflation_reason"
+                  />
+                </template>
               </template>
-            </template>
-          </LoChaObject>
-        </li>
-      </ul>
-    </div>
-    <div class="after-list">
-      <ul>
-        <li
-          v-for="feature in getAfterFeatures(features)"
-          :key="feature.id"
-        >
-          <LoChaObject :feature="feature" :josm-target="josmTarget">
-            <template #tags-diff>
-              <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
-                <slot
-                  name="tags-diff"
-                  :date="feature.properties.created"
-                  :title="getTagsTitle(link)"
-                  :diff="link.diff_tags"
-                  :reason="link.conflation_reason"
-                  :dst="feature.properties"
-                  :src="getBeforeProperties(link)"
-                />
+            </LoChaObject>
+          </li>
+        </ul>
+      </div>
+      <div class="after-list">
+        <ul>
+          <li
+            v-for="feature in getAfterFeatures(features)"
+            :key="feature.id"
+          >
+            <LoChaObject :feature="feature" :josm-target="josmTarget">
+              <template #tags-diff>
+                <template v-for="(link, i) in getDiffs(feature, index)" :key="i">
+                  <slot
+                    name="tags-diff"
+                    :date="feature.properties.created"
+                    :title="getTagsTitle(link)"
+                    :diff="link.diff_tags"
+                    :reason="link.conflation_reason"
+                    :dst="feature.properties"
+                    :src="getBeforeProperties(link)"
+                  />
+                </template>
               </template>
-            </template>
-          </LoChaObject>
-        </li>
-      </ul>
+            </LoChaObject>
+          </li>
+        </ul>
+      </div>
+      <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" />
     </div>
-    <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" />
   </div>
 </template>
 
 <style lang="css" scoped>
 .locha-group {
-  display: grid;
-  grid-template-columns: v-bind(gridColumns);
-  gap: 1rem;
   border: 2px solid #cecece;
   background-color: #ffffff;
 }
 
+.group-content {
+  display: grid;
+  grid-template-columns: v-bind(gridColumns);
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
 .group-header {
-  grid-column: 1 / -1;
   display: grid;
   grid-template-columns: auto auto 1fr auto;
   align-items: center;
