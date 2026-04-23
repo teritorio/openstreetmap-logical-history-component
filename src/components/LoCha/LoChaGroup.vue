@@ -132,7 +132,7 @@ function getTagsTitle(link: ApiLink): string {
   grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
 }
 
