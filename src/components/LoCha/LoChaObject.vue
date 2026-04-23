@@ -186,7 +186,7 @@ header > a {
 :deep(.date),
 :deep(.title) {
   font-size: 12px;
-  color: #636366;
+  color: #48484a;
 }
 
 :deep(.infos) {

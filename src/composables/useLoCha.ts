@@ -10,7 +10,7 @@ export type { Color, LoCha, LoChaGroup, Status } from '@/types'
 export const loChaColors = {
   new: '#1a7f37',
   delete: '#cf222e',
-  updateBefore: '#953800',
+  updateBefore: '#a24200',
   updateAfter: '#0969da',
 } satisfies Color
 
