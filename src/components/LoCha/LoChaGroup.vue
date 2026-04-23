@@ -161,6 +161,7 @@ function getTagsTitle(link: ApiLink): string {
 
 .v-map {
   grid-column: 3;
+  border: 1px solid #000000;
 }
 
 ul {
@@ -168,5 +169,6 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
+  padding: 0;
 }
 </style>
