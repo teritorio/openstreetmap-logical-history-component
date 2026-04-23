@@ -6,9 +6,14 @@ import VMap from '@/components/VMap.vue'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
 
 const props = defineProps<{
+  id: string
   index: number
   features: LoChaGroup
   josmTarget?: string
+}>()
+
+defineEmits<{
+  navigate: [hash: string]
 }>()
 
 defineSlots<{
@@ -53,8 +58,9 @@ function getTagsTitle(link: ApiLink): string {
 </script>
 
 <template>
-  <div class="locha-group">
+  <div :id="id" class="locha-group">
     <div class="group-header">
+      <a class="anchor-button" :href="`#${id}`" @click.prevent="$emit('navigate', `#${id}`)">🔗</a>
       <div class="link-metadata">
         <slot name="link-metadata" :links="loCha!.metadata.links[index]" :index="index" />
       </div>
@@ -128,6 +134,13 @@ function getTagsTitle(link: ApiLink): string {
   justify-content: space-between;
   align-items: flex-start;
   gap: 0.5rem;
+}
+
+.anchor-button {
+  border: 2px solid #cecece;
+  background-color: #ffffff;
+  text-decoration: none;
+  padding: 0.25rem;
 }
 
 .link-metadata {
