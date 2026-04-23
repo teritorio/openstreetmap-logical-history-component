@@ -69,15 +69,8 @@ function getLinks(feature: IFeature, index: number): ApiLink[] {
   return links.filter(l => l.before === feature.id || l.after === feature.id)
 }
 
-function getBeforeProperties(link: ApiLink): IFeature['properties'] | undefined {
-  return geojson.value?.features.find(f => f.id === link.before)?.properties
-}
-
-function getTagsTitle(link: ApiLink): string {
-  const beforeFeature = geojson.value?.features.find(f => f.id === link.before)
-  if (beforeFeature)
-    return `${beforeFeature.properties.objtype}${beforeFeature.properties.id}-v${beforeFeature.properties.version}`
-  return ''
+function getBeforeFeature(link: ApiLink): IFeature | undefined {
+  return geojson.value?.features.find(f => f.id === link.before)
 }
 
 function handleSubmit(data: FormData) {
@@ -127,17 +120,19 @@ function handleSubmit(data: FormData) {
       <template #object-detail="{ feature, index }">
         <template v-for="(link, i) in getLinks(feature, index)" :key="i">
           <template v-if="feature.properties.is_after">
-            <div class="infos">
-              <span v-if="getTagsTitle(link)" class="title">🔗 {{ getTagsTitle(link) }}</span>
-              <span v-if="getBeforeProperties(link)" class="date">📅 {{ feature.properties.created }}</span>
-            </div>
-            <LoChaReason :reason="link.conflation_reason" />
-            <LoChaDiff
-              v-if="!feature.properties.deleted"
-              :diff="link.diff_tags"
-              :dst="feature.properties"
-              :src="getBeforeProperties(link)"
-            />
+            <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
+              <div class="infos">
+                <span v-if="before" class="title">🔗 {{ `${before.properties.objtype}${before.properties.id}-v${before.properties.version}` }}</span>
+                <span v-if="before" class="date">📅 {{ feature.properties.created }}</span>
+              </div>
+              <LoChaReason :reason="link.conflation_reason" />
+              <LoChaDiff
+                v-if="!feature.properties.deleted"
+                :diff="link.diff_tags"
+                :dst="feature.properties"
+                :src="before?.properties"
+              />
+            </template>
           </template>
           <template v-else>
             <LoChaDiff
