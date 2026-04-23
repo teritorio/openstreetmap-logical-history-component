@@ -10,7 +10,7 @@ import { inject, shallowRef, watch } from 'vue'
 import { MAP_STYLE_URL_KEY } from '@/constants/injectionKeys'
 import { MAP_STYLE_URL } from '@/constants/map'
 import { BBOX_SOURCE_ID, LAYERS, SOURCE_ID } from '@/constants/mapLayers'
-import { clipAndEnvelope, normalizeBbox } from '@/utils/geom'
+import { clipAndEnvelope, normalizeBboxForClipping, normalizeBboxForDisplay } from '@/utils/geom'
 import { OBJTYPE_FULL } from '@/utils/osm-links'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -61,14 +61,14 @@ watch(() => props.features, (newValue) => {
 
 function initMap() {
   if (!map.value) {
-    normalizedBbox = props.bbox ? normalizeBbox(props.bbox) : undefined
+    normalizedBbox = props.bbox ? normalizeBboxForClipping(props.bbox) : undefined
 
     const clipped = normalizedBbox
       ? clipAndEnvelope(props.features, normalizedBbox)
       : turfFeatureCollection(props.features)
 
     if (clipped) {
-      const boundsArray = normalizeBbox(turfBbox(clipped))
+      const boundsArray = normalizeBboxForDisplay(turfBbox(clipped))
 
       const bounds: [[number, number], [number, number]] = [
         [boundsArray[0], boundsArray[1]],
