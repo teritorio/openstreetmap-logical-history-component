@@ -155,6 +155,12 @@ function getTagsTitle(link: ApiLink): string {
   gap: 0.5rem;
 }
 
+.group-name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
 .anchor-button {
   border: 2px solid #cecece;
   background-color: #ffffff;
