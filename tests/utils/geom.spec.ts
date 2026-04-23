@@ -1,6 +1,6 @@
 import type { BBox } from 'geojson'
 import { describe, expect, it } from 'vitest'
-import { clipAndEnvelope, normalizeBbox } from '@/utils/geom'
+import { clipAndEnvelope, normalizeBboxForClipping, normalizeBboxForDisplay } from '@/utils/geom'
 
 describe('clipAndEnvelope', () => {
   const bbox: BBox = [-1, -1, 10, 10]
@@ -96,54 +96,59 @@ describe('clipAndEnvelope', () => {
   })
 })
 
-describe('normalizeBbox', () => {
-  it('always adds epsilon padding to non-degenerate bbox', () => {
+describe('normalizeBboxForClipping', () => {
+  it('adds ~100m padding to non-degenerate bbox', () => {
     const bbox = [-122.5, 37.7, -122.4, 37.8] as [number, number, number, number]
-    const result = normalizeBbox(bbox)
+    const result = normalizeBboxForClipping(bbox)
     expect(result[0]).toBeLessThan(-122.5)
     expect(result[1]).toBeLessThan(37.7)
     expect(result[2]).toBeGreaterThan(-122.4)
     expect(result[3]).toBeGreaterThan(37.8)
-  })
-
-  it('adds epsilon padding in standard GeoJSON format', () => {
-    const bbox = [43.4, -1.6, 43.5, -1.5] as [number, number, number, number]
-    const result = normalizeBbox(bbox)
-    expect(result[0]).toBeLessThan(43.4)
-    expect(result[1]).toBeLessThan(-1.6)
-    expect(result[2]).toBeGreaterThan(43.5)
-    expect(result[3]).toBeGreaterThan(-1.5)
-  })
-
-  it('pads degenerate bbox where minX === maxX', () => {
-    const bbox = [-122.5, 37.7, -122.5, 37.8] as [number, number, number, number]
-    const result = normalizeBbox(bbox)
-    expect(result[0]).toBeLessThan(-122.5)
-    expect(result[2]).toBeGreaterThan(-122.5)
-    expect(result[1]).toBeLessThan(37.7)
-    expect(result[3]).toBeGreaterThan(37.8)
-  })
-
-  it('pads degenerate bbox where minY === maxY', () => {
-    const bbox = [-122.5, 37.7, -122.4, 37.7] as [number, number, number, number]
-    const result = normalizeBbox(bbox)
-    expect(result[0]).toBeLessThan(-122.5)
-    expect(result[1]).toBeLessThan(37.7)
-    expect(result[2]).toBeGreaterThan(-122.4)
-    expect(result[3]).toBeGreaterThan(37.7)
   })
 
   it('pads fully degenerate bbox (single point)', () => {
     const bbox = [-1.572, 43.457, -1.572, 43.457] as [number, number, number, number]
-    const result = normalizeBbox(bbox)
+    const result = normalizeBboxForClipping(bbox)
     expect(result[0]).toBeLessThan(-1.572)
     expect(result[2]).toBeGreaterThan(-1.572)
     expect(result[1]).toBeLessThan(43.457)
     expect(result[3]).toBeGreaterThan(43.457)
   })
 
-  it('applies exact BBOX_PADDING of 0.001', () => {
+  it('applies exact clipping padding of 0.001', () => {
     const bbox = [0, 0, 10, 10] as [number, number, number, number]
-    expect(normalizeBbox(bbox)).toEqual([-0.001, -0.001, 10.001, 10.001])
+    expect(normalizeBboxForClipping(bbox)).toEqual([-0.001, -0.001, 10.001, 10.001])
+  })
+})
+
+describe('normalizeBboxForDisplay', () => {
+  it('adds ~10m padding to non-degenerate bbox', () => {
+    const bbox = [-122.5, 37.7, -122.4, 37.8] as [number, number, number, number]
+    const result = normalizeBboxForDisplay(bbox)
+    expect(result[0]).toBeLessThan(-122.5)
+    expect(result[1]).toBeLessThan(37.7)
+    expect(result[2]).toBeGreaterThan(-122.4)
+    expect(result[3]).toBeGreaterThan(37.8)
+  })
+
+  it('pads fully degenerate bbox (single point)', () => {
+    const bbox = [-1.572, 43.457, -1.572, 43.457] as [number, number, number, number]
+    const result = normalizeBboxForDisplay(bbox)
+    expect(result[0]).toBeLessThan(-1.572)
+    expect(result[2]).toBeGreaterThan(-1.572)
+    expect(result[1]).toBeLessThan(43.457)
+    expect(result[3]).toBeGreaterThan(43.457)
+  })
+
+  it('applies exact display padding of 0.0001', () => {
+    const bbox = [0, 0, 10, 10] as [number, number, number, number]
+    expect(normalizeBboxForDisplay(bbox)).toEqual([-0.0001, -0.0001, 10.0001, 10.0001])
+  })
+
+  it('applies smaller padding than clipping variant', () => {
+    const bbox = [0, 0, 0, 0] as [number, number, number, number]
+    const clipping = normalizeBboxForClipping(bbox)
+    const display = normalizeBboxForDisplay(bbox)
+    expect(Math.abs(display[0])).toBeLessThan(Math.abs(clipping[0]))
   })
 })
