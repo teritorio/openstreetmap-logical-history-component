@@ -37,7 +37,7 @@ function navigateToHash(hash: string) {
   if (currentHash.value === hash) {
     internalNavigation = true
     currentHash.value = undefined
-    history.replaceState(null, '', ' ')
+    history.replaceState(null, '', `${location.pathname}${location.search}`)
     nextTick(() => {
       internalNavigation = false
     })
