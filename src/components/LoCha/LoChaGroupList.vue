@@ -31,13 +31,30 @@ function josmTargetName(): string {
   return `hidden_josm_target_${instanceId}`
 }
 
+let internalNavigation = false
+
 function navigateToHash(hash: string) {
+  if (currentHash.value === hash) {
+    internalNavigation = true
+    currentHash.value = undefined
+    history.replaceState(null, '', ' ')
+    nextTick(() => {
+      internalNavigation = false
+    })
+    return
+  }
+  internalNavigation = true
   currentHash.value = hash
   history.replaceState(null, '', hash)
-  nextTick(() => scrollToSection(hash, { container: listRef.value ?? undefined }))
+  nextTick(() => {
+    internalNavigation = false
+    scrollToSection(hash, { container: listRef.value ?? undefined })
+  })
 }
 
 watch(() => props.hash, (newValue) => {
+  if (internalNavigation)
+    return
   currentHash.value = newValue
   if (newValue) {
     nextTick(() => scrollToSection(newValue, { container: listRef.value ?? undefined }))
