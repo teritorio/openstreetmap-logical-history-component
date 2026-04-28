@@ -66,7 +66,7 @@ span {
   flex-direction: column;
   background-color: #ffffff;
   font-size: 0.75rem;
-  border: 1px solid #000000;
+  border: 1px solid #3d3d3d;
   padding: 0.25rem;
 }
 

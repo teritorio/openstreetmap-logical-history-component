@@ -33,27 +33,37 @@ const { loCha, getBeforeFeatures, getAfterFeatures } = inject(LOCHA_KEY)!
 if (!loCha.value)
   throw new Error('LoCha is empty.')
 
-const groupName = computed(() => {
+const groupNameParts = computed(() => {
   const beforeNames = [...new Set(getBeforeFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
   const afterNames = [...new Set(getAfterFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
 
-  const beforeLabel = beforeNames.length > 0 ? beforeNames.join(', ') : '(unnamed)'
-  const afterLabel = afterNames.length > 0 ? afterNames.join(', ') : '(unnamed)'
+  const before = beforeNames.length > 0 ? beforeNames.join(', ') : null
+  const after = afterNames.length > 0 ? afterNames.join(', ') : '(unnamed)'
 
-  if (beforeLabel === afterLabel)
-    return beforeLabel
+  if (before === after)
+    return { before: null, after }
 
-  return `${beforeLabel} → ${afterLabel}`
+  return { before, after }
 })
+
+const groupNameTitle = computed(() =>
+  groupNameParts.value.before
+    ? `${groupNameParts.value.before} → ${groupNameParts.value.after}`
+    : groupNameParts.value.after,
+)
 </script>
 
 <template>
   <div :id="id" class="locha-group">
     <div class="group-header">
-      <a class="anchor-button" :href="`#${id}`" @click.prevent="$emit('navigate', `#${id}`)">🔗</a>
-      <h3 class="group-name">
-        {{ groupName }}
-      </h3>
+      <div class="header-start">
+        <a class="anchor-button" :href="`#${id}`" @click.prevent="$emit('navigate', `#${id}`)">🔗</a>
+        <h3 class="group-name" :title="groupNameTitle">
+          <span v-if="groupNameParts.before" class="name-before">{{ groupNameParts.before }}</span>
+          <span v-if="groupNameParts.before" class="name-separator"> → </span>
+          <span class="name-after">{{ groupNameParts.after }}</span>
+        </h3>
+      </div>
       <div class="header-center">
         <slot name="header-center" :index="index" />
       </div>
@@ -113,18 +123,46 @@ const groupName = computed(() => {
 
 .group-header {
   display: grid;
-  grid-template-columns: auto auto 1fr auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
   gap: 0.5rem;
-  background-color: #f0f0f2;
   padding: 0.5rem;
   border-bottom: 1px solid #cecece;
+}
+
+.header-start {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
 }
 
 .group-name {
   margin: 0;
   font-size: 1rem;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.name-before {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.name-separator {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.name-after {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .anchor-button {
@@ -143,7 +181,7 @@ const groupName = computed(() => {
 }
 
 .v-map {
-  border: 1px solid #000000;
+  border: 1px solid #3d3d3d;
 }
 
 ul {
