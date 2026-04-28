@@ -39,7 +39,7 @@ const groupNameParts = computed(() => {
   const afterNames = [...new Set(getAfterFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
 
   const before = beforeNames.length > 0 ? beforeNames.join(', ') : null
-  const after = afterNames.length > 0 ? afterNames.join(', ') : '(unnamed)'
+  const after = afterNames.length > 0 ? afterNames.join(', ') : null
 
   if (before === after)
     return { before: null, after }
@@ -47,11 +47,12 @@ const groupNameParts = computed(() => {
   return { before, after }
 })
 
-const groupNameTitle = computed(() =>
-  groupNameParts.value.before
-    ? `${groupNameParts.value.before} → ${groupNameParts.value.after}`
-    : groupNameParts.value.after,
-)
+const groupNameTitle = computed(() => {
+  const { before, after } = groupNameParts.value
+  if (before && after)
+    return `${before} → ${after}`
+  return before ?? after ?? undefined
+})
 </script>
 
 <template>
@@ -62,7 +63,7 @@ const groupNameTitle = computed(() =>
         <h3 class="group-name" :title="groupNameTitle">
           <span v-if="groupNameParts.before" class="name-before">{{ groupNameParts.before }}</span>
           <span v-if="groupNameParts.before" class="name-separator"> → </span>
-          <span class="name-after">{{ groupNameParts.after }}</span>
+          <span v-if="groupNameParts.after" class="name-after">{{ groupNameParts.after }}</span>
         </h3>
       </div>
       <div class="header-center">
