@@ -11,19 +11,19 @@ export type Status = 'new' | 'delete' | 'updateBefore' | 'updateAfter'
 
 /**
  * The Color type defines colors based on feature status.
- * - 'new' maps to '#1a7f37'
- * - 'delete' maps to '#cf222e'
- * - 'updateBefore' maps to '#953800'
- * - 'updateAfter' maps to '#0969da'
+ * - 'new' maps to '#52c41a'
+ * - 'delete' maps to '#FF0000'
+ * - 'updateBefore' maps to '#FFA479'
+ * - 'updateAfter' maps to '#F2BE00'
  */
 export type Color = {
   [key in Status]: key extends 'new'
-    ? '#1a7f37'
+    ? '#52c41a'
     : key extends 'delete'
-      ? '#cf222e'
+      ? '#FF0000'
       : key extends 'updateBefore'
-        ? '#953800'
-        : '#0969da'
+        ? '#FFA479'
+        : '#F2BE00'
 }
 
 export type LoChaGroup = IFeature[]
