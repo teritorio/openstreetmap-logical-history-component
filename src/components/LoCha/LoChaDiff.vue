@@ -197,7 +197,7 @@ thead th {
 table,
 th,
 td {
-  border: 1px solid #3d3d3d;
+  border: 1px solid #000000;
   border-collapse: collapse;
   padding: 0.15rem;
 }
@@ -232,7 +232,7 @@ td {
 }
 
 .no_changes {
-  background-color: #eaeaee;
+  background-color: #f4f4f5;
 }
 
 thead th > div {

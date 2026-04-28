@@ -183,7 +183,7 @@ const groupNameTitle = computed(() =>
 }
 
 .v-map {
-  border: 1px solid #3d3d3d;
+  border: 1px solid #000000;
 }
 
 ul {

@@ -142,8 +142,8 @@ header > a {
 }
 
 .fab-toggle {
-  background-color: #d0d0d4;
-  border: 1px solid #a8a8ac;
+  background-color: #e8e8ea;
+  border: 1px solid #c0c0c2;
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.75rem;
@@ -161,7 +161,7 @@ header > a {
   z-index: 5;
   flex-direction: column;
   background-color: #ffffff;
-  border: 1px solid #cecece;
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   min-width: max-content;
@@ -173,7 +173,7 @@ header > a {
 }
 
 .action-btn {
-  color: #3d3d3d;
+  color: #000000;
   padding: 0.4em 0.75em;
   font-size: 0.75em;
   text-decoration: none;
@@ -181,13 +181,13 @@ header > a {
 }
 
 .action-btn:hover {
-  background-color: #eaeaee;
+  background-color: #f0f0f2;
 }
 
 :deep(.date),
 :deep(.title) {
   font-size: 12px;
-  color: #666666;
+  color: grey;
 }
 
 :deep(.infos) {
