@@ -25,6 +25,7 @@ defineSlots<{
 
 const runtimeSlots = useSlots()
 const gridColumns = computed(() => runtimeSlots['content-start'] ? 'repeat(4, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
+const headerGridColumns = computed(() => runtimeSlots['header-end'] ? 'minmax(0, 1fr) minmax(0, 1fr) auto' : 'minmax(0, 1fr) minmax(0, 1fr)')
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
@@ -123,7 +124,7 @@ const groupNameTitle = computed(() =>
 
 .group-header {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: v-bind(headerGridColumns);
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
@@ -166,6 +167,7 @@ const groupNameTitle = computed(() =>
 }
 
 .anchor-button {
+  flex-shrink: 0;
   border: 2px solid #cecece;
   background-color: #ffffff;
   text-decoration: none;
