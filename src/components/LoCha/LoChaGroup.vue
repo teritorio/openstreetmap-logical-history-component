@@ -183,6 +183,12 @@ const groupNameTitle = computed(() => {
   gap: 0.3em;
 }
 
+.header-end {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
 .v-map {
   border: 1px solid #000000;
 }
