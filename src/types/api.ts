@@ -85,6 +85,6 @@ export interface LoChaData extends GeoJSON.FeatureCollection {
   features: IFeature[]
   metadata: {
     links: ApiLinkGroups
-    changesets: Changeset[]
+    changesets: Changeset[] | null
   }
 }
