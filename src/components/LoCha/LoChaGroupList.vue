@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GroupSlotProps, ObjectDetailSlotProps } from '@/types'
-import { inject, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
@@ -38,6 +38,7 @@ function navigateToHash(hash: string) {
     internalNavigation = true
     currentHash.value = undefined
     history.replaceState(null, '', `${location.pathname}${location.search}`)
+    window.dispatchEvent(new CustomEvent('locha-navigate', { detail: { hash: undefined, instanceId } }))
     nextTick(() => {
       internalNavigation = false
     })
@@ -46,10 +47,18 @@ function navigateToHash(hash: string) {
   internalNavigation = true
   currentHash.value = hash
   history.replaceState(null, '', hash)
+  window.dispatchEvent(new CustomEvent('locha-navigate', { detail: { hash, instanceId } }))
   nextTick(() => {
     internalNavigation = false
     scrollToSection(hash, { container: listRef.value ?? undefined })
   })
+}
+
+function handleExternalNavigate(e: Event) {
+  const { instanceId: sourceId } = (e as CustomEvent<{ hash: string | undefined, instanceId: string }>).detail
+  if (sourceId !== instanceId) {
+    currentHash.value = undefined
+  }
 }
 
 watch(() => props.hash, (newValue) => {
@@ -64,10 +73,15 @@ watch(() => props.hash, (newValue) => {
 })
 
 onMounted(() => {
+  window.addEventListener('locha-navigate', handleExternalNavigate)
   const hash = window.location.hash
   if (hash && !props.hash) {
     navigateToHash(hash)
   }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('locha-navigate', handleExternalNavigate)
 })
 </script>
 
