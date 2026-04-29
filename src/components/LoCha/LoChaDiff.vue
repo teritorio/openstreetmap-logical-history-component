@@ -140,7 +140,6 @@ const tagDiffs = computed(() => {
                   <span v-else-if="!(key in (dst?.tags || {}))">{{ src.tags[key] }} </span>
                   <span
                     v-else-if="tagDiffs.get(key)?.isInline"
-                    class="attribute-changed"
                   >
                     <span
                       v-for="(part, i) in tagDiffs.get(key)?.parts ?? []"
