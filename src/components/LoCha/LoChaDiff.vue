@@ -197,7 +197,7 @@ thead th {
 table,
 th,
 td {
-  border: 1px solid #000000;
+  border: none;
   border-collapse: collapse;
   padding: 0.15rem;
 }
