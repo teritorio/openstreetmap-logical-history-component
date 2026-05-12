@@ -18,9 +18,9 @@ export const LAYERS = {
     },
     paint: {
       'line-color': '#000000',
-      'line-width': 2,
-      'line-dasharray': [4, 4],
-      'line-offset': -6,
+      'line-width': 1,
+      'line-dasharray': [2, 2],
+      'line-offset': -32,
     },
   },
   PolygonBorder: {
