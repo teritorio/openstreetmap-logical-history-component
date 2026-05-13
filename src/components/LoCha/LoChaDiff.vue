@@ -241,6 +241,7 @@ thead th > div {
 
 td {
   vertical-align: top;
+  overflow-wrap: anywhere;
 }
 
 td.key {
