@@ -186,7 +186,7 @@ const tagDiffs = computed(() => {
 }
 
 table {
-  table-layout: fixed;
+  table-layout: auto;
 }
 
 thead th {
