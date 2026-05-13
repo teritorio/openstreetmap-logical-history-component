@@ -116,7 +116,6 @@ const color = computed(() => loChaColors[status.value])
 <style lang="css" scoped>
 article {
   border: 2px solid v-bind(color);
-  background-color: color-mix(in srgb, v-bind(color) 20%, white 80%);
   display: flex;
   flex-direction: column;
   gap: 4px;
