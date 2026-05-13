@@ -20,7 +20,7 @@ export const LAYERS = {
       'line-color': '#000000',
       'line-width': 1,
       'line-dasharray': [2, 2],
-      'line-offset': -32,
+      'line-offset': -24,
     },
   },
   PolygonBorder: {
