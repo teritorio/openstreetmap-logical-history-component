@@ -125,8 +125,7 @@ function handleMapOnLoad(): void {
     throw new Error('Call initMap() function first.')
 
   if (normalizedBbox) {
-    const isDegenerate = props.bbox![0] === props.bbox![2] || props.bbox![1] === props.bbox![3]
-    displayBbox(isDegenerate ? normalizeBboxForBboxLayer(props.bbox!) : normalizedBbox)
+    displayBbox(normalizeBboxForBboxLayer(props.bbox!))
   }
 
   map.value!.addSource(SOURCE_ID, {
