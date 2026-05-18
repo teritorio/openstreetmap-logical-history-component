@@ -49,9 +49,6 @@ export function clipAndEnvelope(
 // ~100m padding in degrees, ensures features on bbox edges are not excluded during clipping
 const CLIPPING_PADDING = 0.001
 
-// Minimal expansion for degenerate bboxes (point/line), visual padding comes from fitBounds padding
-const DEGENERATE_BBOX_PADDING = 0.00001
-
 function padBbox(bbox: GeoJSON.BBox, padding: number): [number, number, number, number] {
   return [
     bbox[0] - padding,
@@ -65,7 +62,6 @@ export function normalizeBboxForClipping(bbox: GeoJSON.BBox): [number, number, n
   return padBbox(bbox, CLIPPING_PADDING)
 }
 
-export function normalizeBboxForBboxLayer(bbox: GeoJSON.BBox): [number, number, number, number] {
-  const isDegenerate = bbox[0] === bbox[2] || bbox[1] === bbox[3]
-  return isDegenerate ? padBbox(bbox, DEGENERATE_BBOX_PADDING) : (bbox as [number, number, number, number])
+export function isBboxDegenerate(bbox: GeoJSON.BBox): boolean {
+  return bbox[0] === bbox[2] || bbox[1] === bbox[3]
 }
