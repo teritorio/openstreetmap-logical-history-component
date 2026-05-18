@@ -8,6 +8,7 @@ import { getDeepHistoryUrl, getJosmUrl, getOsmHistoryUrl, getOsmHistoryViewerUrl
 const props = defineProps<{
   feature: IFeature
   josmTarget?: string
+  compact?: boolean
 }>()
 
 defineSlots<{ 'object-detail'?: () => void }>()
@@ -43,7 +44,7 @@ const color = computed(() => loChaColors[status.value])
           {{ `${feature.properties.objtype}${feature.properties.id}-v${feature.properties.version}` }}
         </a>
         <div
-          v-if="status === 'new' || status === 'delete'"
+          v-if="!compact && (status === 'new' || status === 'delete')"
           class="status-content"
           :class="{
             'object-new': status === 'new',
@@ -52,7 +53,7 @@ const color = computed(() => loChaColors[status.value])
         >
           {{ statusContent }}
         </div>
-        <div class="fab">
+        <div v-if="!compact" class="fab">
           <button class="fab-toggle" type="button" title="Tools">
             🔧 Tools
           </button>
@@ -109,7 +110,7 @@ const color = computed(() => loChaColors[status.value])
         👤{{ feature.properties.username }}
       </a>
     </header>
-    <slot name="object-detail" />
+    <slot v-if="!compact" name="object-detail" />
   </article>
 </template>
 
