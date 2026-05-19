@@ -40,8 +40,8 @@ const isSingleNew = computed(() => beforeFeatures.value.length === 0 && afterFea
 const isSingleUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1)
 
 const groupNameParts = computed(() => {
-  const beforeNames = [...new Set(getBeforeFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
-  const afterNames = [...new Set(getAfterFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
+  const beforeNames = [...new Set(beforeFeatures.value.map(f => f.properties.tags?.name).filter(Boolean))]
+  const afterNames = [...new Set(afterFeatures.value.map(f => f.properties.tags?.name).filter(Boolean))]
 
   const before = beforeNames.length > 0 ? beforeNames.join(', ') : null
   const after = afterNames.length > 0 ? afterNames.join(', ') : null
@@ -82,7 +82,7 @@ const groupNameTitle = computed(() => {
       <div v-if="$slots['content-start']" class="content-start">
         <slot name="content-start" :index="index" />
       </div>
-      <div v-if="!isSingleUpdate" class="before-list" :class="{ 'list--wide': isSingleDelete }">
+      <div v-if="!isSingleUpdate && !isSingleNew" class="before-list" :class="{ 'list--wide': isSingleDelete }">
         <ul>
           <li
             v-for="feature in beforeFeatures"
@@ -96,8 +96,8 @@ const groupNameTitle = computed(() => {
           </li>
         </ul>
       </div>
-      <div class="after-list" :class="{ 'list--wide': isSingleNew || isSingleUpdate }">
-        <LoChaObject v-if="isSingleUpdate" :feature="beforeFeatures[0]" :compact="true" />
+      <div v-if="!isSingleDelete" class="after-list" :class="{ 'list--wide': isSingleNew || isSingleUpdate }">
+        <LoChaObject v-if="isSingleUpdate" :feature="beforeFeatures[0]!" :compact="true" />
         <ul>
           <li
             v-for="feature in afterFeatures"
