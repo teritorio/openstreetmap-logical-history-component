@@ -1,6 +1,6 @@
 import type { BBox } from 'geojson'
 import { describe, expect, it } from 'vitest'
-import { clipAndEnvelope, normalizeBboxForBboxLayer, normalizeBboxForClipping } from '@/utils/geom'
+import { clipAndEnvelope, isBboxDegenerate, normalizeBboxForClipping } from '@/utils/geom'
 
 describe('clipAndEnvelope', () => {
   const bbox: BBox = [-1, -1, 10, 10]
@@ -121,30 +121,20 @@ describe('normalizeBboxForClipping', () => {
   })
 })
 
-describe('normalizeBboxForBboxLayer', () => {
-  it('returns bbox as-is for non-degenerate bbox', () => {
-    const bbox = [0, 0, 10, 10] as [number, number, number, number]
-    expect(normalizeBboxForBboxLayer(bbox)).toEqual([0, 0, 10, 10])
+describe('isBboxDegenerate', () => {
+  it('returns false for non-degenerate bbox', () => {
+    expect(isBboxDegenerate([0, 0, 10, 10])).toBe(false)
   })
 
-  it('expands fully degenerate bbox (single point)', () => {
-    const bbox = [-1.572, 43.457, -1.572, 43.457] as [number, number, number, number]
-    const result = normalizeBboxForBboxLayer(bbox)
-    expect(result[0]).toBeLessThan(-1.572)
-    expect(result[2]).toBeGreaterThan(-1.572)
-    expect(result[1]).toBeLessThan(43.457)
-    expect(result[3]).toBeGreaterThan(43.457)
+  it('returns true for fully degenerate bbox (single point)', () => {
+    expect(isBboxDegenerate([-1.572, 43.457, -1.572, 43.457])).toBe(true)
   })
 
-  it('expands degenerate bbox with zero width (vertical line)', () => {
-    const bbox = [2.0, 48.0, 2.0, 48.5] as [number, number, number, number]
-    const result = normalizeBboxForBboxLayer(bbox)
-    expect(result[0]).toBeLessThan(2.0)
-    expect(result[2]).toBeGreaterThan(2.0)
+  it('returns true for degenerate bbox with zero width (vertical line)', () => {
+    expect(isBboxDegenerate([2.0, 48.0, 2.0, 48.5])).toBe(true)
   })
 
-  it('applies minimal expansion of 0.00001 on degenerate bbox', () => {
-    const bbox = [0, 0, 0, 0] as [number, number, number, number]
-    expect(normalizeBboxForBboxLayer(bbox)).toEqual([-0.00001, -0.00001, 0.00001, 0.00001])
+  it('returns true for degenerate bbox with zero height (horizontal line)', () => {
+    expect(isBboxDegenerate([0, 5, 10, 5])).toBe(true)
   })
 })

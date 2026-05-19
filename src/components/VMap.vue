@@ -10,7 +10,7 @@ import { inject, shallowRef, watch } from 'vue'
 import { MAP_STYLE_URL_KEY } from '@/constants/injectionKeys'
 import { MAP_STYLE_URL } from '@/constants/map'
 import { BBOX_SOURCE_ID, LAYERS, SOURCE_ID } from '@/constants/mapLayers'
-import { clipAndEnvelope, normalizeBboxForBboxLayer, normalizeBboxForClipping } from '@/utils/geom'
+import { clipAndEnvelope, isBboxDegenerate, normalizeBboxForClipping } from '@/utils/geom'
 import { OBJTYPE_FULL } from '@/utils/osm-links'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -124,8 +124,8 @@ function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
 
-  if (normalizedBbox) {
-    displayBbox(normalizeBboxForBboxLayer(props.bbox!))
+  if (props.bbox && !isBboxDegenerate(props.bbox)) {
+    displayBbox(props.bbox as [number, number, number, number])
   }
 
   map.value!.addSource(SOURCE_ID, {

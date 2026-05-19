@@ -33,9 +33,16 @@ const { loCha, getBeforeFeatures, getAfterFeatures } = inject(LOCHA_KEY)!
 if (!loCha.value)
   throw new Error('LoCha is empty.')
 
+const beforeFeatures = computed(() => getBeforeFeatures(props.features))
+const afterFeatures = computed(() => getAfterFeatures(props.features))
+const isSingleDelete = computed(() => beforeFeatures.value.length > 0 && afterFeatures.value.length === 0)
+const isSingleNew = computed(() => beforeFeatures.value.length === 0 && afterFeatures.value.length > 0)
+const isSingleDeletedUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !!afterFeatures.value[0]?.properties.deleted)
+const isSingleUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !afterFeatures.value[0]?.properties.deleted)
+
 const groupNameParts = computed(() => {
-  const beforeNames = [...new Set(getBeforeFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
-  const afterNames = [...new Set(getAfterFeatures(props.features).map(f => f.properties.tags?.name).filter(Boolean))]
+  const beforeNames = [...new Set(beforeFeatures.value.map(f => f.properties.tags?.name).filter(Boolean))]
+  const afterNames = [...new Set(afterFeatures.value.map(f => f.properties.tags?.name).filter(Boolean))]
 
   const before = beforeNames.length > 0 ? beforeNames.join(', ') : null
   const after = afterNames.length > 0 ? afterNames.join(', ') : null
@@ -76,10 +83,10 @@ const groupNameTitle = computed(() => {
       <div v-if="$slots['content-start']" class="content-start">
         <slot name="content-start" :index="index" />
       </div>
-      <div class="before-list">
+      <div v-if="!isSingleUpdate && !isSingleNew && !isSingleDeletedUpdate" class="before-list" :class="{ 'list--wide': isSingleDelete }">
         <ul>
           <li
-            v-for="feature in getBeforeFeatures(features)"
+            v-for="feature in beforeFeatures"
             :key="feature.id"
           >
             <LoChaObject :feature="feature" :josm-target="josmTarget">
@@ -90,18 +97,41 @@ const groupNameTitle = computed(() => {
           </li>
         </ul>
       </div>
-      <div class="after-list">
+      <div v-if="!isSingleDelete" class="after-list" :class="{ 'list--wide': isSingleNew || isSingleUpdate || isSingleDeletedUpdate }">
         <ul>
-          <li
-            v-for="feature in getAfterFeatures(features)"
-            :key="feature.id"
-          >
-            <LoChaObject :feature="feature" :josm-target="josmTarget">
-              <template v-if="$slots['object-detail']" #object-detail>
-                <slot name="object-detail" :feature="feature" :index="index" />
-              </template>
-            </LoChaObject>
-          </li>
+          <template v-if="isSingleDeletedUpdate">
+            <li>
+              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget">
+                <template #object-detail>
+                  <slot name="object-detail" :feature="beforeFeatures[0]!" :index="index" />
+                </template>
+              </LoChaObject>
+            </li>
+          </template>
+          <template v-else-if="isSingleUpdate">
+            <li>
+              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget">
+                <template #before>
+                  <LoChaObject :feature="beforeFeatures[0]!" :compact="true" />
+                </template>
+                <template #object-detail>
+                  <slot name="object-detail" :feature="afterFeatures[0]!" :index="index" />
+                </template>
+              </LoChaObject>
+            </li>
+          </template>
+          <template v-else>
+            <li
+              v-for="feature in afterFeatures"
+              :key="feature.id"
+            >
+              <LoChaObject :feature="feature" :josm-target="josmTarget">
+                <template v-if="$slots['object-detail']" #object-detail>
+                  <slot name="object-detail" :feature="feature" :index="index" />
+                </template>
+              </LoChaObject>
+            </li>
+          </template>
         </ul>
       </div>
       <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" />
@@ -186,6 +216,10 @@ const groupNameTitle = computed(() => {
   display: flex;
   align-items: center;
   gap: 0.3em;
+}
+
+.list--wide {
+  grid-column: span 2;
 }
 
 .v-map {
