@@ -10,8 +10,8 @@ permissions:
 
 # Allow only one concurrent deployment at a time
 concurrency:
-  group: pages # Group deployments by name for concurrency control
-  cancel-in-progress: true # Cancel any in-progress deployments if a new one starts
+  group: ${{ github.ref }} # Group by ref so tag pushes don't cancel branch runs
+  cancel-in-progress: true # Cancel any in-progress run for the same ref
 
 jobs:
   # Setup environment and dependencies
