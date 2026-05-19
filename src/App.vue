@@ -121,10 +121,6 @@ function handleSubmit(data: FormData) {
         <template v-for="(link, i) in getLinks(feature, index)" :key="i">
           <template v-if="feature.properties.is_after">
             <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
-              <div class="infos">
-                <span v-if="before" class="title">🔗 {{ `${before.properties.objtype}${before.properties.id}-v${before.properties.version}` }}</span>
-                <span v-if="before" class="date">📅 {{ feature.properties.created }}</span>
-              </div>
               <LoChaReason :reason="link.conflation_reason" />
               <LoChaDiff
                 v-if="!feature.properties.deleted"

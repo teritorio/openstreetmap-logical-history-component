@@ -11,7 +11,10 @@ const props = defineProps<{
   compact?: boolean
 }>()
 
-defineSlots<{ 'object-detail'?: () => void }>()
+defineSlots<{
+  'before'?: () => void
+  'object-detail'?: () => void
+}>()
 
 const { getStatus } = inject(LOCHA_KEY)!
 
@@ -33,83 +36,91 @@ const color = computed(() => loChaColors[status.value])
 
 <template>
   <article class="locha-object">
-    <header>
-      <div class="wrap">
+    <div class="header-row">
+      <template v-if="$slots.before">
+        <div class="before-content">
+          <slot name="before" />
+        </div>
+        <span class="header-arrow">→</span>
+      </template>
+      <header>
+        <div class="wrap">
+          <a
+            :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
+            title="OSM History"
+            target="_blank"
+            @click.stop
+          >
+            {{ `${feature.properties.objtype}${feature.properties.id}-v${feature.properties.version}` }}
+          </a>
+          <div
+            v-if="!compact && (status === 'new' || status === 'delete')"
+            class="status-content"
+            :class="{
+              'object-new': status === 'new',
+              'object-deleted': status === 'delete',
+            }"
+          >
+            {{ statusContent }}
+          </div>
+          <div v-if="!compact" class="fab">
+            <button class="fab-toggle" type="button" title="Tools">
+              🔧 Tools
+            </button>
+            <div class="fab-menu">
+              <a
+                :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
+                class="action-btn"
+                title="Edit in OSM iD"
+                target="_blank"
+                @click.stop
+              >
+                OSM iD
+              </a>
+              <a
+                :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
+                class="action-btn"
+                title="Edit in JOSM"
+                :target="josmTarget || 'hidden_josm_target'"
+                @click.stop
+              >
+                JOSM
+              </a>
+              <a
+                :href="getDeepHistoryUrl(feature.properties.objtype, feature.properties.id)"
+                class="action-btn"
+                title="OSM Deep History"
+                target="_blank"
+                @click.stop
+              >
+                Deep H
+              </a>
+              <a
+                :href="getOsmHistoryViewerUrl(feature.properties.objtype, feature.properties.id)"
+                class="action-btn"
+                title="OSM History Viewer"
+                target="_blank"
+                @click.stop
+              >
+                OSM H
+              </a>
+            </div>
+          </div>
+        </div>
+        <p class="date">
+          📅 {{ props.feature.properties.created }}
+        </p>
         <a
-          :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
-          title="OSM History"
+          v-if="feature.properties.username"
+          :href="getOsmUserUrl(feature.properties.username)"
+          :title="`View ${feature.properties.username} OSM profile`"
           target="_blank"
           @click.stop
         >
-          {{ `${feature.properties.objtype}${feature.properties.id}-v${feature.properties.version}` }}
+          👤{{ feature.properties.username }}
         </a>
-        <div
-          v-if="!compact && (status === 'new' || status === 'delete')"
-          class="status-content"
-          :class="{
-            'object-new': status === 'new',
-            'object-deleted': status === 'delete',
-          }"
-        >
-          {{ statusContent }}
-        </div>
-        <div v-if="!compact" class="fab">
-          <button class="fab-toggle" type="button" title="Tools">
-            🔧 Tools
-          </button>
-          <div class="fab-menu">
-            <a
-              :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
-              class="action-btn"
-              title="Edit in OSM iD"
-              target="_blank"
-              @click.stop
-            >
-              OSM iD
-            </a>
-            <a
-              :href="getJosmUrl(feature.properties.objtype, feature.properties.id)"
-              class="action-btn"
-              title="Edit in JOSM"
-              :target="josmTarget || 'hidden_josm_target'"
-              @click.stop
-            >
-              JOSM
-            </a>
-            <a
-              :href="getDeepHistoryUrl(feature.properties.objtype, feature.properties.id)"
-              class="action-btn"
-              title="OSM Deep History"
-              target="_blank"
-              @click.stop
-            >
-              Deep H
-            </a>
-            <a
-              :href="getOsmHistoryViewerUrl(feature.properties.objtype, feature.properties.id)"
-              class="action-btn"
-              title="OSM History Viewer"
-              target="_blank"
-              @click.stop
-            >
-              OSM H
-            </a>
-          </div>
-        </div>
-      </div>
-      <p class="date">
-        📅 {{ props.feature.properties.created }}
-      </p>
-      <a
-        v-if="feature.properties.username"
-        :href="getOsmUserUrl(feature.properties.username)"
-        :title="`View ${feature.properties.username} OSM profile`"
-        target="_blank"
-        @click.stop
-      >
-        👤{{ feature.properties.username }}
-      </a>
-    </header>
+      </header>
+    </div>
     <slot v-if="!compact" name="object-detail" />
   </article>
 </template>
@@ -121,6 +132,33 @@ article {
   flex-direction: column;
   gap: 4px;
   padding: 0.25rem;
+}
+
+.header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.before-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.before-content :deep(article) {
+  border: none;
+  padding: 0;
+}
+
+.header-arrow {
+  align-self: center;
+  flex-shrink: 0;
+  color: #666;
+}
+
+header {
+  flex: 1;
+  min-width: 0;
 }
 
 header > a {
