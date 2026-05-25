@@ -27,6 +27,7 @@ const runtimeSlots = useSlots()
 const hasContentStart = computed(() => !!runtimeSlots['content-start'])
 const gridColumns = computed(() => hasContentStart.value ? 'repeat(4, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
 const newColumnStart = computed(() => hasContentStart.value ? 3 : 2)
+const vmapColumnStart = computed(() => hasContentStart.value ? 4 : 3)
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
@@ -99,7 +100,7 @@ const groupNameTitle = computed(() => {
           </li>
         </ul>
       </div>
-      <div v-if="!isSingleDelete" class="after-list" :class="{ 'list--wide': isSingleUpdate || isSingleDeletedUpdate }" :style="isSingleNew ? { gridColumnStart: newColumnStart } : {}">
+      <div v-if="!isSingleDelete" class="after-list" :class="{ 'list--wide': isSingleUpdate }" :style="isSingleNew ? { gridColumnStart: newColumnStart } : isSingleDeletedUpdate ? { gridColumnStart: 2 } : {}">
         <ul>
           <template v-if="isSingleDeletedUpdate">
             <li>
@@ -136,7 +137,7 @@ const groupNameTitle = computed(() => {
           </template>
         </ul>
       </div>
-      <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" />
+      <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" :style="{ gridColumnStart: vmapColumnStart }" />
     </div>
   </div>
 </template>
