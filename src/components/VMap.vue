@@ -124,8 +124,11 @@ function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
 
-  if (props.bbox && !isBboxDegenerate(props.bbox)) {
-    displayBbox(props.bbox as [number, number, number, number])
+  if (props.bbox) {
+    const bbox = isBboxDegenerate(props.bbox)
+      ? [props.bbox[0] - 0.0001, props.bbox[1] - 0.0001, props.bbox[2] + 0.0001, props.bbox[3] + 0.0001] as [number, number, number, number]
+      : props.bbox as [number, number, number, number]
+    displayBbox(bbox)
   }
 
   map.value!.addSource(SOURCE_ID, {

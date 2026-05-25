@@ -187,6 +187,8 @@ const tagDiffs = computed(() => {
 
 table {
   table-layout: auto;
+  border-collapse: separate;
+  border-spacing: 0.25rem 0.15rem;
 }
 
 thead th {
@@ -197,7 +199,6 @@ table,
 th,
 td {
   border: none;
-  border-collapse: collapse;
   padding: 0.15rem;
 }
 

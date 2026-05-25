@@ -121,13 +121,13 @@ function handleSubmit(data: FormData) {
         <template v-for="(link, i) in getLinks(feature, index)" :key="i">
           <template v-if="feature.properties.is_after">
             <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
-              <LoChaReason :reason="link.conflation_reason" />
               <LoChaDiff
                 v-if="!feature.properties.deleted"
                 :diff="link.diff_tags"
                 :dst="feature.properties"
                 :src="before?.properties"
               />
+              <LoChaReason :reason="link.conflation_reason" />
             </template>
           </template>
           <template v-else>

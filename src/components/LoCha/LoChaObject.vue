@@ -141,7 +141,7 @@ article {
 }
 
 .before-content {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
 }
 
