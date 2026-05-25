@@ -85,7 +85,7 @@ const groupNameTitle = computed(() => {
       <div v-if="$slots['content-start']" class="content-start">
         <slot name="content-start" :index="index" />
       </div>
-      <div v-if="!isSingleUpdate && !isSingleNew && !isSingleDeletedUpdate" class="before-list">
+      <div v-if="!isSingleUpdate && !isSingleNew && !isSingleDeletedUpdate" class="before-list" :style="isSingleDelete ? { gridColumnStart: 2 } : {}">
         <ul>
           <li
             v-for="feature in beforeFeatures"
