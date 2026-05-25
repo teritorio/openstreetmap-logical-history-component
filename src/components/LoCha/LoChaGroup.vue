@@ -24,7 +24,9 @@ defineSlots<{
 }>()
 
 const runtimeSlots = useSlots()
-const gridColumns = computed(() => runtimeSlots['content-start'] ? 'repeat(4, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
+const hasContentStart = computed(() => !!runtimeSlots['content-start'])
+const gridColumns = computed(() => hasContentStart.value ? 'repeat(4, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
+const newColumnStart = computed(() => hasContentStart.value ? 3 : 2)
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
@@ -83,7 +85,7 @@ const groupNameTitle = computed(() => {
       <div v-if="$slots['content-start']" class="content-start">
         <slot name="content-start" :index="index" />
       </div>
-      <div v-if="!isSingleUpdate && !isSingleNew && !isSingleDeletedUpdate" class="before-list" :class="{ 'list--wide': isSingleDelete }">
+      <div v-if="!isSingleUpdate && !isSingleNew && !isSingleDeletedUpdate" class="before-list">
         <ul>
           <li
             v-for="feature in beforeFeatures"
@@ -97,7 +99,7 @@ const groupNameTitle = computed(() => {
           </li>
         </ul>
       </div>
-      <div v-if="!isSingleDelete" class="after-list" :class="{ 'list--wide': isSingleNew || isSingleUpdate || isSingleDeletedUpdate }">
+      <div v-if="!isSingleDelete" class="after-list" :class="{ 'list--wide': isSingleUpdate || isSingleDeletedUpdate }" :style="isSingleNew ? { gridColumnStart: newColumnStart } : {}">
         <ul>
           <template v-if="isSingleDeletedUpdate">
             <li>
