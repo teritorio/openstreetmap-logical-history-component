@@ -69,7 +69,19 @@ function initMap() {
       : turfFeatureCollection(props.features)
 
     if (clipped) {
-      const boundsArray = normalizedBbox ?? turfBbox(clipped) as [number, number, number, number]
+      const rawBounds = turfBbox(clipped) as [number, number, number, number]
+
+      // Clamp to original bbox: normalizedBbox adds fixed padding that can dwarf
+      // small query bboxes, causing clipped endpoints to fall outside the original bbox.
+      const b = props.bbox
+      const boundsArray: [number, number, number, number] = b
+        ? [
+            Math.max(rawBounds[0], b[0]),
+            Math.max(rawBounds[1], b[1]),
+            Math.min(rawBounds[2], b[2]),
+            Math.min(rawBounds[3], b[3]),
+          ]
+        : rawBounds
 
       initialBounds = [
         [boundsArray[0], boundsArray[1]],
