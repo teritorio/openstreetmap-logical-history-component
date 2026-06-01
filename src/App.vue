@@ -121,6 +121,9 @@ function handleSubmit(data: FormData) {
         <template v-for="(link, i) in getLinks(feature, index)" :key="i">
           <template v-if="feature.properties.is_after">
             <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
+              <span v-if="before && geojson!.metadata.links[index].length > 1" class="before-link">
+                🔗 {{ `${before.properties.objtype}${before.properties.id}-v${before.properties.version}` }}
+              </span>
               <LoChaDiff
                 v-if="!feature.properties.deleted"
                 :diff="link.diff_tags"
@@ -175,5 +178,10 @@ aside {
 
 .locha {
   grid-column: 2;
+}
+
+.before-link {
+  font-size: 0.75em;
+  color: #888;
 }
 </style>
