@@ -26,11 +26,15 @@ type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
 }
 
-const paddingOptions = {
-  top: 60,
-  left: 60,
-  right: 60,
-  bottom: 80,
+function getPadding(container: HTMLElement) {
+  const w = container.offsetWidth
+  const h = container.offsetHeight
+  return {
+    top: Math.min(60, Math.floor(h * 0.15)),
+    left: Math.min(60, Math.floor(w * 0.15)),
+    right: Math.min(60, Math.floor(w * 0.15)),
+    bottom: Math.min(80, Math.floor(h * 0.20)),
+  }
 }
 
 const map = shallowRef<maplibre.Map>()
@@ -38,7 +42,6 @@ const isVisible = shallowRef(false)
 const popup = shallowRef<maplibre.Popup>()
 const hoveredStateFeature = shallowRef<maplibre.MapGeoJSONFeature>()
 let normalizedBbox: [number, number, number, number] | undefined
-let initialBounds: [[number, number], [number, number]] | undefined
 
 watch(isVisible, (newState) => {
   if (newState) {
@@ -62,6 +65,10 @@ watch(() => props.features, (newValue) => {
 
 function initMap() {
   if (!map.value) {
+    const container = document.getElementById(`map-${props.id}`)
+    if (!container)
+      return
+
     normalizedBbox = props.bbox ? normalizeBboxForClipping(props.bbox) : undefined
 
     const clipped = normalizedBbox
@@ -83,7 +90,7 @@ function initMap() {
           ]
         : rawBounds
 
-      initialBounds = [
+      const bounds: [[number, number], [number, number]] = [
         [boundsArray[0], boundsArray[1]],
         [boundsArray[2], boundsArray[3]],
       ]
@@ -91,6 +98,12 @@ function initMap() {
       map.value = new maplibre.Map({
         hash: false,
         container: `map-${props.id}`,
+        bounds,
+        fitBoundsOptions: {
+          padding: getPadding(container),
+          animate: false,
+          maxZoom: 17,
+        },
         style: mapStyleUrl,
         cooperativeGestures: true,
         attributionControl: false,
@@ -130,15 +143,6 @@ function displayBbox(bbox: BBox): void {
 function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
-
-  map.value.resize()
-  if (initialBounds) {
-    map.value.fitBounds(initialBounds, {
-      padding: paddingOptions,
-      animate: false,
-      maxZoom: 17,
-    })
-  }
 
   if (props.bbox) {
     const bbox = isBboxDegenerate(props.bbox)
