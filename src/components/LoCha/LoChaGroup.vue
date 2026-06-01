@@ -175,28 +175,12 @@ const groupNameTitle = computed(() => {
   margin: 0;
   font-size: 1rem;
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
   min-width: 0;
-}
-
-.name-before {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex-shrink: 1;
-  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .name-separator {
-  flex-shrink: 0;
   white-space: nowrap;
-}
-
-.name-after {
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .anchor-button {
