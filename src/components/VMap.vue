@@ -68,7 +68,7 @@ function initMap() {
       : turfFeatureCollection(props.features)
 
     if (clipped) {
-      const boundsArray = turfBbox(clipped) as [number, number, number, number]
+      const boundsArray = normalizedBbox ?? turfBbox(clipped) as [number, number, number, number]
 
       const bounds: [[number, number], [number, number]] = [
         [boundsArray[0], boundsArray[1]],

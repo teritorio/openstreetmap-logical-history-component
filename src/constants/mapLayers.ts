@@ -12,10 +12,14 @@ export const LAYERS = {
     id: 'bbox-layer',
     type: 'line',
     source: BBOX_SOURCE_ID,
+    layout: {
+      'line-join': 'miter',
+    },
     paint: {
       'line-color': '#000000',
       'line-width': 1,
       'line-dasharray': [2, 2],
+      'line-offset': -32,
     },
   },
   PolygonBorder: {
