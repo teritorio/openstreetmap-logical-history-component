@@ -52,6 +52,7 @@ export interface LoCha {
   groups: Ref<LoChaGroup[]>
   loCha: Ref<LoChaData | undefined>
   setLoCha: (loCha: LoChaData) => void
+  resetLoCha: () => void
   getStatus: (feature: IFeature) => Status
   getBeforeFeatures: (features: IFeature[]) => IFeature[]
   getAfterFeatures: (features: IFeature[]) => IFeature[]

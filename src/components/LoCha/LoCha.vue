@@ -35,6 +35,7 @@ const {
   featureCount,
   groups,
   setLoCha,
+  resetLoCha,
 } = loChaInstance
 
 const isSingle = computed(() => groups.value.length === 1)
@@ -42,6 +43,9 @@ const isSingle = computed(() => groups.value.length === 1)
 watch(() => props.data, (newValue) => {
   if (newValue) {
     setLoCha(newValue)
+  }
+  else {
+    resetLoCha()
   }
 }, { immediate: true })
 </script>
