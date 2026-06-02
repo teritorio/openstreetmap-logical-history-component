@@ -113,8 +113,8 @@ function handleSubmit(data: FormData) {
       @submit="handleSubmit"
     />
     <div v-if="dateFrom || dateTo" class="locha-header">
-      <h2>Before : {{ dateFrom }}</h2>
-      <h2>After : {{ dateTo }}</h2>
+      <h2>From : {{ dateFrom }}</h2>
+      <h2>To : {{ dateTo }}</h2>
     </div>
     <LoCha id="demo" :data="geojson" :reason-collapsed="false">
       <template #object-detail="{ feature, index }">
