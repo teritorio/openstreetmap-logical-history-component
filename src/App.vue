@@ -133,6 +133,12 @@ function handleSubmit(data: FormData) {
               <LoChaReason :reason="link.conflation_reason" />
             </template>
           </template>
+          <template v-else-if="feature.properties.is_new">
+            <LoChaDiff
+              :diff="link.diff_tags"
+              :dst="feature.properties"
+            />
+          </template>
           <template v-else>
             <LoChaDiff
               :diff="link.diff_tags"
