@@ -162,9 +162,10 @@ main {
 .locha-header {
   grid-column: 2;
   grid-row: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
   border-bottom: 1px solid #d0d0d2;
 }
@@ -174,7 +175,6 @@ aside {
 }
 
 .locha-header h2 {
-  flex: 1;
   text-align: center;
   margin: 0;
   font-size: 1rem;
