@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { GroupSlotProps, LoChaGroup, ObjectDetailSlotProps } from '@/types'
+import type { GroupSlotProps, IFeature, LoChaGroup, ObjectDetailSlotProps } from '@/types'
 import { computed, inject, useSlots } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
