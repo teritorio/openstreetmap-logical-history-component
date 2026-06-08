@@ -56,46 +56,12 @@ watch(isVisible, (newState) => {
 })
 
 watch(() => props.features, (newValue) => {
-  if (!map.value || !isVisible.value || !newValue)
-    return
-
-  const source = map.value.getSource(SOURCE_ID) as maplibre.GeoJSONSource
-  if (!source) {
+  if (map.value && isVisible.value && newValue) {
     map.value.remove()
     map.value = undefined
     initMap()
-    return
   }
-
-  source.setData({ type: 'FeatureCollection', features: newValue })
 })
-
-function computeBounds(features: LoChaGroup): [[number, number], [number, number]] | undefined {
-  normalizedBbox = props.bbox ? normalizeBboxForClipping(props.bbox) : undefined
-
-  const clipped = normalizedBbox
-    ? clipAndEnvelope(features, normalizedBbox)
-    : turfFeatureCollection(features)
-
-  if (!clipped)
-    return undefined
-
-  const rawBounds = turfBbox(clipped) as [number, number, number, number]
-
-  // Clamp to original bbox: normalizedBbox adds fixed padding that can dwarf
-  // small query bboxes, causing clipped endpoints to fall outside the original bbox.
-  const b = props.bbox
-  const boundsArray: [number, number, number, number] = b
-    ? [
-        Math.max(rawBounds[0], b[0]),
-        Math.max(rawBounds[1], b[1]),
-        Math.min(rawBounds[2], b[2]),
-        Math.min(rawBounds[3], b[3]),
-      ]
-    : rawBounds
-
-  return [[boundsArray[0], boundsArray[1]], [boundsArray[2], boundsArray[3]]]
-}
 
 function initMap() {
   if (!map.value) {
@@ -103,26 +69,49 @@ function initMap() {
     if (!container)
       return
 
-    const bounds = computeBounds(props.features)
-    if (!bounds)
-      return
+    normalizedBbox = props.bbox ? normalizeBboxForClipping(props.bbox) : undefined
 
-    map.value = new maplibre.Map({
-      hash: false,
-      container: `map-${props.id}`,
-      bounds,
-      fitBoundsOptions: {
-        padding: getPadding(container),
-        animate: false,
-        maxZoom: 17,
-      },
-      style: mapStyleUrl,
-      cooperativeGestures: true,
-      attributionControl: false,
-    })
-    map.value.addControl(new maplibre.FullscreenControl())
+    const clipped = normalizedBbox
+      ? clipAndEnvelope(props.features, normalizedBbox)
+      : turfFeatureCollection(props.features)
 
-    map.value.on('load', handleMapOnLoad)
+    if (clipped) {
+      const rawBounds = turfBbox(clipped) as [number, number, number, number]
+
+      // Clamp to original bbox: normalizedBbox adds fixed padding that can dwarf
+      // small query bboxes, causing clipped endpoints to fall outside the original bbox.
+      const b = props.bbox
+      const boundsArray: [number, number, number, number] = b
+        ? [
+            Math.max(rawBounds[0], b[0]),
+            Math.max(rawBounds[1], b[1]),
+            Math.min(rawBounds[2], b[2]),
+            Math.min(rawBounds[3], b[3]),
+          ]
+        : rawBounds
+
+      const bounds: [[number, number], [number, number]] = [
+        [boundsArray[0], boundsArray[1]],
+        [boundsArray[2], boundsArray[3]],
+      ]
+
+      map.value = new maplibre.Map({
+        hash: false,
+        container: `map-${props.id}`,
+        bounds,
+        fitBoundsOptions: {
+          padding: getPadding(container),
+          animate: false,
+          maxZoom: 17,
+        },
+        style: mapStyleUrl,
+        cooperativeGestures: true,
+        attributionControl: false,
+      })
+      map.value.addControl(new maplibre.FullscreenControl())
+
+      map.value.on('load', handleMapOnLoad)
+    }
   }
 }
 
