@@ -219,6 +219,7 @@ const groupNameTitle = computed(() => {
 .header-end {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.3em;
 }
 
