@@ -71,12 +71,21 @@ function initMap() {
 
     normalizedBbox = props.bbox ? normalizeBboxForClipping(props.bbox) : undefined
 
+    const geoFeatures = props.features.filter(f => f.geometry != null)
+    if (!geoFeatures.length)
+      return
+
     const clipped = normalizedBbox
-      ? clipAndEnvelope(props.features, normalizedBbox)
-      : turfFeatureCollection(props.features)
+      ? clipAndEnvelope(geoFeatures, normalizedBbox)
+      : turfFeatureCollection(geoFeatures)
 
     if (clipped) {
-      const rawBounds = turfBbox(clipped) as [number, number, number, number]
+      let rawBounds = turfBbox(clipped) as [number, number, number, number]
+
+      // Expand degenerate bounds (single point) so MapLibre fitBounds doesn't default to world level.
+      if (isBboxDegenerate(rawBounds)) {
+        rawBounds = [rawBounds[0] - 0.0001, rawBounds[1] - 0.0001, rawBounds[2] + 0.0001, rawBounds[3] + 0.0001]
+      }
 
       // Clamp to original bbox: normalizedBbox adds fixed padding that can dwarf
       // small query bboxes, causing clipped endpoints to fall outside the original bbox.
