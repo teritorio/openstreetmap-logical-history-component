@@ -68,7 +68,6 @@ watch(() => props.features, (newValue) => {
   }
 
   source.setData({ type: 'FeatureCollection', features: newValue })
-  refitBounds(newValue)
 })
 
 function computeBounds(features: LoChaGroup): [[number, number], [number, number]] | undefined {
@@ -96,25 +95,6 @@ function computeBounds(features: LoChaGroup): [[number, number], [number, number
     : rawBounds
 
   return [[boundsArray[0], boundsArray[1]], [boundsArray[2], boundsArray[3]]]
-}
-
-function refitBounds(features: LoChaGroup): void {
-  if (!map.value)
-    return
-
-  const bounds = computeBounds(features)
-  if (!bounds)
-    return
-
-  const container = document.getElementById(`map-${props.id}`)
-  if (!container)
-    return
-
-  map.value.fitBounds(bounds, {
-    padding: getPadding(container),
-    animate: false,
-    maxZoom: 17,
-  })
 }
 
 function initMap() {
