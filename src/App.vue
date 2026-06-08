@@ -141,7 +141,6 @@ function handleSubmit(data: FormData) {
           </template>
           <template v-else>
             <LoChaDiff
-              v-if="!link.after"
               :src="feature.properties"
             />
           </template>
