@@ -43,14 +43,18 @@ const isSingleNew = computed(() => beforeFeatures.value.length === 0 && afterFea
 const isSingleDeletedUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !!afterFeatures.value[0]?.properties.deleted)
 const isSingleUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !afterFeatures.value[0]?.properties.deleted)
 
-function getBeforeFeaturesForAfter(afterFeature: IFeature): IFeature[] {
+const beforeFeaturesPerAfter = computed((): Map<string | number, IFeature[]> => {
   const links = loCha.value?.metadata.links[props.index] ?? []
-  const beforeIds = links
-    .filter(link => link.after === afterFeature.id)
-    .map(link => link.before)
-    .filter(Boolean)
-  return props.features.filter(f => beforeIds.includes(f.id as string))
-}
+  return new Map(
+    afterFeatures.value.map((afterFeature) => {
+      const beforeIds = links
+        .filter(link => link.after === afterFeature.id)
+        .map(link => link.before)
+        .filter(Boolean)
+      return [afterFeature.id as string | number, props.features.filter(f => beforeIds.includes(f.id as string))]
+    }),
+  )
+})
 
 const groupNameParts = computed(() => {
   const beforeNames = [...new Set(beforeFeatures.value.map(f => f.properties.tags?.name).filter(Boolean))]
@@ -138,9 +142,9 @@ const groupNameTitle = computed(() => {
               :key="feature.id"
             >
               <LoChaObject :feature="feature" :josm-target="josmTarget">
-                <template v-if="getBeforeFeaturesForAfter(feature).length" #before>
+                <template v-if="beforeFeaturesPerAfter.get(feature.id)?.length" #before>
                   <LoChaObject
-                    v-for="beforeFeature in getBeforeFeaturesForAfter(feature)"
+                    v-for="beforeFeature in beforeFeaturesPerAfter.get(feature.id)"
                     :key="beforeFeature.id"
                     :feature="beforeFeature"
                     :compact="true"
