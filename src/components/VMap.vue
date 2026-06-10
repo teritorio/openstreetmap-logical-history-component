@@ -26,11 +26,15 @@ type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
 }
 
-const paddingOptions = {
-  top: 60,
-  left: 60,
-  right: 60,
-  bottom: 80,
+function getPadding(container: HTMLElement) {
+  const w = container.offsetWidth
+  const h = container.offsetHeight
+  return {
+    top: Math.min(60, Math.floor(h * 0.15)),
+    left: Math.min(60, Math.floor(w * 0.15)),
+    right: Math.min(60, Math.floor(w * 0.15)),
+    bottom: Math.min(80, Math.floor(h * 0.20)),
+  }
 }
 
 const map = shallowRef<maplibre.Map>()
@@ -38,7 +42,6 @@ const isVisible = shallowRef(false)
 const popup = shallowRef<maplibre.Popup>()
 const hoveredStateFeature = shallowRef<maplibre.MapGeoJSONFeature>()
 let normalizedBbox: [number, number, number, number] | undefined
-let initialBounds: [[number, number], [number, number]] | undefined
 
 watch(isVisible, (newState) => {
   if (newState) {
@@ -62,16 +65,43 @@ watch(() => props.features, (newValue) => {
 
 function initMap() {
   if (!map.value) {
+    const container = document.getElementById(`map-${props.id}`)
+    if (!container)
+      return
+
     normalizedBbox = props.bbox ? normalizeBboxForClipping(props.bbox) : undefined
 
+    const geoFeatures = props.features.filter(f => f.geometry != null)
+    if (!geoFeatures.length)
+      return
+
     const clipped = normalizedBbox
-      ? clipAndEnvelope(props.features, normalizedBbox)
-      : turfFeatureCollection(props.features)
+      ? clipAndEnvelope(geoFeatures, normalizedBbox)
+      : turfFeatureCollection(geoFeatures)
 
     if (clipped) {
-      const boundsArray = normalizedBbox ?? turfBbox(clipped) as [number, number, number, number]
+      let rawBounds = turfBbox(clipped) as [number, number, number, number]
 
-      initialBounds = [
+      // Expand degenerate bounds (single point) so MapLibre fitBounds doesn't default to world level.
+      if (isBboxDegenerate(rawBounds)) {
+        rawBounds = [rawBounds[0] - 0.0001, rawBounds[1] - 0.0001, rawBounds[2] + 0.0001, rawBounds[3] + 0.0001]
+      }
+
+      // Clamp to original bbox: normalizedBbox adds fixed padding that can dwarf
+      // small query bboxes, causing clipped endpoints to fall outside the original bbox.
+      const b = props.bbox
+      let boundsArray: [number, number, number, number] = b
+        ? [
+            Math.max(rawBounds[0], b[0]),
+            Math.max(rawBounds[1], b[1]),
+            Math.min(rawBounds[2], b[2]),
+            Math.min(rawBounds[3], b[3]),
+          ]
+        : rawBounds
+      if (boundsArray[0] > boundsArray[2] || boundsArray[1] > boundsArray[3])
+        boundsArray = rawBounds
+
+      const bounds: [[number, number], [number, number]] = [
         [boundsArray[0], boundsArray[1]],
         [boundsArray[2], boundsArray[3]],
       ]
@@ -79,6 +109,12 @@ function initMap() {
       map.value = new maplibre.Map({
         hash: false,
         container: `map-${props.id}`,
+        bounds,
+        fitBoundsOptions: {
+          padding: getPadding(container),
+          animate: false,
+          maxZoom: 17,
+        },
         style: mapStyleUrl,
         cooperativeGestures: true,
         attributionControl: false,
@@ -118,15 +154,6 @@ function displayBbox(bbox: BBox): void {
 function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
-
-  map.value.resize()
-  if (initialBounds) {
-    map.value.fitBounds(initialBounds, {
-      padding: paddingOptions,
-      animate: false,
-      maxZoom: 17,
-    })
-  }
 
   if (props.bbox) {
     const bbox = isBboxDegenerate(props.bbox)

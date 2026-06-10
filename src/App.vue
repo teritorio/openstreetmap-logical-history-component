@@ -113,8 +113,8 @@ function handleSubmit(data: FormData) {
       @submit="handleSubmit"
     />
     <div v-if="dateFrom || dateTo" class="locha-header">
-      <h2>Before : {{ dateFrom }}</h2>
-      <h2>After : {{ dateTo }}</h2>
+      <h2>From : {{ dateFrom }}</h2>
+      <h2>To : {{ dateTo }}</h2>
     </div>
     <LoCha id="demo" :data="geojson" :reason-collapsed="false">
       <template #object-detail="{ feature, index }">
@@ -133,9 +133,14 @@ function handleSubmit(data: FormData) {
               <LoChaReason :reason="link.conflation_reason" />
             </template>
           </template>
-          <template v-else>
+          <template v-else-if="feature.properties.is_new">
             <LoChaDiff
               :diff="link.diff_tags"
+              :dst="feature.properties"
+            />
+          </template>
+          <template v-else>
+            <LoChaDiff
               :src="feature.properties"
             />
           </template>
@@ -156,9 +161,10 @@ main {
 .locha-header {
   grid-column: 2;
   grid-row: 1;
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
-  padding: 0.75rem 1rem;
+  padding: 0.75rem 0.5rem;
   background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
   border-bottom: 1px solid #d0d0d2;
 }
@@ -168,7 +174,6 @@ aside {
 }
 
 .locha-header h2 {
-  flex: 1;
   text-align: center;
   margin: 0;
   font-size: 1rem;

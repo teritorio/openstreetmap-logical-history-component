@@ -87,9 +87,6 @@ export function useLoCha(): LoChaInterface {
     return loChaStatus.updateAfter
   }
 
-  /**
-   * Resets the LoCha state by clearing the LoCha data and resetting the feature arrays.
-   */
   function _resetState(): void {
     loCha.value = undefined
     groups.value = []
@@ -100,6 +97,7 @@ export function useLoCha(): LoChaInterface {
     loCha,
     groups,
     setLoCha,
+    resetLoCha: _resetState,
     getStatus,
     getBeforeFeatures,
     getAfterFeatures,

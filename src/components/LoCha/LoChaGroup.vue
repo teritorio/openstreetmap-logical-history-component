@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { GroupSlotProps, LoChaGroup, ObjectDetailSlotProps } from '@/types'
+import type { GroupSlotProps, IFeature, LoChaGroup, ObjectDetailSlotProps } from '@/types'
 import { computed, inject, useSlots } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
@@ -42,6 +42,19 @@ const isSingleDelete = computed(() => beforeFeatures.value.length > 0 && afterFe
 const isSingleNew = computed(() => beforeFeatures.value.length === 0 && afterFeatures.value.length > 0)
 const isSingleDeletedUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !!afterFeatures.value[0]?.properties.deleted)
 const isSingleUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !afterFeatures.value[0]?.properties.deleted)
+
+const beforeFeaturesPerAfter = computed((): Map<string | number, IFeature[]> => {
+  const links = loCha.value?.metadata.links[props.index] ?? []
+  return new Map(
+    afterFeatures.value.map((afterFeature) => {
+      const beforeIds = links
+        .filter(link => link.after === afterFeature.id)
+        .map(link => link.before)
+        .filter(Boolean)
+      return [afterFeature.id as string | number, props.features.filter(f => beforeIds.includes(f.id as string))]
+    }),
+  )
+})
 
 const groupNameParts = computed(() => {
   const beforeNames = [...new Set(beforeFeatures.value.map(f => f.properties.tags?.name).filter(Boolean))]
@@ -129,6 +142,14 @@ const groupNameTitle = computed(() => {
               :key="feature.id"
             >
               <LoChaObject :feature="feature" :josm-target="josmTarget">
+                <template v-if="beforeFeaturesPerAfter.get(feature.id)?.length" #before>
+                  <LoChaObject
+                    v-for="beforeFeature in beforeFeaturesPerAfter.get(feature.id)"
+                    :key="beforeFeature.id"
+                    :feature="beforeFeature"
+                    :compact="true"
+                  />
+                </template>
                 <template v-if="$slots['object-detail']" #object-detail>
                   <slot name="object-detail" :feature="feature" :index="index" />
                 </template>
@@ -202,6 +223,7 @@ const groupNameTitle = computed(() => {
 .header-end {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.3em;
 }
 

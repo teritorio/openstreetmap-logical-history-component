@@ -22,6 +22,14 @@ const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 const highlightBorderColor = loChaColors.delete
 const currentHash = ref<string>()
 const listRef = useTemplateRef<HTMLElement>('listRef')
+const scrollRef = useTemplateRef<HTMLElement>('scrollRef')
+
+watch(groups, () => {
+  nextTick(() => {
+    if (scrollRef.value)
+      scrollRef.value.scrollTop = 0
+  })
+})
 
 function groupId(index: number): string {
   return `locha-${instanceId}-group-${index}`
@@ -87,7 +95,7 @@ onUnmounted(() => {
 
 <template>
   <div ref="listRef" class="locha-group-list">
-    <ul>
+    <ul ref="scrollRef">
       <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
         <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" @navigate="navigateToHash">
           <template v-if="$slots['object-detail']" #object-detail="slotProps">
