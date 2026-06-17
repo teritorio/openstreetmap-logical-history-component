@@ -74,6 +74,14 @@ A scoped slot rendered once per group in the center of the group header (between
 | ------- | -------- | ---------------- |
 | `index` | `number` | The group index. |
 
+#### `#header-start-end`
+
+A scoped slot rendered once per group inside the left section of the group header, between the anchor button (🔗) and the group name. Useful for injecting a per-group action button close to the anchor.
+
+| Prop    | Type     | Description      |
+| ------- | -------- | ---------------- |
+| `index` | `number` | The group index. |
+
 #### `#header-end`
 
 A scoped slot rendered once per group at the right end of the group header. Useful for injecting per-group action buttons (e.g. accept/reject validation).
@@ -97,8 +105,11 @@ Example usage:
   <template #object-detail="{ feature, index }">
     <!-- Custom per-feature rendering -->
   </template>
-  <template #header-end="{ index }">
+  <template #header-start-end="{ index }">
     <button @click="acceptGroup(index)">Accept</button>
+  </template>
+  <template #header-end="{ index }">
+    <!-- Optional: action at the far right of the group header -->
   </template>
   <template #content-start="{ index }">
     <!-- Custom first-column content (e.g. changesets) -->
