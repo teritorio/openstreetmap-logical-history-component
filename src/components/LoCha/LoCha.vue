@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<{
 
 defineSlots<{
   'object-detail'?: (props: ObjectDetailSlotProps) => void
+  'header-start-end'?: (props: GroupSlotProps) => void
   'header-center'?: (props: GroupSlotProps) => void
   'header-end'?: (props: GroupSlotProps) => void
   'content-start'?: (props: GroupSlotProps) => void
@@ -58,6 +59,9 @@ watch(() => props.data, (newValue) => {
     <LoChaGroupList v-else :hash="hash">
       <template v-if="$slots['object-detail']" #object-detail="slotProps">
         <slot name="object-detail" v-bind="slotProps" />
+      </template>
+      <template v-if="$slots['header-start-end']" #header-start-end="slotProps">
+        <slot name="header-start-end" v-bind="slotProps" />
       </template>
       <template v-if="$slots['header-center']" #header-center="slotProps">
         <slot name="header-center" v-bind="slotProps" />
