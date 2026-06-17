@@ -18,6 +18,7 @@ defineEmits<{
 
 defineSlots<{
   'object-detail'?: (props: ObjectDetailSlotProps) => void
+  'header-start-end'?: (props: GroupSlotProps) => void
   'header-center'?: (props: GroupSlotProps) => void
   'header-end'?: (props: GroupSlotProps) => void
   'content-start'?: (props: GroupSlotProps) => void
@@ -82,6 +83,7 @@ const groupNameTitle = computed(() => {
     <div class="group-header">
       <div class="header-start">
         <a class="anchor-button" :href="`#${id}`" @click.prevent="$emit('navigate', `#${id}`)">🔗</a>
+        <slot name="header-start-end" :index="index" />
         <h3 class="group-name" :title="groupNameTitle">
           <span v-if="groupNameParts.before" class="name-before">{{ groupNameParts.before }}</span>
           <span v-if="groupNameParts.before" class="name-separator"> → </span>
