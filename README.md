@@ -31,11 +31,11 @@ import '@teritorio/openstreetmap-logical-history-component/style.css'
 
 ```vue
 <script setup lang="ts">
-import type { ApiResponse } from '@teritorio/openstreetmap-logical-history-component'
+import type { LoChaData } from '@teritorio/openstreetmap-logical-history-component'
 import { LoCha } from '@teritorio/openstreetmap-logical-history-component'
 import { ref } from 'vue'
 
-const data = ref<ApiResponse>()
+const data = ref<LoChaData>()
 
 // Fetch data from your API and assign it to `data`
 </script>
@@ -47,11 +47,11 @@ const data = ref<ApiResponse>()
 
 ### Props
 
-| Prop              | Type          | Default     | Description                                                                    |
-| ----------------- | ------------- | ----------- | ------------------------------------------------------------------------------ |
-| `id`              | `string`      | —           | **Required.** A unique, deterministic identifier used to build anchor targets. |
-| `data`            | `ApiResponse` | `undefined` | The API response containing features and metadata to display.                  |
-| `reasonCollapsed` | `boolean`     | `true`      | Whether conflation reason details are collapsed by default.                    |
+| Prop              | Type        | Default     | Description                                                                    |
+| ----------------- | ----------- | ----------- | ------------------------------------------------------------------------------ |
+| `id`              | `string`    | —           | **Required.** A unique, deterministic identifier used to build anchor targets. |
+| `data`            | `LoChaData` | `undefined` | The API response containing features and metadata to display.                  |
+| `reasonCollapsed` | `boolean`   | `true`      | Whether conflation reason details are collapsed by default.                    |
 
 ### Slots
 
@@ -112,7 +112,7 @@ Example usage:
     <!-- Optional: action at the far right of the group header -->
   </template>
   <template #content-start="{ index }">
-    <!-- Custom first-column content (e.g. changesets) -->
+    <!-- Custom first-column content -->
   </template>
 </LoCha>
 ```
@@ -128,10 +128,9 @@ import type {
   ActionType,
   ApiLink,
   ApiLinkGroups,
-  ApiResponse,
-  Changeset,
   GroupSlotProps,
   IFeature,
+  LoChaData,
   ObjectDetailSlotProps,
   Reason,
   ReasonGeom,
@@ -139,13 +138,12 @@ import type {
 } from '@teritorio/openstreetmap-logical-history-component'
 ```
 
-### `ApiResponse` shape
+### `LoChaData` shape
 
-`ApiResponse` extends `GeoJSON.FeatureCollection` with:
+`LoChaData` extends `GeoJSON.FeatureCollection` with:
 
 - `features` — an array of `IFeature` objects (GeoJSON features with OSM-specific properties such as `objtype`, `version`, `username`, `tags`, etc.)
 - `metadata.links` — a record mapping link group IDs to arrays of `ApiLink` objects describing before/after relationships between features
-- `metadata.changesets` — an array of OSM changeset objects
 
 ## Development
 

@@ -1,4 +1,4 @@
-import type { ActionType, ApiLink, ApiLinkGroups, ApiResponse, IFeature } from '@/types'
+import type { ActionType, ApiLink, ApiLinkGroups, IFeature, LoChaData } from '@/types'
 
 const NON_DIGIT_RE = /\D/g
 
@@ -52,13 +52,12 @@ export function createLink(overrides: Partial<ApiLink> = {}): ApiLink {
 export function createApiResponse(
   features: IFeature[],
   links: ApiLinkGroups = [],
-): ApiResponse {
+): LoChaData {
   return {
     type: 'FeatureCollection',
     features,
     metadata: {
       links,
-      changesets: [],
     },
   }
 }

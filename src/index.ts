@@ -7,7 +7,6 @@ export type {
   ActionTypeOptions,
   ApiLink,
   ApiLinkGroups,
-  Changeset,
   GroupSlotProps,
   IFeature,
   LoChaData,

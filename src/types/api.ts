@@ -26,22 +26,6 @@ export interface Reason {
   conflate: string
 }
 
-export interface Changeset {
-  id: number
-  created_at: string
-  closed_at: string
-  open: boolean
-  user: string
-  uid: number
-  minlat: number
-  minlon: number
-  maxlat: number
-  maxlon: number
-  comments_count: number
-  changes_count: number
-  tags: Record<string, string>
-}
-
 export type ApiLinkGroups = ApiLink[][]
 
 /**
@@ -85,6 +69,5 @@ export interface LoChaData extends GeoJSON.FeatureCollection {
   features: IFeature[]
   metadata: {
     links: ApiLinkGroups
-    changesets: Changeset[] | null
   }
 }
