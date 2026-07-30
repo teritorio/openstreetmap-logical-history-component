@@ -1,4 +1,5 @@
 export { default as LoCha } from './components/LoCha/LoCha.vue'
+export { default as LoChaObject } from './components/LoCha/LoChaObject.vue'
 
 export type {
   Action,

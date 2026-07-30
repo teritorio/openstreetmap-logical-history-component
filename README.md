@@ -27,6 +27,12 @@ import { LoCha } from '@teritorio/openstreetmap-logical-history-component'
 import '@teritorio/openstreetmap-logical-history-component/style.css'
 ```
 
+`LoChaObject` is also exported for standalone use — for example, to render a compact feature card inside a slot passed to `<LoCha>`:
+
+```ts
+import { LoCha, LoChaObject } from '@teritorio/openstreetmap-logical-history-component'
+```
+
 ### Basic example
 
 ```vue
@@ -126,6 +132,7 @@ import type {
   Action,
   Actions,
   ActionType,
+  ActionTypeOptions,
   ApiLink,
   ApiLinkGroups,
   GroupSlotProps,
