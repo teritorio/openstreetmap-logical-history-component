@@ -3,6 +3,7 @@ import type { IFeature } from '@/types'
 import { computed, inject } from 'vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_KEY } from '@/constants/injectionKeys'
+import { getFeatureStatus } from '@/utils/feature-status'
 import { getDeepHistoryUrl, getJosmUrl, getOsmHistoryUrl, getOsmHistoryViewerUrl, getOsmUserUrl } from '@/utils/osm-links'
 
 const props = defineProps<{
@@ -17,17 +18,7 @@ defineSlots<{
 }>()
 
 const locha = inject(LOCHA_KEY, null)
-const { getStatus } = locha ?? {
-  getStatus: (feature: IFeature) => {
-    if (feature.properties.is_new)
-      return 'new' as const
-    if (feature.properties.deleted)
-      return 'delete' as const
-    if (feature.properties.is_before)
-      return 'updateBefore' as const
-    return 'updateAfter' as const
-  },
-}
+const getStatus = locha?.getStatus ?? getFeatureStatus
 
 const status = computed(() => getStatus(props.feature))
 
