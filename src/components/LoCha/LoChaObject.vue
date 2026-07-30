@@ -16,7 +16,18 @@ defineSlots<{
   'object-detail'?: () => void
 }>()
 
-const { getStatus } = inject(LOCHA_KEY)!
+const locha = inject(LOCHA_KEY, null)
+const { getStatus } = locha ?? {
+  getStatus: (feature: IFeature) => {
+    if (feature.properties.is_new)
+      return 'new' as const
+    if (feature.properties.deleted)
+      return 'delete' as const
+    if (feature.properties.is_before)
+      return 'updateBefore' as const
+    return 'updateAfter' as const
+  },
+}
 
 const status = computed(() => getStatus(props.feature))
 
