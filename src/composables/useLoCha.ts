@@ -1,5 +1,6 @@
 import type { Color, IFeature, LoChaData, LoChaGroup, LoCha as LoChaInterface, Status } from '@/types'
 import { computed, ref } from 'vue'
+import { getFeatureStatus } from '@/utils/feature-status'
 import { transformFeatures } from '@/utils/feature-transform'
 
 export type { Color, LoCha, LoChaGroup, Status } from '@/types'
@@ -72,19 +73,7 @@ export function useLoCha(): LoChaInterface {
   }
 
   function getStatus(feature: IFeature): Status {
-    if (feature.properties.is_new) {
-      return loChaStatus.new
-    }
-
-    if (feature.properties.deleted) {
-      return loChaStatus.delete
-    }
-
-    if (feature.properties.is_before) {
-      return loChaStatus.updateBefore
-    }
-
-    return loChaStatus.updateAfter
+    return getFeatureStatus(feature)
   }
 
   function _resetState(): void {
