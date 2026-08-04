@@ -52,12 +52,14 @@ export function createLink(overrides: Partial<ApiLink> = {}): ApiLink {
 export function createApiResponse(
   features: IFeature[],
   links: ApiLinkGroups = [],
+  metadata: Partial<Omit<LoChaData['metadata'], 'links'>> = {},
 ): LoChaData {
   return {
     type: 'FeatureCollection',
     features,
     metadata: {
       links,
+      ...metadata,
     },
   }
 }

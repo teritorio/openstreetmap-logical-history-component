@@ -74,6 +74,12 @@ export interface LoChaData extends GeoJSON.FeatureCollection {
      * even for groups with a single before/after pair. Useful when the caller
      * splits a N:1 merge group into separate LoCha instances per pair and wants
      * to preserve the multi-column appearance.
+     *
+     * Note: this flag applies to **all groups** in the LoCha instance. For
+     * per-group control, split each group into a separate LoCha instance.
+     *
+     * Has no effect when the after feature is deleted — `isSingleDeletedUpdate`
+     * takes precedence in that case.
      */
     forceMultiColumn?: boolean
   }
