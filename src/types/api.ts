@@ -69,5 +69,12 @@ export interface LoChaData extends GeoJSON.FeatureCollection {
   features: IFeature[]
   metadata: {
     links: ApiLinkGroups
+    /**
+     * When true, forces multi-column layout (before panel visible on the left)
+     * even for groups with a single before/after pair. Useful when the caller
+     * splits a N:1 merge group into separate LoCha instances per pair and wants
+     * to preserve the multi-column appearance.
+     */
+    forceMultiColumn?: boolean
   }
 }
