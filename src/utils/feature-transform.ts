@@ -34,7 +34,10 @@ export function transformFeatures(data: LoChaData): LoChaData['features'] {
       return undefined
     }
 
-    const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
+    const linkedId = feature.id === link.before ? link.after : link.before
+    const linkedFeature = linkedId !== undefined
+      ? data.features.find(f => f.id === linkedId)
+      : undefined
 
     if (linkedFeature?.geometry && feature.geometry) {
       feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)
@@ -51,9 +54,7 @@ export function transformFeatures(data: LoChaData): LoChaData['features'] {
     }
 
     if (feature.id === link.after) {
-      const hasBefore = group.filter(link => 'before' in link)
-
-      if (!hasBefore.length) {
+      if (!('before' in link)) {
         return {
           ...feature,
           properties: {
@@ -62,12 +63,7 @@ export function transformFeatures(data: LoChaData): LoChaData['features'] {
           },
         }
       }
-    }
 
-    if (
-      (feature.id === link.after)
-      || (link.before === undefined && link.after !== undefined)
-    ) {
       return {
         ...feature,
         properties: {
