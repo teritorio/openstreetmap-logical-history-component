@@ -42,7 +42,7 @@ const afterFeatures = computed(() => getAfterFeatures(props.features))
 const isSingleDelete = computed(() => beforeFeatures.value.length > 0 && afterFeatures.value.length === 0)
 const isSingleNew = computed(() => beforeFeatures.value.length === 0 && afterFeatures.value.length > 0)
 const isSingleDeletedUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !!afterFeatures.value[0]?.properties.deleted)
-const isSingleUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !afterFeatures.value[0]?.properties.deleted)
+const isSingleUpdate = computed(() => !loCha.value?.metadata.forceMultiColumn && beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !afterFeatures.value[0]?.properties.deleted)
 
 const beforeFeaturesPerAfter = computed((): Map<string | number, IFeature[]> => {
   const links = loCha.value?.metadata.links[props.index] ?? []
