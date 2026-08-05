@@ -143,7 +143,7 @@ const groupNameTitle = computed(() => {
               v-for="feature in afterFeatures"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" :josm-target="josmTarget">
+              <LoChaObject :feature="feature" :josm-target="josmTarget" :tools-only="(beforeFeaturesPerAfter.get(feature.id)?.length ?? 0) > 1">
                 <template v-if="beforeFeaturesPerAfter.get(feature.id)?.length" #before>
                   <LoChaObject
                     v-for="beforeFeature in beforeFeaturesPerAfter.get(feature.id)"

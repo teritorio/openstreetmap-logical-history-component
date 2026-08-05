@@ -10,6 +10,7 @@ const props = defineProps<{
   feature: IFeature
   josmTarget?: string
   compact?: boolean
+  toolsOnly?: boolean
 }>()
 
 defineSlots<{
@@ -48,6 +49,7 @@ const color = computed(() => loChaColors[status.value])
       <header>
         <div class="wrap">
           <a
+            v-if="!toolsOnly"
             :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
             title="OSM History"
             target="_blank"
@@ -56,7 +58,7 @@ const color = computed(() => loChaColors[status.value])
             {{ `${feature.properties.objtype}${feature.properties.id}-v${feature.properties.version}` }}
           </a>
           <div
-            v-if="!compact && (status === 'new' || status === 'delete')"
+            v-if="!compact && !toolsOnly && (status === 'new' || status === 'delete')"
             class="status-content"
             :class="{
               'object-new': status === 'new',
@@ -109,11 +111,11 @@ const color = computed(() => loChaColors[status.value])
             </div>
           </div>
         </div>
-        <p class="date">
+        <p v-if="!toolsOnly" class="date">
           📅 {{ props.feature.properties.created }}
         </p>
         <a
-          v-if="feature.properties.username"
+          v-if="!toolsOnly && feature.properties.username"
           :href="getOsmUserUrl(feature.properties.username)"
           :title="`View ${feature.properties.username} OSM profile`"
           target="_blank"
