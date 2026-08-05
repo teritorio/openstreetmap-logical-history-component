@@ -40,7 +40,7 @@ const color = computed(() => loChaColors[status.value])
 <template>
   <article class="locha-object">
     <div class="header-row">
-      <template v-if="$slots.before">
+      <template v-if="$slots.before && !toolsOnly">
         <div class="before-content">
           <slot name="before" />
         </div>
