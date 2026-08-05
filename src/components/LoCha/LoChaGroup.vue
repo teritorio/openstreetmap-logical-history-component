@@ -26,6 +26,7 @@ defineSlots<{
 
 const runtimeSlots = useSlots()
 const hasContentStart = computed(() => !!runtimeSlots['content-start'])
+const hasObjectDetail = computed(() => !!runtimeSlots['object-detail'])
 const gridColumns = computed(() => hasContentStart.value ? 'repeat(4, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
 const newColumnStart = computed(() => hasContentStart.value ? 3 : 2)
 const vmapColumnStart = computed(() => hasContentStart.value ? 4 : 3)
@@ -143,7 +144,11 @@ const groupNameTitle = computed(() => {
               v-for="feature in afterFeatures"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" :josm-target="josmTarget" :tools-only="(beforeFeaturesPerAfter.get(feature.id)?.length ?? 0) > 1">
+              <LoChaObject
+                :feature="feature"
+                :josm-target="josmTarget"
+                :tools-only="hasObjectDetail && (beforeFeaturesPerAfter.get(feature.id)?.length ?? 0) > 1"
+              >
                 <template v-if="beforeFeaturesPerAfter.get(feature.id)?.length" #before>
                   <LoChaObject
                     v-for="beforeFeature in beforeFeaturesPerAfter.get(feature.id)"
