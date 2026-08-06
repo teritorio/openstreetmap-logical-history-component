@@ -11,6 +11,7 @@ const props = defineProps<{
 }>()
 
 defineSlots<{
+  'object-header'?: (props: ObjectDetailSlotProps) => void
   'object-detail'?: (props: ObjectDetailSlotProps) => void
   'header-start-end'?: (props: GroupSlotProps) => void
   'header-center'?: (props: GroupSlotProps) => void
@@ -99,6 +100,9 @@ onUnmounted(() => {
     <ul ref="scrollRef">
       <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
         <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" @navigate="navigateToHash">
+          <template v-if="$slots['object-header']" #object-header="slotProps">
+            <slot name="object-header" v-bind="slotProps" />
+          </template>
           <template v-if="$slots['object-detail']" #object-detail="slotProps">
             <slot name="object-detail" v-bind="slotProps" />
           </template>

@@ -17,6 +17,7 @@ defineEmits<{
 }>()
 
 defineSlots<{
+  'object-header'?: (props: ObjectDetailSlotProps) => void
   'object-detail'?: (props: ObjectDetailSlotProps) => void
   'header-start-end'?: (props: GroupSlotProps) => void
   'header-center'?: (props: GroupSlotProps) => void
@@ -156,6 +157,9 @@ const groupNameTitle = computed(() => {
                     :feature="beforeFeature"
                     :compact="true"
                   />
+                </template>
+                <template v-if="$slots['object-header']" #object-header>
+                  <slot name="object-header" :feature="feature" :index="index" />
                 </template>
                 <template v-if="$slots['object-detail']" #object-detail>
                   <slot name="object-detail" :feature="feature" :index="index" />
