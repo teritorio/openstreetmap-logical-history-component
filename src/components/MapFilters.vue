@@ -18,6 +18,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   (e: 'submit', payload: FormData): void
+  (e: 'toggle'): void
 }>()
 
 const formRef = ref<InstanceType<typeof HTMLFormElement>>()
@@ -70,6 +71,9 @@ function handleSubmit(): void {
 
 <template>
   <aside :class="{ minimized: !isOpen }">
+    <button class="toggle-button" :title="isOpen ? 'Close panel' : 'Open panel'" @click="emit('toggle')">
+      {{ isOpen ? '◀' : '▶' }}
+    </button>
     <form ref="formRef" @submit.prevent="handleSubmit">
       <h2>Filter by:</h2>
       <div>
@@ -136,13 +140,33 @@ aside {
   padding: 1rem;
 }
 
+.toggle-button {
+  position: absolute;
+  top: 0.75rem;
+  right: -1px;
+  transform: translateX(100%);
+  height: 40px;
+  width: 28px;
+  background: #082e4e;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  color: #fff;
+  font-size: 0.85em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.toggle-button:hover {
+  background: #0d4a7a;
+}
+
 .minimized {
   padding-left: 0;
   padding-right: 0;
-}
-
-.minimized .toggle-button {
-  transform: translateX(calc(100% + 1em));
 }
 
 .minimized *:not(.toggle-button) {

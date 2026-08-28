@@ -2,10 +2,6 @@
 import { onMounted, shallowRef } from 'vue'
 import VDialog from './VDialog.vue'
 
-const emit = defineEmits<{
-  (e: 'toggleMenu'): void
-}>()
-
 const showDialog = shallowRef(true)
 
 onMounted(() => {
@@ -22,9 +18,6 @@ onMounted(() => {
 
 <template>
   <header>
-    <button class="toggle-button" @click="emit('toggleMenu')">
-      ☰
-    </button>
     <img src="/teritorio.png" alt="Logo Teritorio">
     <h1>OpenStreetMap Logical History</h1>
     <button class="info-button" @click="showDialog = true">
@@ -54,16 +47,6 @@ img {
 .info-button {
   margin-left: auto;
   font-size: 1.25em;
-}
-
-.toggle-button {
-  height: 48px;
-  width: 48px;
-  font-size: 1.5em;
-}
-
-.toggle-button,
-.info-button {
   background: none;
   border: none;
   color: #fff;
