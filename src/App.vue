@@ -16,7 +16,7 @@ const $api = useApiConfig()
 const { error, loading, resetError } = $api
 const geojson = ref<LoChaData>()
 const mapFiltersRef = ref<InstanceType<typeof MapFilters>>()
-const mapFiltersIsOpen = ref(true)
+const mapFiltersIsOpen = ref(window.innerWidth >= 768)
 
 const route = useRoute()
 const router = useRouter()
@@ -93,7 +93,7 @@ function handleSubmit(data: FormData) {
 </script>
 
 <template>
-  <VHeader @toggle-menu="mapFiltersIsOpen = !mapFiltersIsOpen" />
+  <VHeader />
   <VLoading v-if="loading" />
   <VError
     v-if="error.message"
@@ -111,6 +111,7 @@ function handleSubmit(data: FormData) {
       :initial-values="initialFormValues"
       :is-open="mapFiltersIsOpen"
       @submit="handleSubmit"
+      @toggle="mapFiltersIsOpen = !mapFiltersIsOpen"
     />
     <div v-if="dateFrom || dateTo" class="locha-header">
       <h2>From : {{ dateFrom }}</h2>
