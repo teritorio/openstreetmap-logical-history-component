@@ -40,7 +40,7 @@ const groupedTagKeys = computed((): string[][] => {
   return Object.values(
     groupBy(
       keys,
-      key => props.diff?.[key]?.map(a => a[0] ?? '').join('||') || '',
+      key => props.diff?.[key]?.map(diff => `${diff}`).join('||') || '',
     ),
   )
 })
