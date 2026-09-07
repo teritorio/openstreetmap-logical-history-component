@@ -20,8 +20,8 @@ defineProps<{
     <div
       class="tag"
       :class="{
-        'attribute-removed': action[0] === 'reject',
-        'no_changes': action[0] !== 'reject',
+        'attribute-removed': action.action === 'reject',
+        'no_changes': action.action !== 'reject',
       }"
     >
       {{ type }}

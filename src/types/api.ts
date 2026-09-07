@@ -4,7 +4,12 @@ export type ActionType = 'accept' | 'reject'
 
 export type ActionTypeOptions = Record<string, string | string[] | object>
 
-export type Action = [ActionType | null, boolean | null, ActionTypeOptions | null]
+export interface Action {
+  validator_id?: string | null
+  action: ActionType | null
+  force: boolean | null
+  options: ActionTypeOptions | null
+}
 
 export type Actions = Record<string, Action[]>
 
