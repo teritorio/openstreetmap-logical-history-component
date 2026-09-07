@@ -40,7 +40,7 @@ const groupedTagKeys = computed((): string[][] => {
   return Object.values(
     groupBy(
       keys,
-      key => props.diff?.[key]?.map(a => `${a.validator_id ?? ''}:${a.action}`).join('||') || '',
+      key => props.diff?.[key]?.map(a => a[0] ?? '').join('||') || '',
     ),
   )
 })
@@ -72,7 +72,7 @@ function isRejected(key: string): boolean {
   const actions = props.diff?.[key]
   if (!actions || !actions[0])
     return false
-  return actions[0].action === 'reject'
+  return actions[0][0] === 'reject'
 }
 
 function getRowClass(key: string): string | undefined {
