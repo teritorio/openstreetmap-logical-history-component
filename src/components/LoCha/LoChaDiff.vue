@@ -72,7 +72,7 @@ function isRejected(key: string): boolean {
   const actions = props.diff?.[key]
   if (!actions || !actions[0])
     return false
-  return actions[0][0] === 'reject'
+  return actions[0][1] === 'reject'
 }
 
 function getRowClass(key: string): string | undefined {
