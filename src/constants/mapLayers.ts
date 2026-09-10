@@ -34,6 +34,7 @@ export const LAYERS = {
         2,
       ],
       'line-color': '#000000',
+      'line-opacity': 0.4,
     },
     filter: ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
   },
@@ -46,7 +47,7 @@ export const LAYERS = {
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         1,
-        0.3,
+        0.6,
       ],
       'fill-color': [
         'case',
@@ -111,6 +112,7 @@ export const LAYERS = {
         2,
       ],
       'line-color': '#000000',
+      'line-opacity': 0.4,
       'line-offset': [
         'case',
         ['==', ['get', 'is_before'], true],
@@ -141,11 +143,17 @@ export const LAYERS = {
         1,
         2,
       ],
+      'circle-stroke-opacity': [
+        'case',
+        ['boolean', ['feature-state', 'hover'], false],
+        1,
+        0.4,
+      ],
       'circle-opacity': [
         'case',
         ['boolean', ['feature-state', 'hover'], false],
         1,
-        0.3,
+        0.6,
       ],
       'circle-color': [
         'case',
