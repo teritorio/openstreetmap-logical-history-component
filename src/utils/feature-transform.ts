@@ -1,6 +1,5 @@
 import type { LoChaData } from '@/types'
 import { area } from '@turf/area'
-import booleanEqual from '@turf/boolean-equal'
 
 /**
  * Transforms the features of the API response to include additional metadata.
@@ -34,11 +33,7 @@ export function transformFeatures(data: LoChaData): LoChaData['features'] {
       return undefined
     }
 
-    const linkedFeature = data.features.find(f => (f.properties.links === feature.properties.links) && (f.id !== feature.id))
-
-    if (linkedFeature?.geometry && feature.geometry) {
-      feature.properties.geom = !booleanEqual(feature.geometry, linkedFeature.geometry)
-    }
+    feature.properties.geom = !!link.diff_attribs && 'geom' in link.diff_attribs
 
     if (feature.id === link.before) {
       return {
