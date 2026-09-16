@@ -47,9 +47,7 @@ export function transformFeatures(data: LoChaData): LoChaData['features'] {
     }
 
     if (feature.id === link.after) {
-      const hasBefore = group.filter(link => 'before' in link)
-
-      if (!hasBefore.length) {
+      if (!link.before) {
         return {
           ...feature,
           properties: {
@@ -58,12 +56,7 @@ export function transformFeatures(data: LoChaData): LoChaData['features'] {
           },
         }
       }
-    }
 
-    if (
-      (feature.id === link.after)
-      || (link.before === undefined && link.after !== undefined)
-    ) {
       return {
         ...feature,
         properties: {
