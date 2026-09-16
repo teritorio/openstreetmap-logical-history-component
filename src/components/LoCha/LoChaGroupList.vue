@@ -98,7 +98,7 @@ onUnmounted(() => {
 <template>
   <div ref="listRef" class="locha-group-list">
     <ul ref="scrollRef">
-      <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
+      <li v-for="(group, index) in groups" :key="group[0].properties.links" :class="{ selected: currentHash === `#${groupId(index)}` }">
         <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" @navigate="navigateToHash">
           <template v-if="$slots['object-header']" #object-header="slotProps">
             <slot name="object-header" v-bind="slotProps" />
