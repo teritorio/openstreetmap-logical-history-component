@@ -4,12 +4,15 @@ import { computed, inject, useSlots } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
+import { isMinorGeomOnly, isUnchangedFeature } from '@/utils/feature-status'
 
 const props = defineProps<{
   id: string
   index: number
   features: LoChaGroup
   josmTarget?: string
+  hideUnchanged?: boolean
+  hideMinorGeom?: boolean
 }>()
 
 defineEmits<{
@@ -78,6 +81,17 @@ const groupNameTitle = computed(() => {
     return `${before} → ${after}`
   return before ?? after ?? undefined
 })
+
+function isFeatureDimmed(feature: IFeature): boolean {
+  if (!props.hideUnchanged && !props.hideMinorGeom)
+    return false
+  const links = loCha.value?.metadata.links[props.index] ?? []
+  if (props.hideUnchanged && isUnchangedFeature(feature, links))
+    return true
+  if (props.hideMinorGeom && isMinorGeomOnly(feature, links))
+    return true
+  return false
+}
 </script>
 
 <template>
@@ -109,7 +123,7 @@ const groupNameTitle = computed(() => {
             v-for="feature in beforeFeatures"
             :key="feature.id"
           >
-            <LoChaObject :feature="feature" :josm-target="josmTarget">
+            <LoChaObject :feature="feature" :josm-target="josmTarget" :dimmed="isFeatureDimmed(feature)">
               <template v-if="$slots['object-detail']" #object-detail>
                 <slot name="object-detail" :feature="feature" :index="index" />
               </template>
@@ -121,7 +135,7 @@ const groupNameTitle = computed(() => {
         <ul>
           <template v-if="isSingleDeletedUpdate">
             <li>
-              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget">
+              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget" :dimmed="isFeatureDimmed(afterFeatures[0]!)">
                 <template #object-detail>
                   <slot name="object-detail" :feature="beforeFeatures[0]!" :index="index" />
                 </template>
@@ -130,7 +144,7 @@ const groupNameTitle = computed(() => {
           </template>
           <template v-else-if="isSingleUpdate">
             <li>
-              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget">
+              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget" :dimmed="isFeatureDimmed(afterFeatures[0]!)">
                 <template #before>
                   <LoChaObject :feature="beforeFeatures[0]!" :compact="true" />
                 </template>
@@ -155,6 +169,7 @@ const groupNameTitle = computed(() => {
                 :feature="feature"
                 :josm-target="josmTarget"
                 :tools-only="hasObjectDetail && (beforeFeaturesPerAfter.get(feature.id)?.length ?? 0) > 1"
+                :dimmed="isFeatureDimmed(feature)"
               >
                 <template v-if="beforeFeaturesPerAfter.get(feature.id)?.length" #before>
                   <LoChaObject
