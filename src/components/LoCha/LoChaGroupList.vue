@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { GroupSlotProps, ObjectDetailSlotProps } from '@/types'
-import { inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch, watchEffect } from 'vue'
+import { inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
 import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
@@ -26,11 +26,6 @@ const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
 const localHideUnchanged = ref(props.hideUnchanged ?? true)
 const localHideMinorGeom = ref(props.hideMinorGeom ?? true)
-
-watchEffect(() => {
-  localHideUnchanged.value = props.hideUnchanged ?? true
-  localHideMinorGeom.value = props.hideMinorGeom ?? true
-})
 const highlightBorderColor = loChaColors.delete
 const currentHash = ref<string>()
 const listRef = useTemplateRef<HTMLElement>('listRef')

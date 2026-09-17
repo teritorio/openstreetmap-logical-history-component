@@ -8,6 +8,8 @@ export function isUnchangedFeature(feature: IFeature, links: ApiLink[]): boolean
   if (feature.properties.is_new || feature.properties.deleted)
     return false
   const featureLinks = links.filter(l => l.before === feature.id || l.after === feature.id)
+  if (!featureLinks.length)
+    return false
   return featureLinks.every(l => isEmptyActions(l.diff_tags) && isEmptyActions(l.diff_attribs))
 }
 
