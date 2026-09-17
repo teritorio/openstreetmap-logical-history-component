@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormData } from '@/types'
 import { Collapsible } from '@ark-ui/vue'
-import { reactive, ref, shallowRef, useTemplateRef, watchEffect } from 'vue'
+import { computed, reactive, ref, shallowRef, useTemplateRef, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import MapBbox from '@/components/MapBbox.vue'
 import { presets } from '@/data/presets'
@@ -21,7 +21,6 @@ const emit = defineEmits<{
 }>()
 
 const isEditing = ref(false)
-const formRef = ref<InstanceType<typeof HTMLFormElement>>()
 const formValues = reactive<FormData>({
   dateStart: '',
   dateEnd: '',
@@ -39,7 +38,7 @@ watchEffect(() => {
 const router = useRouter()
 const route = useRoute()
 
-function readSummary(): string {
+const readSummary = computed<string>(() => {
   if (!formValues.dateStart)
     return 'No filter applied'
 
@@ -48,7 +47,7 @@ function readSummary(): string {
   const bboxPart = formValues.bbox ? ' — bounding box defined' : ''
 
   return `From ${from} → To ${to}${bboxPart}`
-}
+})
 
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
@@ -98,7 +97,7 @@ function handleCancel(): void {
 <template>
   <Collapsible.Root v-model:open="isEditing" class="filter-bar">
     <div class="filter-bar-read">
-      <span class="filter-summary">{{ readSummary() }}</span>
+      <span class="filter-summary">{{ readSummary }}</span>
       <Collapsible.Trigger as-child>
         <button class="edit-button">
           Edit
@@ -107,7 +106,7 @@ function handleCancel(): void {
     </div>
 
     <Collapsible.Content class="filter-bar-edit">
-      <form ref="formRef" @submit.prevent="handleSubmit">
+      <form @submit.prevent="handleSubmit">
         <div class="form-row">
           <div class="form-field">
             <label for="fb_date_start">From <span class="required">*</span></label>
