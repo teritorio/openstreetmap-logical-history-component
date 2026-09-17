@@ -15,7 +15,6 @@ const props = defineProps<{
 
 defineSlots<{
   'before'?: () => void
-  'object-header'?: () => void
   'object-detail'?: () => void
 }>()
 
@@ -68,7 +67,6 @@ const color = computed(() => loChaColors[status.value])
           >
             {{ statusContent }}
           </div>
-          <slot v-if="toolsOnly && !compact" name="object-header" />
           <div v-if="!compact" class="fab">
             <button class="fab-toggle" type="button" title="Tools">
               🔧 Tools
