@@ -82,16 +82,19 @@ const groupNameTitle = computed(() => {
   return before ?? after ?? undefined
 })
 
-function isFeatureDimmed(feature: IFeature): boolean {
+const dimmedFeatureIds = computed<Set<string | number>>(() => {
   if (!props.hideUnchanged && !props.hideMinorGeom)
-    return false
+    return new Set()
   const links = loCha.value?.metadata.links[props.index] ?? []
-  if (props.hideUnchanged && isUnchangedFeature(feature, links))
-    return true
-  if (props.hideMinorGeom && isMinorGeomOnly(feature, links))
-    return true
-  return false
-}
+  const dimmed = new Set<string | number>()
+  for (const feature of props.features) {
+    if (props.hideUnchanged && isUnchangedFeature(feature, links))
+      dimmed.add(feature.id)
+    else if (props.hideMinorGeom && isMinorGeomOnly(feature, links))
+      dimmed.add(feature.id)
+  }
+  return dimmed
+})
 </script>
 
 <template>
@@ -123,7 +126,7 @@ function isFeatureDimmed(feature: IFeature): boolean {
             v-for="feature in beforeFeatures"
             :key="feature.id"
           >
-            <LoChaObject :feature="feature" :josm-target="josmTarget" :dimmed="isFeatureDimmed(feature)">
+            <LoChaObject :feature="feature" :josm-target="josmTarget" :dimmed="dimmedFeatureIds.has(feature.id)">
               <template v-if="$slots['object-detail']" #object-detail>
                 <slot name="object-detail" :feature="feature" :index="index" />
               </template>
@@ -135,7 +138,7 @@ function isFeatureDimmed(feature: IFeature): boolean {
         <ul>
           <template v-if="isSingleDeletedUpdate">
             <li>
-              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget" :dimmed="isFeatureDimmed(afterFeatures[0]!)">
+              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget" :dimmed="dimmedFeatureIds.has(afterFeatures[0]!.id)">
                 <template #object-detail>
                   <slot name="object-detail" :feature="beforeFeatures[0]!" :index="index" />
                 </template>
@@ -144,7 +147,7 @@ function isFeatureDimmed(feature: IFeature): boolean {
           </template>
           <template v-else-if="isSingleUpdate">
             <li>
-              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget" :dimmed="isFeatureDimmed(afterFeatures[0]!)">
+              <LoChaObject :feature="afterFeatures[0]!" :josm-target="josmTarget" :dimmed="dimmedFeatureIds.has(afterFeatures[0]!.id)">
                 <template #before>
                   <LoChaObject :feature="beforeFeatures[0]!" :compact="true" />
                 </template>
@@ -169,7 +172,7 @@ function isFeatureDimmed(feature: IFeature): boolean {
                 :feature="feature"
                 :josm-target="josmTarget"
                 :tools-only="hasObjectDetail && (beforeFeaturesPerAfter.get(feature.id)?.length ?? 0) > 1"
-                :dimmed="isFeatureDimmed(feature)"
+                :dimmed="dimmedFeatureIds.has(feature.id)"
               >
                 <template v-if="beforeFeaturesPerAfter.get(feature.id)?.length" #before>
                   <LoChaObject
