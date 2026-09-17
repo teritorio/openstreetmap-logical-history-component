@@ -12,9 +12,13 @@ const props = withDefaults(defineProps<{
   mapStyleUrl?: string
   reasonCollapsed?: boolean
   hash?: string
+  hideUnchanged?: boolean
+  hideMinorGeom?: boolean
 }>(), {
   mapStyleUrl: MAP_STYLE_URL,
   reasonCollapsed: true,
+  hideUnchanged: true,
+  hideMinorGeom: true,
 })
 
 defineSlots<{
@@ -57,7 +61,7 @@ watch(() => props.data, (newValue) => {
     <p v-if="!featureCount" class="user-feedback">
       ⚠️ No data
     </p>
-    <LoChaGroupList v-else :hash="hash">
+    <LoChaGroupList v-else :hash="hash" :hide-unchanged="hideUnchanged" :hide-minor-geom="hideMinorGeom">
       <template v-if="$slots['object-header']" #object-header="slotProps">
         <slot name="object-header" v-bind="slotProps" />
       </template>
