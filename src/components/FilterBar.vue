@@ -106,70 +106,75 @@ function handleCancel(): void {
     </div>
 
     <Collapsible.Content class="filter-bar-edit">
-      <form @submit.prevent="handleSubmit">
-        <div class="form-row">
+      <div class="filter-bar-map">
+        <MapBbox
+          ref="mapBboxRef"
+          :bbox="formValues.bbox"
+          @update-bbox="handleBboxChange"
+        />
+      </div>
+
+      <div class="filter-bar-controls">
+        <form @submit.prevent="handleSubmit">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="fb_date_start">From <span class="required">*</span></label>
+              <input
+                id="fb_date_start"
+                v-model="formValues.dateStart"
+                type="datetime-local"
+                required
+              >
+            </div>
+            <div class="form-field">
+              <label for="fb_date_end">To</label>
+              <input
+                id="fb_date_end"
+                v-model="formValues.dateEnd"
+                type="datetime-local"
+              >
+            </div>
+          </div>
+
           <div class="form-field">
-            <label for="fb_date_start">From <span class="required">*</span></label>
+            <label for="fb_bbox">Bounding Box <span class="required">*</span></label>
             <input
-              id="fb_date_start"
-              v-model="formValues.dateStart"
-              type="datetime-local"
+              id="fb_bbox"
+              v-model="formValues.bbox"
+              type="text"
+              placeholder="west, south, east, north"
+              pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
               required
             >
+            <pre v-if="needZoom" class="zoom-warning">Need smaller bbox, zoom more !</pre>
           </div>
-          <div class="form-field">
-            <label for="fb_date_end">To</label>
-            <input
-              id="fb_date_end"
-              v-model="formValues.dateEnd"
-              type="datetime-local"
-            >
-          </div>
-        </div>
 
-        <div class="form-field bbox-field">
-          <label for="fb_bbox">Bounding Box <span class="required">*</span></label>
-          <input
-            id="fb_bbox"
-            v-model="formValues.bbox"
-            type="text"
-            placeholder="west, south, east, north"
-            pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
-            required
-          >
-          <MapBbox
-            ref="mapBboxRef"
-            :bbox="formValues.bbox"
-            @update-bbox="handleBboxChange"
-          />
-          <pre v-if="needZoom" class="zoom-warning">Need smaller bbox, zoom more !</pre>
-        </div>
+          <pre class="required-note">* required fields</pre>
 
-        <pre class="required-note">* required fields</pre>
-
-        <div class="form-actions">
-          <button type="submit" class="btn-run" :disabled="needZoom">
-            Run
-          </button>
-          <button type="button" class="btn-cancel" @click="handleCancel">
-            Cancel
-          </button>
-        </div>
-      </form>
-
-      <div class="presets">
-        <h3>Examples</h3>
-        <ul>
-          <li
-            v-for="(preset, index) in presets"
-            :key="preset.title"
-            @click="setPreset(index)"
-          >
-            <button type="button">
-              {{ preset.title }}
+          <div class="form-actions">
+            <button type="submit" class="btn-run" :disabled="needZoom">
+              Run
             </button>
-          </li>
-        </ul>
+            <button type="button" class="btn-cancel" @click="handleCancel">
+              Cancel
+            </button>
+          </div>
+        </form>
+
+        <div class="presets">
+          <h3>Examples</h3>
+          <ul>
+            <li
+              v-for="(preset, index) in presets"
+              :key="preset.title"
+              @click="setPreset(index)"
+            >
+              <button type="button">
+                {{ preset.title }}
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </Collapsible.Content>
   </Collapsible.Root>
@@ -215,7 +220,19 @@ function handleCancel(): void {
   border-top: 1px solid #d0d0d2;
   padding: 1rem;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  min-height: 350px;
+}
+
+.filter-bar-map {
+  height: 100%;
+  min-height: 350px;
+}
+
+.filter-bar-controls {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
 }
 
@@ -223,6 +240,7 @@ form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  flex: 1;
 }
 
 .form-row {
@@ -236,11 +254,17 @@ form {
   flex-direction: column;
   gap: 0.4rem;
   flex: 1;
-  min-width: 200px;
+  min-width: 160px;
 }
 
-.bbox-field {
-  flex-basis: 100%;
+@media (max-width: 768px) {
+  .filter-bar-edit {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-bar-map {
+    min-height: 250px;
+  }
 }
 
 label {
