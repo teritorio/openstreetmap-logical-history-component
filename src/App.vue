@@ -15,6 +15,7 @@ import { fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
 const $api = useApiConfig()
 const { error, loading, resetError } = $api
 const geojson = ref<LoChaData>()
+const lastQuery = ref<Record<string, string | undefined>>({})
 
 const route = useRoute()
 const router = useRouter()
@@ -43,7 +44,13 @@ watch(
 )
 
 async function fetchData(query: Record<string, string | undefined>) {
+  lastQuery.value = query
   geojson.value = await $api.fetchData(query)
+}
+
+function handleRetry() {
+  if (Object.keys(lastQuery.value).length > 0)
+    fetchData(lastQuery.value)
 }
 
 function getLinks(feature: IFeature, index: number): ApiLink[] {
@@ -67,19 +74,25 @@ function handleSubmit(data: FormData) {
   if (!data.dateStart)
     throw new Error('Missing start date.')
 
-  const query = {
+  const query: Record<string, string | undefined> = {
     date_start: fromDatetimeLocal(data.dateStart),
-    date_end: data.dateEnd
-      ? fromDatetimeLocal(data.dateEnd)
-      : undefined,
+    date_end: data.dateEnd ? fromDatetimeLocal(data.dateEnd) : undefined,
     bbox: data.bbox ?? '',
     include_relation_type_route: data.includeRelationTypeRoute ? 'true' : undefined,
   }
 
-  router.push({
-    path: route.path,
-    query,
-  })
+  const currentQuery: Record<string, string | undefined> = {
+    date_start: route.query.date_start ? String(route.query.date_start) : undefined,
+    date_end: route.query.date_end ? String(route.query.date_end) : undefined,
+    bbox: route.query.bbox ? String(route.query.bbox) : undefined,
+  }
+
+  if (JSON.stringify(query) === JSON.stringify(currentQuery)) {
+    fetchData(query)
+  }
+  else {
+    router.push({ path: route.path, query })
+  }
 }
 </script>
 
@@ -91,6 +104,7 @@ function handleSubmit(data: FormData) {
     :message="error.message"
     :type="error.type"
     @close="resetError"
+    @retry="handleRetry"
   />
   <main>
     <FilterBar :initial-values="initialFormValues" @submit="handleSubmit" />
