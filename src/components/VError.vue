@@ -8,6 +8,7 @@ defineProps<{
 
 defineEmits<{
   (e: 'close'): void
+  (e: 'retry'): void
 }>()
 
 const colors = {
@@ -21,6 +22,9 @@ const colors = {
 <template>
   <div class="alert" :style="{ backgroundColor: colors[type] }">
     {{ message }}
+    <button class="btn-retry" @click="$emit('retry')">
+      ↻ Retry
+    </button>
     <button @click="$emit('close')">
       &#10006;
     </button>
@@ -56,6 +60,15 @@ button {
   align-items: center;
   font-size: 1rem;
   cursor: pointer;
+}
+
+.btn-retry {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  font-family: inherit;
 }
 
 .alert::before {
