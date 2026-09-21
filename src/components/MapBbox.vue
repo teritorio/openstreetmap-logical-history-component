@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type * as GeoJSON from 'geojson'
 import maplibre from 'maplibre-gl'
-import { onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
+import { onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { MAP_STYLE_URL } from '@/constants/map'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
@@ -16,6 +16,7 @@ const emit = defineEmits<{
   (e: 'updateBbox', bbox: string): void
 }>()
 
+const mapContainer = useTemplateRef<HTMLDivElement>('mapContainer')
 const map = shallowRef<maplibre.Map | null>(null)
 const isDrawing = ref(false)
 
@@ -100,21 +101,35 @@ function onDrawMouseMove(e: maplibre.MapMouseEvent): void {
   drawRect(`${west},${south},${east},${north}`)
 }
 
-function onDrawMouseUp(e: maplibre.MapMouseEvent): void {
-  if (!drawStart || !map.value)
+function deactivateDrawMode(): void {
+  if (!map.value)
     return
-  map.value.off('mousemove', onDrawMouseMove)
   map.value.off('mousedown', onDrawMouseDown)
+  map.value.off('mousemove', onDrawMouseMove)
+  map.value.off('mouseup', onDrawMouseUp)
+  map.value.getCanvas().removeEventListener('mouseleave', cancelDraw)
   map.value.getCanvas().style.cursor = ''
   map.value.dragPan.enable()
   isDrawing.value = false
+  drawStart = null
+}
 
+function cancelDraw(): void {
+  deactivateDrawMode()
+  if (props.bbox)
+    drawRect(props.bbox)
+  else
+    clearRect()
+}
+
+function onDrawMouseUp(e: maplibre.MapMouseEvent): void {
+  if (!drawStart || !map.value)
+    return
   const west = Math.min(drawStart.lng, e.lngLat.lng)
   const east = Math.max(drawStart.lng, e.lngLat.lng)
   const south = Math.min(drawStart.lat, e.lngLat.lat)
   const north = Math.max(drawStart.lat, e.lngLat.lat)
-  drawStart = null
-
+  deactivateDrawMode()
   const bbox = `${west},${south},${east},${north}`
   drawRect(bbox)
   emit('updateBbox', bbox)
@@ -124,30 +139,27 @@ function onDrawMouseDown(e: maplibre.MapMouseEvent): void {
   e.preventDefault()
   drawStart = e.lngLat
   map.value!.on('mousemove', onDrawMouseMove)
-  map.value!.once('mouseup', onDrawMouseUp)
+  map.value!.on('mouseup', onDrawMouseUp)
 }
 
 function toggleDrawMode(): void {
   if (!map.value)
     return
-  isDrawing.value = !isDrawing.value
   if (isDrawing.value) {
+    cancelDraw()
+  }
+  else {
+    isDrawing.value = true
     map.value.getCanvas().style.cursor = 'crosshair'
     map.value.dragPan.disable()
     map.value.on('mousedown', onDrawMouseDown)
-  }
-  else {
-    map.value.getCanvas().style.cursor = ''
-    map.value.dragPan.enable()
-    map.value.off('mousedown', onDrawMouseDown)
-    map.value.off('mousemove', onDrawMouseMove)
-    drawStart = null
+    map.value.getCanvas().addEventListener('mouseleave', cancelDraw)
   }
 }
 
 onMounted(() => {
   map.value = new maplibre.Map({
-    container: 'bbox-selector',
+    container: mapContainer.value!,
     style: props.mapStyleUrl,
     attributionControl: { compact: false },
   })
@@ -190,7 +202,7 @@ defineExpose({ getZoom })
 
 <template>
   <div class="map-bbox-wrapper">
-    <div id="bbox-selector" class="map-bbox" />
+    <div ref="mapContainer" class="map-bbox" />
     <button
       class="draw-bbox-btn"
       :class="{ 'draw-bbox-btn--active': isDrawing }"
