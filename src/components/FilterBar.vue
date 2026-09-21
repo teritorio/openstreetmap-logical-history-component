@@ -25,6 +25,7 @@ const formValues = reactive<FormData>({
   dateStart: '',
   dateEnd: '',
   bbox: '',
+  includeRelationTypeRoute: false,
 })
 const mapBboxRef = useTemplateRef('mapBboxRef')
 const needZoom = shallowRef(false)
@@ -149,6 +150,16 @@ function handleCancel(): void {
             <pre v-if="needZoom" class="zoom-warning">Need smaller bbox, zoom more !</pre>
           </div>
 
+          <div class="form-field form-field--checkbox">
+            <label>
+              <input
+                v-model="formValues.includeRelationTypeRoute"
+                type="checkbox"
+              >
+              Include route relations
+            </label>
+          </div>
+
           <pre class="required-note">* required fields</pre>
 
           <div class="form-actions">
@@ -255,6 +266,24 @@ form {
   gap: 0.4rem;
   flex: 1;
   min-width: 160px;
+}
+
+.form-field--checkbox {
+  flex-direction: row;
+  align-items: center;
+  min-width: unset;
+}
+
+.form-field--checkbox input[type='checkbox'] {
+  width: auto;
+  cursor: pointer;
+}
+
+.form-field--checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
