@@ -85,6 +85,7 @@ function handleSubmit(data: FormData) {
     date_start: route.query.date_start ? String(route.query.date_start) : undefined,
     date_end: route.query.date_end ? String(route.query.date_end) : undefined,
     bbox: route.query.bbox ? String(route.query.bbox) : undefined,
+    include_relation_type_route: route.query.include_relation_type_route ? String(route.query.include_relation_type_route) : undefined,
   }
 
   if (JSON.stringify(query) === JSON.stringify(currentQuery)) {
