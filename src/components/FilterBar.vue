@@ -46,13 +46,20 @@ const readSummary = computed<string>(() => {
   const from = formatDate(fromDatetimeLocal(formValues.dateStart))
   const to = formValues.dateEnd ? formatDate(fromDatetimeLocal(formValues.dateEnd)) : '—'
   const bboxPart = formValues.bbox ? ' — bounding box defined' : ''
+  const routePart = formValues.includeRelationTypeRoute ? ' — with route relations' : ''
 
-  return `From ${from} → To ${to}${bboxPart}`
+  return `From ${from} → To ${to}${bboxPart}${routePart}`
 })
+
+// Default values for optional API params — extend here when new params are added
+const EXTRA_PARAM_DEFAULTS: Partial<FormData> = {
+  includeRelationTypeRoute: false,
+}
 
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
   const mapped: FormData = {
+    ...EXTRA_PARAM_DEFAULTS,
     dateStart: preset.dateStart ? toDatetimeLocal(new Date(preset.dateStart).toISOString()) : '',
     dateEnd: preset.dateEnd ? toDatetimeLocal(new Date(preset.dateEnd).toISOString()) : '',
     bbox: preset.bbox,
@@ -272,11 +279,6 @@ form {
   flex-direction: row;
   align-items: center;
   min-width: unset;
-}
-
-.form-field--checkbox input[type='checkbox'] {
-  width: auto;
-  cursor: pointer;
 }
 
 .form-field--checkbox label {
