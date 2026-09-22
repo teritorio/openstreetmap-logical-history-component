@@ -125,6 +125,12 @@ function cancelDraw(): void {
 function onDrawMouseUp(e: maplibre.MapMouseEvent): void {
   if (!drawStart || !map.value)
     return
+  const startPx = map.value.project(drawStart)
+  const endPx = map.value.project(e.lngLat)
+  if (Math.abs(endPx.x - startPx.x) < 4 && Math.abs(endPx.y - startPx.y) < 4) {
+    cancelDraw()
+    return
+  }
   const west = Math.min(drawStart.lng, e.lngLat.lng)
   const east = Math.max(drawStart.lng, e.lngLat.lng)
   const south = Math.min(drawStart.lat, e.lngLat.lat)
