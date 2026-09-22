@@ -270,5 +270,6 @@ function onIntersectionObserver([entry]: IntersectionObserverEntry[]) {
 .v-map {
   height: 280px;
   width: 100%;
+  isolation: isolate;
 }
 </style>
