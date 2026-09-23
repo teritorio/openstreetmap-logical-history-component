@@ -19,7 +19,7 @@ function formatNumericValue(key: string, val: number | string): number | string 
       return `${Math.round(((1 - (val as number)) * 100))}%`
     case 'max_distance':
     case 'min_distance':
-      return `${Number.parseFloat((val as number).toFixed(2))}m`
+      return val != null ? `${Number.parseFloat((val as number).toFixed(2))}m` : '—'
     default:
       return val
   }
