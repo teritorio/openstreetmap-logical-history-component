@@ -58,6 +58,7 @@ export interface IFeature extends GeoJSON.Feature {
     is_before?: boolean
     is_after?: boolean
     is_new?: boolean
+    is_deleted?: boolean
   }
 }
 

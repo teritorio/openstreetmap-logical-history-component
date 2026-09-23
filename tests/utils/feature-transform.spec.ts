@@ -97,6 +97,28 @@ describe('transformFeatures', () => {
     expect(before?.properties.geom).toBe(false)
   })
 
+  it('sets is_deleted flag when link has no after key', async () => {
+    const transformFeatures = await importTransform()
+    const f1 = createFeature({ id: 'n1', properties: { links: 0 } })
+    const data = createApiResponse([f1], [[createLink({ before: 'n1', after: undefined })]])
+
+    const result = transformFeatures(data)
+    const before = result.find(f => f.id === 'n1')
+    expect(before?.properties.is_deleted).toBe(true)
+    expect(before?.properties.is_before).toBe(true)
+  })
+
+  it('does not set is_deleted when link has an after key', async () => {
+    const transformFeatures = await importTransform()
+    const f1 = createFeature({ id: 'n1', properties: { links: 0 } })
+    const f2 = createFeature({ id: 'n2', properties: { links: 0 } })
+    const data = createApiResponse([f1, f2], [[createLink({ before: 'n1', after: 'n2' })]])
+
+    const result = transformFeatures(data)
+    const before = result.find(f => f.id === 'n1')
+    expect(before?.properties.is_deleted).toBe(false)
+  })
+
   it('skips feature with no matching group', async () => {
     const transformFeatures = await importTransform()
     const f1 = createFeature({ id: 'n1', properties: { links: 999 } })
