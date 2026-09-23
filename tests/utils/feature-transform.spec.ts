@@ -74,11 +74,11 @@ describe('transformFeatures', () => {
     expect(result[0].properties.geom).toBe(false)
   })
 
-  it('sets geom to true when linked features have different geometries', async () => {
+  it('sets geom to true when link has diff_attribs with geom key', async () => {
     const transformFeatures = await importTransform()
     const f1 = createFeature({ id: 'n1', geometry: { type: 'Point', coordinates: [1, 2] }, properties: { links: 0 } })
     const f2 = createFeature({ id: 'n2', geometry: { type: 'Point', coordinates: [3, 4] }, properties: { links: 0 } })
-    const data = createApiResponse([f1, f2], [[createLink({ before: 'n1', after: 'n2' })]])
+    const data = createApiResponse([f1, f2], [[createLink({ before: 'n1', after: 'n2', diff_attribs: { geom: [['geom', 'reject', null]] } })]])
 
     const result = transformFeatures(data)
     const before = result.find(f => f.id === 'n1')
