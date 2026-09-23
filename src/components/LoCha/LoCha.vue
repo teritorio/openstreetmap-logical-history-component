@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import type { GroupSlotProps, LoChaData, ObjectDetailSlotProps } from '@/types'
-import { computed, provide, watch } from 'vue'
+import { computed, provide, toRef, watch } from 'vue'
 import LoChaGroupList from '@/components/LoCha/LoChaGroupList.vue'
 import { useLoCha } from '@/composables/useLoCha'
-import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY, MAP_STYLE_URL_KEY, REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
+import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY, MAP_LOCALE_KEY, MAP_STYLE_URL_KEY, REASON_COLLAPSED_KEY } from '@/constants/injectionKeys'
 import { MAP_STYLE_URL } from '@/constants/map'
 
 const props = withDefaults(defineProps<{
   id: string
   data?: LoChaData
   mapStyleUrl?: string
+  mapLocale?: Record<string, string>
   reasonCollapsed?: boolean
   hash?: string
 }>(), {
@@ -29,6 +30,7 @@ defineSlots<{
 provide(REASON_COLLAPSED_KEY, props.reasonCollapsed)
 provide(LOCHA_INSTANCE_ID_KEY, props.id)
 provide(MAP_STYLE_URL_KEY, props.mapStyleUrl)
+provide(MAP_LOCALE_KEY, toRef(() => props.mapLocale))
 
 const loChaInstance = useLoCha()
 provide(LOCHA_KEY, loChaInstance)
