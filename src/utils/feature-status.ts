@@ -5,6 +5,8 @@ export function getFeatureStatus(feature: IFeature): Status {
     return 'new'
   if (feature.properties.deleted)
     return 'delete'
+  if (feature.properties.is_deleted)
+    return 'delete'
   if (feature.properties.is_before)
     return 'updateBefore'
   return 'updateAfter'

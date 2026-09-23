@@ -41,6 +41,7 @@ export function transformFeatures(data: LoChaData): LoChaData['features'] {
         properties: {
           ...feature.properties,
           is_before: true,
+          is_deleted: link.after === undefined,
         },
       }
     }
