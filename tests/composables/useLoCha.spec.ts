@@ -66,7 +66,7 @@ describe('useLoCha', () => {
       const { getStatus } = useLoCha()
       const feature = createFeature({
         id: 'n1',
-        properties: { is_deleted: true, is_before: true },
+        properties: { is_deleted: true },
       })
       expect(getStatus(feature)).toBe('delete')
     })
