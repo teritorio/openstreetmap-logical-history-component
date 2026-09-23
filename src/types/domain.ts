@@ -18,7 +18,7 @@ export type Status = 'new' | 'delete' | 'updateBefore' | 'updateAfter'
  */
 export type Color = {
   [key in Status]: key extends 'new'
-    ? '#52c41a'
+    ? '#00A550'
     : key extends 'delete'
       ? '#FF0000'
       : key extends 'updateBefore'

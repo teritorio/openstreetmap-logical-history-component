@@ -9,7 +9,7 @@ export type { Color, LoCha, LoChaGroup, Status } from '@/types'
  * A predefined object that maps status types to corresponding color codes.
  */
 export const loChaColors = {
-  new: '#52c41a',
+  new: '#00A550',
   delete: '#FF0000',
   updateBefore: '#FFA479',
   updateAfter: '#F2BE00',

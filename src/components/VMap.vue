@@ -6,8 +6,8 @@ import turfBbox from '@turf/bbox'
 import { featureCollection as turfFeatureCollection } from '@turf/helpers'
 import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
-import { inject, shallowRef, watch } from 'vue'
-import { MAP_STYLE_URL_KEY } from '@/constants/injectionKeys'
+import { inject, ref, shallowRef, watch } from 'vue'
+import { MAP_LOCALE_KEY, MAP_STYLE_URL_KEY } from '@/constants/injectionKeys'
 import { MAP_STYLE_URL } from '@/constants/map'
 import { BBOX_SOURCE_ID, LAYERS, SOURCE_ID } from '@/constants/mapLayers'
 import { clipAndEnvelope, isBboxDegenerate, normalizeBboxForClipping } from '@/utils/geom'
@@ -21,6 +21,8 @@ const props = defineProps<{
 }>()
 
 const mapStyleUrl = inject(MAP_STYLE_URL_KEY, MAP_STYLE_URL)
+const NO_LOCALE = ref(undefined)
+const mapLocale = inject(MAP_LOCALE_KEY, NO_LOCALE)
 
 type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
@@ -61,6 +63,18 @@ watch(() => props.features, (newValue) => {
     map.value = undefined
     initMap()
   }
+})
+
+watch(mapLocale, (newLocale) => {
+  if (!map.value || !newLocale) {
+    return
+  }
+  // MapLibre v4+ has no public locale setter — mutating _locale then cycling
+  // cooperativeGestures is the only workaround. See maplibre/maplibre-gl-js#5307.
+  const l = (map.value as any)._locale as Record<string, string>
+  Object.assign(l, newLocale)
+  map.value.cooperativeGestures.disable()
+  map.value.cooperativeGestures.enable()
 })
 
 function initMap() {
@@ -117,6 +131,7 @@ function initMap() {
         },
         style: mapStyleUrl,
         cooperativeGestures: true,
+        locale: mapLocale.value,
         attributionControl: false,
       })
       map.value.addControl(new maplibre.FullscreenControl())
@@ -270,5 +285,6 @@ function onIntersectionObserver([entry]: IntersectionObserverEntry[]) {
 .v-map {
   height: 280px;
   width: 100%;
+  isolation: isolate;
 }
 </style>

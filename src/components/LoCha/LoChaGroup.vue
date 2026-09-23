@@ -178,6 +178,7 @@ const groupNameTitle = computed(() => {
 .locha-group {
   border: 2px solid #cecece;
   background-color: #ffffff;
+  scroll-margin-top: var(--locha-scroll-offset, 0px);
 }
 
 .group-content {

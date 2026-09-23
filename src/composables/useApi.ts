@@ -99,7 +99,7 @@ export function useApiConfig(): ApiComposable {
 
     return await fetch(
       buildApiUrl(params),
-      { method: 'GET' },
+      { method: 'GET', headers: { Accept: 'application/geo+json' } },
     )
       .then(async (res) => {
         if (!res.ok) {
