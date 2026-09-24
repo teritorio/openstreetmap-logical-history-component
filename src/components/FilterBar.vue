@@ -1,73 +1,51 @@
 <script setup lang="ts">
 import type { FormData } from '@/types'
 import { Collapsible } from '@ark-ui/vue'
-import { computed, reactive, ref, shallowRef, useTemplateRef, watchEffect } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed, reactive, shallowRef, useTemplateRef, watchEffect } from 'vue'
 import MapBbox from '@/components/MapBbox.vue'
 import { presets } from '@/data/presets'
-import { formatDate, fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
 
 const props = withDefaults(
   defineProps<{
-    initialValues?: FormData
+    bbox?: string
   }>(),
   {
-    initialValues: () => ({ dateStart: '', dateEnd: '', bbox: '' }),
+    bbox: '',
   },
 )
 
 const emit = defineEmits<{
-  (e: 'submit', payload: FormData): void
+  (e: 'submit', bbox: string): void
+  (e: 'preset', data: FormData): void
 }>()
 
-const isEditing = ref(false)
-const formValues = reactive<FormData>({
-  dateStart: '',
-  dateEnd: '',
-  bbox: '',
-  includeRelationTypeRoute: false,
-})
+const isEditing = shallowRef(false)
+const localBbox = reactive({ bbox: '' })
 const mapBboxRef = useTemplateRef('mapBboxRef')
 const needZoom = shallowRef(false)
 
 watchEffect(() => {
-  if (props.initialValues) {
-    Object.assign(formValues, props.initialValues)
-  }
+  localBbox.bbox = props.bbox ?? ''
 })
-
-const router = useRouter()
-const route = useRoute()
 
 const readSummary = computed<string>(() => {
-  if (!formValues.dateStart)
-    return 'No filter applied'
-
-  const from = formatDate(fromDatetimeLocal(formValues.dateStart))
-  const to = formValues.dateEnd ? formatDate(fromDatetimeLocal(formValues.dateEnd)) : '—'
-  const bboxPart = formValues.bbox ? ' — bounding box defined' : ''
-  const routePart = formValues.includeRelationTypeRoute ? ' — with route relations' : ''
-
-  return `From ${from} → To ${to}${bboxPart}${routePart}`
+  return props.bbox ? 'Bounding box defined' : 'No bounding box'
 })
 
-// Default values for optional API params — extend here when new params are added
 const EXTRA_PARAM_DEFAULTS: Partial<FormData> = {
   includeRelationTypeRoute: false,
 }
 
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
-  const mapped: FormData = {
+  const data: FormData = {
     ...EXTRA_PARAM_DEFAULTS,
-    dateStart: preset.dateStart ? toDatetimeLocal(new Date(preset.dateStart).toISOString()) : '',
-    dateEnd: preset.dateEnd ? toDatetimeLocal(new Date(preset.dateEnd).toISOString()) : '',
+    dateStart: preset.dateStart ? preset.dateStart.slice(0, 10) : '',
+    dateEnd: preset.dateEnd ? preset.dateEnd.slice(0, 10) : '',
     bbox: preset.bbox,
   }
-  Object.assign(formValues, mapped)
-  router.replace({ path: route.path, hash: '' })
   isEditing.value = false
-  emit('submit', formValues)
+  emit('preset', data)
 }
 
 function handleBboxChange(bbox: string) {
@@ -75,7 +53,7 @@ function handleBboxChange(bbox: string) {
     return
 
   needZoom.value = mapBboxRef.value.getZoom() < 14
-  formValues.bbox = bbox
+  localBbox.bbox = bbox
 }
 
 function handleSubmit(): void {
@@ -90,13 +68,11 @@ function handleSubmit(): void {
   }
 
   isEditing.value = false
-  emit('submit', formValues)
+  emit('submit', localBbox.bbox)
 }
 
 function handleCancel(): void {
-  if (props.initialValues) {
-    Object.assign(formValues, props.initialValues)
-  }
+  localBbox.bbox = props.bbox ?? ''
   needZoom.value = false
   isEditing.value = false
 }
@@ -117,54 +93,24 @@ function handleCancel(): void {
       <div class="filter-bar-map">
         <MapBbox
           ref="mapBboxRef"
-          :bbox="formValues.bbox"
+          :bbox="localBbox.bbox"
           @update-bbox="handleBboxChange"
         />
       </div>
 
       <div class="filter-bar-controls">
         <form @submit.prevent="handleSubmit">
-          <div class="form-row">
-            <div class="form-field">
-              <label for="fb_date_start">From <span class="required">*</span></label>
-              <input
-                id="fb_date_start"
-                v-model="formValues.dateStart"
-                type="datetime-local"
-                required
-              >
-            </div>
-            <div class="form-field">
-              <label for="fb_date_end">To</label>
-              <input
-                id="fb_date_end"
-                v-model="formValues.dateEnd"
-                type="datetime-local"
-              >
-            </div>
-          </div>
-
           <div class="form-field">
             <label for="fb_bbox">Bounding Box <span class="required">*</span></label>
             <input
               id="fb_bbox"
-              v-model="formValues.bbox"
+              v-model="localBbox.bbox"
               type="text"
               placeholder="west, south, east, north"
               pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
               required
             >
             <pre v-if="needZoom" class="zoom-warning">Need smaller bbox, zoom more !</pre>
-          </div>
-
-          <div class="form-field form-field--checkbox">
-            <label>
-              <input
-                v-model="formValues.includeRelationTypeRoute"
-                type="checkbox"
-              >
-              Include route relations
-            </label>
           </div>
 
           <pre class="required-note">* required fields</pre>
@@ -261,31 +207,12 @@ form {
   flex: 1;
 }
 
-.form-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
 .form-field {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   flex: 1;
   min-width: 160px;
-}
-
-.form-field--checkbox {
-  flex-direction: row;
-  align-items: center;
-  min-width: unset;
-}
-
-.form-field--checkbox label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
 }
 
 @media (max-width: 768px) {
@@ -321,7 +248,6 @@ label {
   margin: 0;
 }
 
-input[type='datetime-local'],
 input[type='text'] {
   padding: 8px;
   border: 1px solid #ddd;
