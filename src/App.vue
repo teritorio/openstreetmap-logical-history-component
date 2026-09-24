@@ -23,6 +23,7 @@ const initialFormValues = computed<FormData>(() => ({
   dateStart: route.query.date_start ? toDatetimeLocal(String(route.query.date_start)) : '',
   dateEnd: route.query.date_end ? toDatetimeLocal(String(route.query.date_end)) : '',
   bbox: route.query.bbox ? String(route.query.bbox) : '',
+  includeRelationTypeRoute: route.query.include_relation_type_route === 'true',
 }))
 
 watch(
@@ -34,6 +35,7 @@ watch(
         date_start: String(query.date_start),
         date_end: query.date_end ? String(query.date_end) : undefined,
         bbox: String(query.bbox),
+        include_relation_type_route: query.include_relation_type_route ? String(query.include_relation_type_route) : undefined,
       })
     }
   },
@@ -71,6 +73,7 @@ function handleSubmit(data: FormData) {
       ? fromDatetimeLocal(data.dateEnd)
       : undefined,
     bbox: data.bbox ?? '',
+    include_relation_type_route: data.includeRelationTypeRoute ? 'true' : undefined,
   }
 
   router.push({

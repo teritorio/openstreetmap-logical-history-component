@@ -25,6 +25,7 @@ const formValues = reactive<FormData>({
   dateStart: '',
   dateEnd: '',
   bbox: '',
+  includeRelationTypeRoute: false,
 })
 const mapBboxRef = useTemplateRef('mapBboxRef')
 const needZoom = shallowRef(false)
@@ -45,13 +46,20 @@ const readSummary = computed<string>(() => {
   const from = formatDate(fromDatetimeLocal(formValues.dateStart))
   const to = formValues.dateEnd ? formatDate(fromDatetimeLocal(formValues.dateEnd)) : '—'
   const bboxPart = formValues.bbox ? ' — bounding box defined' : ''
+  const routePart = formValues.includeRelationTypeRoute ? ' — with route relations' : ''
 
-  return `From ${from} → To ${to}${bboxPart}`
+  return `From ${from} → To ${to}${bboxPart}${routePart}`
 })
+
+// Default values for optional API params — extend here when new params are added
+const EXTRA_PARAM_DEFAULTS: Partial<FormData> = {
+  includeRelationTypeRoute: false,
+}
 
 function setPreset(index: number) {
   const { title, ...preset } = presets[index]
   const mapped: FormData = {
+    ...EXTRA_PARAM_DEFAULTS,
     dateStart: preset.dateStart ? toDatetimeLocal(new Date(preset.dateStart).toISOString()) : '',
     dateEnd: preset.dateEnd ? toDatetimeLocal(new Date(preset.dateEnd).toISOString()) : '',
     bbox: preset.bbox,
@@ -147,6 +155,16 @@ function handleCancel(): void {
               required
             >
             <pre v-if="needZoom" class="zoom-warning">Need smaller bbox, zoom more !</pre>
+          </div>
+
+          <div class="form-field form-field--checkbox">
+            <label>
+              <input
+                v-model="formValues.includeRelationTypeRoute"
+                type="checkbox"
+              >
+              Include route relations
+            </label>
           </div>
 
           <pre class="required-note">* required fields</pre>
@@ -255,6 +273,19 @@ form {
   gap: 0.4rem;
   flex: 1;
   min-width: 160px;
+}
+
+.form-field--checkbox {
+  flex-direction: row;
+  align-items: center;
+  min-width: unset;
+}
+
+.form-field--checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {
