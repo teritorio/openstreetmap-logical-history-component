@@ -2,34 +2,22 @@
 import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import FilterBar from '@/components/FilterBar.vue'
 import LoCha from '@/components/LoCha/LoCha.vue'
 import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import LoChaReason from '@/components/LoCha/LoChaReason.vue'
-import MapFilters from '@/components/MapFilters.vue'
 import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
-import { formatDate, fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
+import { fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
 
 const $api = useApiConfig()
 const { error, loading, resetError } = $api
 const geojson = ref<LoChaData>()
-const mapFiltersRef = ref<InstanceType<typeof MapFilters>>()
-const mapFiltersIsOpen = ref(window.innerWidth >= 768)
 
 const route = useRoute()
 const router = useRouter()
-
-const dateFrom = computed(() => {
-  const dateStart = route.query.date_start as string | undefined
-  return dateStart ? formatDate(dateStart) : undefined
-})
-
-const dateTo = computed(() => {
-  const dateEnd = route.query.date_end as string | undefined
-  return dateEnd ? formatDate(dateEnd) : undefined
-})
 
 const initialFormValues = computed<FormData>(() => ({
   dateStart: route.query.date_start ? toDatetimeLocal(String(route.query.date_start)) : '',
@@ -101,22 +89,8 @@ function handleSubmit(data: FormData) {
     :type="error.type"
     @close="resetError"
   />
-  <main
-    :style="{
-      gridTemplateColumns: mapFiltersIsOpen ? '300px 1fr' : '0px 1fr',
-    }"
-  >
-    <MapFilters
-      ref="mapFiltersRef"
-      :initial-values="initialFormValues"
-      :is-open="mapFiltersIsOpen"
-      @submit="handleSubmit"
-      @toggle="mapFiltersIsOpen = !mapFiltersIsOpen"
-    />
-    <div v-if="dateFrom || dateTo" class="locha-header">
-      <h2>From : {{ dateFrom }}</h2>
-      <h2>To : {{ dateTo }}</h2>
-    </div>
+  <main>
+    <FilterBar :initial-values="initialFormValues" @submit="handleSubmit" />
     <LoCha id="demo" :data="geojson" :reason-collapsed="false">
       <template #object-detail="{ feature, index }">
         <template v-for="(link, i) in getLinks(feature, index)" :key="i">
@@ -153,37 +127,9 @@ function handleSubmit(data: FormData) {
 
 <style lang="css" scoped>
 main {
-  display: grid;
-  grid-template-rows: auto 1fr;
+  display: flex;
+  flex-direction: column;
   height: calc(100vh - 64px);
-  transition: grid-template-columns 0.3s ease;
-}
-
-.locha-header {
-  grid-column: 2;
-  grid-row: 1;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  padding: 0.75rem 0.5rem;
-  background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
-  border-bottom: 1px solid #d0d0d2;
-}
-
-aside {
-  grid-row: 1 / -1;
-}
-
-.locha-header h2 {
-  text-align: center;
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #333333;
-}
-
-.locha {
-  grid-column: 2;
 }
 
 .before-link {
