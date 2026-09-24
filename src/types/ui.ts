@@ -2,6 +2,7 @@ export interface FormData {
   dateStart: string
   dateEnd?: string
   bbox: string
+  includeRelationTypeRoute?: boolean
 }
 
 export interface Preset extends FormData {
