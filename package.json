@@ -61,6 +61,7 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.7.3",
+    "@ark-ui/vue": "^5.39.2",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@sentry/vite-plugin": "^5.1.1",
