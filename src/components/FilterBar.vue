@@ -3,9 +3,10 @@ import type { FormData } from '@/types'
 import { Collapsible } from '@ark-ui/vue'
 import { computed, reactive, ref, shallowRef, useTemplateRef, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import DateRangeSlider from '@/components/DateRangeSlider.vue'
 import MapBbox from '@/components/MapBbox.vue'
 import { presets } from '@/data/presets'
-import { formatDate, fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
+import { formatDateOnly } from '@/utils/date-format'
 
 const props = withDefaults(
   defineProps<{
@@ -43,8 +44,8 @@ const readSummary = computed<string>(() => {
   if (!formValues.dateStart)
     return 'No filter applied'
 
-  const from = formatDate(fromDatetimeLocal(formValues.dateStart))
-  const to = formValues.dateEnd ? formatDate(fromDatetimeLocal(formValues.dateEnd)) : '—'
+  const from = formatDateOnly(formValues.dateStart)
+  const to = formValues.dateEnd ? formatDateOnly(formValues.dateEnd) : '—'
   const bboxPart = formValues.bbox ? ' — bounding box defined' : ''
   const routePart = formValues.includeRelationTypeRoute ? ' — with route relations' : ''
 
@@ -60,8 +61,8 @@ function setPreset(index: number) {
   const { title, ...preset } = presets[index]
   const mapped: FormData = {
     ...EXTRA_PARAM_DEFAULTS,
-    dateStart: preset.dateStart ? toDatetimeLocal(new Date(preset.dateStart).toISOString()) : '',
-    dateEnd: preset.dateEnd ? toDatetimeLocal(new Date(preset.dateEnd).toISOString()) : '',
+    dateStart: preset.dateStart ? preset.dateStart.slice(0, 10) : '',
+    dateEnd: preset.dateEnd ? preset.dateEnd.slice(0, 10) : '',
     bbox: preset.bbox,
   }
   Object.assign(formValues, mapped)
@@ -124,24 +125,12 @@ function handleCancel(): void {
 
       <div class="filter-bar-controls">
         <form @submit.prevent="handleSubmit">
-          <div class="form-row">
-            <div class="form-field">
-              <label for="fb_date_start">From <span class="required">*</span></label>
-              <input
-                id="fb_date_start"
-                v-model="formValues.dateStart"
-                type="datetime-local"
-                required
-              >
-            </div>
-            <div class="form-field">
-              <label for="fb_date_end">To</label>
-              <input
-                id="fb_date_end"
-                v-model="formValues.dateEnd"
-                type="datetime-local"
-              >
-            </div>
+          <div class="form-field">
+            <label>Date range <span class="required">*</span></label>
+            <DateRangeSlider
+              v-model:start="formValues.dateStart"
+              v-model:end="formValues.dateEnd"
+            />
           </div>
 
           <div class="form-field">
@@ -261,12 +250,6 @@ form {
   flex: 1;
 }
 
-.form-row {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
 .form-field {
   display: flex;
   flex-direction: column;
@@ -321,7 +304,6 @@ label {
   margin: 0;
 }
 
-input[type='datetime-local'],
 input[type='text'] {
   padding: 8px;
   border: 1px solid #ddd;

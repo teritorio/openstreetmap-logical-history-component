@@ -10,7 +10,7 @@ import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
-import { fromDatetimeLocal, toDatetimeLocal } from '@/utils/date-format'
+import { fromDateOnly, toDateOnly } from '@/utils/date-format'
 
 const $api = useApiConfig()
 const { error, loading, resetError } = $api
@@ -21,8 +21,8 @@ const route = useRoute()
 const router = useRouter()
 
 const initialFormValues = computed<FormData>(() => ({
-  dateStart: route.query.date_start ? toDatetimeLocal(String(route.query.date_start)) : '',
-  dateEnd: route.query.date_end ? toDatetimeLocal(String(route.query.date_end)) : '',
+  dateStart: route.query.date_start ? toDateOnly(String(route.query.date_start)) : '',
+  dateEnd: route.query.date_end ? toDateOnly(String(route.query.date_end)) : '',
   bbox: route.query.bbox ? String(route.query.bbox) : '',
   includeRelationTypeRoute: route.query.include_relation_type_route === 'true',
 }))
@@ -75,8 +75,8 @@ function handleSubmit(data: FormData) {
     throw new Error('Missing start date.')
 
   const query: Record<string, string | undefined> = {
-    date_start: fromDatetimeLocal(data.dateStart),
-    date_end: data.dateEnd ? fromDatetimeLocal(data.dateEnd) : undefined,
+    date_start: fromDateOnly(data.dateStart),
+    date_end: data.dateEnd ? fromDateOnly(data.dateEnd) : undefined,
     bbox: data.bbox ?? '',
     include_relation_type_route: data.includeRelationTypeRoute ? 'true' : undefined,
   }
