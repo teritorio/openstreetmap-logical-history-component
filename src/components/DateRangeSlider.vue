@@ -85,6 +85,7 @@ const brushOptions: ApexOptions = {
       enabled: true,
       fill: { color: '#082e4e', opacity: 0.1 },
       stroke: { width: 1, color: '#082e4e', dashArray: 0, opacity: 0.9 },
+      // Initial selection from props; subsequent changes handled by the watch below
       xaxis: {
         min: props.start ? dateToMs(props.start) : OSM_EPOCH_MS,
         max: props.end ? dateToMs(props.end) : TODAY_MS,
