@@ -1947,6 +1947,7 @@ __metadata:
     "@vue/test-utils": "npm:^2.4.6"
     "@vue/tsconfig": "npm:^0.9.0"
     "@vueuse/components": "npm:^14.2.1"
+    apexcharts: "npm:^7.5.1"
     diff: "npm:^8.0.3"
     eslint: "npm:^10.0.3"
     eslint-plugin-format: "npm:^2.0.1"
@@ -1962,6 +1963,7 @@ __metadata:
     vue: "npm:^3.5.30"
     vue-router: "npm:^5.0.3"
     vue-tsc: "npm:^3.2.6"
+    vue3-apexcharts: "npm:^1.11.1"
   peerDependencies:
     maplibre-gl: ^5.0.0
     vue: ^3.5.13
@@ -4029,6 +4031,22 @@ __metadata:
   version: 4.3.1
   resolution: "ansis@npm:4.3.1"
   checksum: 10c0/d1a48090f9c33b18f254a3496e5336a20391a51140b552a1c0bc38710ae7c8bc36a62658f28759797d7bce15e89b893e9ef1962ea1ea42a291d112263f6e593c
+  languageName: node
+  linkType: hard
+
+"apex-commons@npm:^0.8.0":
+  version: 0.8.1
+  resolution: "apex-commons@npm:0.8.1"
+  checksum: 10c0/9d0817892f57b355b440226676d06f2aee44a443527f10500e1be0a6aeb00a172616f2701c76a10fdf031984dddc49aacddbc4bb5638b1da82f8b07b9b572683
+  languageName: node
+  linkType: hard
+
+"apexcharts@npm:^7.5.1":
+  version: 7.5.1
+  resolution: "apexcharts@npm:7.5.1"
+  dependencies:
+    apex-commons: "npm:^0.8.0"
+  checksum: 10c0/5791e98f01c6a113ea59f16b8304dca3e5172d5121fd70bb671f12812cc52380d366ce788a79bcc7b1f528c61baf87fac92117d6bca0cd9d2791e8c622abddb3
   languageName: node
   linkType: hard
 
@@ -8720,6 +8738,19 @@ __metadata:
   bin:
     vue-tsc: bin/vue-tsc.js
   checksum: 10c0/582ab81a0c5bb53a589e7f0ff2710cfaf32df1c180acaac5f65cbdfec8bd52a647aea0926a9fbef664799260d2df08a9f15cc9405759a6365169c73be16066c4
+  languageName: node
+  linkType: hard
+
+"vue3-apexcharts@npm:^1.11.1":
+  version: 1.11.1
+  resolution: "vue3-apexcharts@npm:1.11.1"
+  peerDependencies:
+    apexcharts: ">=5.10.0"
+    vue: ">=3.0.0"
+  peerDependenciesMeta:
+    apexcharts:
+      optional: false
+  checksum: 10c0/60d47d1301c4fd6f8b697d8a6338024607b253b00771bfff9f5c96655f55cf6745eaf0e91786c172e2ad90e0219c9981698741496775cf03fef7cbe89481d5c0
   languageName: node
   linkType: hard
 
