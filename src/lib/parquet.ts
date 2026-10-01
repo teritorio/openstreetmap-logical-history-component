@@ -15,10 +15,10 @@ async function fetchFile(baseUrl: string, path: string): Promise<Awaited<ReturnT
   }
 }
 
-async function maybeParseMetadata(file: Awaited<ReturnType<typeof asyncBufferFromUrl>>, footerSize?: number, always = false): Promise<Awaited<ReturnType<typeof parquetMetadataAsync>> | undefined> {
-  if (!always && !footerSize)
+async function maybeParseMetadata(file: Awaited<ReturnType<typeof asyncBufferFromUrl>>, footerSize?: number): Promise<Awaited<ReturnType<typeof parquetMetadataAsync>> | undefined> {
+  if (!footerSize)
     return undefined
-  return parquetMetadataAsync(file, footerSize ? { initialFetchSize: footerSize + 8 } : undefined)
+  return parquetMetadataAsync(file, { initialFetchSize: footerSize + 8 })
 }
 
 export async function queryRows(
