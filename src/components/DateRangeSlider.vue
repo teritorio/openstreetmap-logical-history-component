@@ -8,8 +8,6 @@ const props = defineProps<{
   start?: string
   end?: string
   histogramData?: [number, number][]
-  minDate?: string
-  maxDate?: string
 }>()
 
 const emit = defineEmits<{
@@ -55,8 +53,8 @@ const histogramOptions: ApexOptions = {
   },
   xaxis: {
     type: 'datetime',
-    min: OSM_EPOCH_MS,
-    max: TODAY_MS,
+    min: props.start ? dateToMs(props.start) : OSM_EPOCH_MS,
+    max: props.end ? dateToMs(props.end) : TODAY_MS,
     labels: {
       style: { fontSize: '10px', colors: '#888' },
       datetimeUTC: true,
@@ -107,8 +105,8 @@ const brushOptions: ApexOptions = {
   },
   xaxis: {
     type: 'datetime',
-    min: OSM_EPOCH_MS,
-    max: TODAY_MS,
+    min: props.start ? dateToMs(props.start) : OSM_EPOCH_MS,
+    max: props.end ? dateToMs(props.end) : TODAY_MS,
     tooltip: { enabled: false },
     labels: { show: false },
     axisBorder: { show: false },
@@ -128,38 +126,13 @@ const brushSeries = [{ name: '', data: FLAT_SERIES }]
 watch(
   () => [props.start, props.end] as const,
   ([start, end]) => {
+    const min = start ? dateToMs(start) : OSM_EPOCH_MS
+    const max = end ? dateToMs(end) : TODAY_MS
+    ApexCharts.exec('locha-histogram', 'updateOptions', { xaxis: { min, max } }, false, false)
     ApexCharts.exec('locha-brush', 'updateOptions', {
-      chart: {
-        selection: {
-          xaxis: {
-            min: start ? dateToMs(start) : OSM_EPOCH_MS,
-            max: end ? dateToMs(end) : TODAY_MS,
-          },
-        },
-      },
+      xaxis: { min, max },
+      chart: { selection: { xaxis: { min, max } } },
     }, false, false)
-  },
-)
-
-watch(
-  () => [props.minDate, props.maxDate] as const,
-  ([minDate, maxDate]) => {
-    const min = minDate ? dateToMs(minDate) : OSM_EPOCH_MS
-    const max = maxDate ? dateToMs(maxDate) : TODAY_MS
-    ApexCharts.exec('locha-histogram', 'updateOptions', { xaxis: { min, max } }, false, false)
-    ApexCharts.exec('locha-brush', 'updateOptions', { xaxis: { min, max } }, false, false)
-  },
-)
-
-watch(
-  () => props.histogramData,
-  (data) => {
-    if (!data || data.length === 0)
-      return
-    const min = data.reduce((acc, [t]) => Math.min(acc, t), Infinity)
-    const max = data.reduce((acc, [t]) => Math.max(acc, t), -Infinity)
-    ApexCharts.exec('locha-histogram', 'updateOptions', { xaxis: { min, max } }, false, false)
-    ApexCharts.exec('locha-brush', 'updateOptions', { xaxis: { min, max } }, false, false)
   },
 )
 </script>
