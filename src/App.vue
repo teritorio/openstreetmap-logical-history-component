@@ -36,7 +36,7 @@ const karmaDateStart = toRef(formValues, 'dateStart')
 const karmaDateEnd = toRef(formValues, 'dateEnd')
 const viewportBbox = ref('')
 
-const { histogramData, heatmapData, dateRange } = useKarmaData({
+const { histogramData, heatmapData } = useKarmaData({
   bbox: viewportBbox,
   dateStart: karmaDateStart,
   dateEnd: karmaDateEnd,
@@ -170,8 +170,6 @@ function goBack() {
           v-model:start="formValues.dateStart"
           v-model:end="formValues.dateEnd"
           :histogram-data="histogramData"
-          :min-date="dateRange?.min_date"
-          :max-date="dateRange?.max_date"
         />
       </div>
       <FilterBar
