@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type * as GeoJSON from 'geojson'
 import maplibre from 'maplibre-gl'
-import { onMounted, onUnmounted, shallowRef, useTemplateRef, watch } from 'vue'
+import { onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
 import { useDrawMode } from '@/composables/useDrawMode'
 import { MAP_STYLE_URL } from '@/constants/map'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -47,6 +47,11 @@ const H3_FILL_PAINT: maplibre.FillLayerSpecification['paint'] = {
   ],
   'fill-opacity': 0.6,
 }
+
+type Corner = 'nw' | 'ne' | 'sw' | 'se'
+type HandlePositions = Record<Corner, { x: number, y: number }>
+
+const handlePositions = ref<HandlePositions | null>(null)
 
 function parseBbox(bbox: string): [number, number, number, number] | null {
   const parts = bbox.split(',').map(Number)
@@ -97,6 +102,80 @@ function getZoom(): number {
   return map.value.getZoom()
 }
 
+function updateHandlePositionsFromBbox(bbox: string): void {
+  if (!map.value) {
+    handlePositions.value = null
+    return
+  }
+  const parsed = parseBbox(bbox)
+  if (!parsed) {
+    handlePositions.value = null
+    return
+  }
+  const [west, south, east, north] = parsed
+  handlePositions.value = {
+    nw: map.value.project([west, north] as [number, number]),
+    ne: map.value.project([east, north] as [number, number]),
+    sw: map.value.project([west, south] as [number, number]),
+    se: map.value.project([east, south] as [number, number]),
+  }
+}
+
+function updateHandlePositions(): void {
+  if (!props.bbox) {
+    handlePositions.value = null
+    return
+  }
+  updateHandlePositionsFromBbox(props.bbox)
+}
+
+function startResize(corner: Corner, e: MouseEvent): void {
+  e.preventDefault()
+  e.stopPropagation()
+  if (!map.value || !props.bbox)
+    return
+
+  const parsed = parseBbox(props.bbox)
+  if (!parsed)
+    return
+  const [west, south, east, north] = parsed
+
+  const anchor: [number, number] = corner === 'nw'
+    ? [east, south]
+    : corner === 'ne'
+      ? [west, south]
+      : corner === 'sw'
+        ? [east, north]
+        : [west, north]
+
+  map.value.dragPan.disable()
+
+  const wrapperEl = (e.target as HTMLElement).parentElement!
+
+  function onMove(ev: MouseEvent): void {
+    if (!map.value)
+      return
+    const rect = wrapperEl.getBoundingClientRect()
+    const pt = map.value.unproject([ev.clientX - rect.left, ev.clientY - rect.top] as [number, number])
+    const newBbox = `${Math.min(anchor[0], pt.lng)},${Math.min(anchor[1], pt.lat)},${Math.max(anchor[0], pt.lng)},${Math.max(anchor[1], pt.lat)}`
+    drawRect(newBbox)
+    updateHandlePositionsFromBbox(newBbox)
+  }
+
+  function onUp(ev: MouseEvent): void {
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onUp)
+    map.value?.dragPan.enable()
+    const rect = wrapperEl.getBoundingClientRect()
+    const pt = map.value!.unproject([ev.clientX - rect.left, ev.clientY - rect.top] as [number, number])
+    const newBbox = `${Math.min(anchor[0], pt.lng)},${Math.min(anchor[1], pt.lat)},${Math.max(anchor[0], pt.lng)},${Math.max(anchor[1], pt.lat)}`
+    emit('updateBbox', newBbox)
+  }
+
+  document.addEventListener('mousemove', onMove)
+  document.addEventListener('mouseup', onUp)
+}
+
 const { isDrawing, toggle: toggleDrawMode } = useDrawMode(map, {
   onDrawMove: bbox => drawRect(bbox),
   onDrawEnd: (bbox) => {
@@ -119,9 +198,11 @@ watch(
     if (newBbox) {
       fitMapToBbox(newBbox)
       drawRect(newBbox)
+      updateHandlePositionsFromBbox(newBbox)
     }
     else {
       clearRect()
+      handlePositions.value = null
     }
   },
 )
@@ -181,9 +262,13 @@ onMounted(() => {
       paint: { 'line-color': '#082e4e', 'line-width': 2 },
     })
 
+    map.value!.on('move', updateHandlePositions)
+    map.value!.on('zoom', updateHandlePositions)
+
     if (props.bbox) {
       fitMapToBbox(props.bbox)
       drawRect(props.bbox)
+      updateHandlePositionsFromBbox(props.bbox)
     }
   })
 })
@@ -206,6 +291,19 @@ defineExpose({ getZoom })
     >
       {{ isDrawing ? 'Cancel draw' : 'Draw bbox' }}
     </button>
+    <template v-if="handlePositions">
+      <div
+        v-for="corner in (['nw', 'ne', 'sw', 'se'] as const)"
+        :key="corner"
+        class="bbox-handle"
+        :class="`bbox-handle--${corner}`"
+        :style="{
+          left: `${handlePositions[corner].x}px`,
+          top: `${handlePositions[corner].y}px`,
+        }"
+        @mousedown="startResize(corner, $event)"
+      />
+    </template>
   </div>
 </template>
 
@@ -246,5 +344,30 @@ defineExpose({ getZoom })
 .draw-bbox-btn:not(.draw-bbox-btn--active):hover {
   background: #f0f4f8;
   border-color: #082e4e;
+}
+
+.bbox-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #082e4e;
+  border: 2px solid #fff;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+  pointer-events: all;
+}
+
+.bbox-handle--nw {
+  cursor: nw-resize;
+}
+.bbox-handle--ne {
+  cursor: ne-resize;
+}
+.bbox-handle--sw {
+  cursor: sw-resize;
+}
+.bbox-handle--se {
+  cursor: se-resize;
 }
 </style>
