@@ -136,8 +136,7 @@ function handleBboxUpdate(bbox: string) {
   formValues.bbox = bbox
 }
 
-function handleFilterSubmit(bbox: string) {
-  formValues.bbox = bbox
+function handleFilterSubmit(_bbox: string) {
   doSubmit()
 }
 

@@ -94,6 +94,8 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
     if (!manifest.value || !bboxVal || !dateStartVal)
       return
 
+    const manifestRes = manifest.value.h3_resolution
+
     const parts = bboxVal.split(',').map(Number)
     if (parts.length !== 4 || parts.some(Number.isNaN))
       return
@@ -101,7 +103,7 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
 
     let hexCells: string[]
     try {
-      hexCells = bboxToCells(bbox, manifest.value.h3_resolution)
+      hexCells = bboxToCells(bbox, manifestRes)
     }
     catch {
       return
@@ -134,8 +136,8 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
       histogramData.value = Array.from(byDay.entries(), ([day, count]): [number, number] => [new Date(`${day}T00:00:00Z`).getTime(), count])
         .sort(([a], [b]) => a - b)
 
-      const displayRes = getDisplayRes(byCell.size, manifest.value.h3_resolution)
-      const displayCells = displayRes === manifest.value.h3_resolution
+      const displayRes = getDisplayRes(byCell.size, manifestRes)
+      const displayCells = displayRes === manifestRes
         ? byCell
         : aggregateCells(byCell, displayRes)
       heatmapData.value = h3CellsToGeoJSON(displayCells)
