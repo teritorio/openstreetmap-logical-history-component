@@ -8,6 +8,8 @@ import { scrollToSection } from '@/utils/scrollToSection'
 
 const props = defineProps<{
   hash?: string
+  hideUnchanged?: boolean
+  hideMinorGeom?: boolean
 }>()
 
 defineSlots<{
@@ -21,6 +23,9 @@ defineSlots<{
 
 const { groups } = inject(LOCHA_KEY)!
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
+
+const localHideUnchanged = ref(props.hideUnchanged ?? true)
+const localHideMinorGeom = ref(props.hideMinorGeom ?? true)
 const highlightBorderColor = loChaColors.delete
 const currentHash = ref<string>()
 const listRef = useTemplateRef<HTMLElement>('listRef')
@@ -97,9 +102,19 @@ onUnmounted(() => {
 
 <template>
   <div ref="listRef" class="locha-group-list">
+    <div class="locha-filters">
+      <label>
+        <input v-model="localHideUnchanged" type="checkbox">
+        Gray out unchanged
+      </label>
+      <label>
+        <input v-model="localHideMinorGeom" type="checkbox">
+        Gray out minor geometry changes
+      </label>
+    </div>
     <ul ref="scrollRef">
-      <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
-        <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" @navigate="navigateToHash">
+      <li v-for="(group, index) in groups" :key="group[0].properties.links" :class="{ selected: currentHash === `#${groupId(index)}` }">
+        <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" :hide-unchanged="localHideUnchanged" :hide-minor-geom="localHideMinorGeom" @navigate="navigateToHash">
           <template v-if="$slots['object-header']" #object-header="slotProps">
             <slot name="object-header" v-bind="slotProps" />
           </template>
@@ -159,5 +174,20 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
+}
+
+.locha-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.locha-filters label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  user-select: none;
 }
 </style>

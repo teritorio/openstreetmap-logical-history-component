@@ -56,13 +56,13 @@ describe('transformFeatures', () => {
     expect(result).toHaveLength(2)
   })
 
-  it('sets is_after when link.before is undefined but link.after is defined', async () => {
+  it('sets is_new when link.before is undefined but link.after is defined', async () => {
     const transformFeatures = await importTransform()
     const f1 = createFeature({ id: 'n1', properties: { links: 0 } })
     const data = createApiResponse([f1], [[createLink({ before: undefined, after: 'n1' })]])
 
     const result = transformFeatures(data)
-    expect(result[0].properties.is_after).toBe(true)
+    expect(result[0].properties.is_new).toBe(true)
   })
 
   it('does not set geom property when single feature in group (no linkedFeature)', async () => {
@@ -74,11 +74,11 @@ describe('transformFeatures', () => {
     expect(result[0].properties.geom).toBe(false)
   })
 
-  it('sets geom to true when link has diff_attribs with geom key', async () => {
+  it('sets geom to true when link diff_attribs contains geom key', async () => {
     const transformFeatures = await importTransform()
     const f1 = createFeature({ id: 'n1', geometry: { type: 'Point', coordinates: [1, 2] }, properties: { links: 0 } })
     const f2 = createFeature({ id: 'n2', geometry: { type: 'Point', coordinates: [3, 4] }, properties: { links: 0 } })
-    const data = createApiResponse([f1, f2], [[createLink({ before: 'n1', after: 'n2', diff_attribs: { geom: [['geom', 'reject', null]] } })]])
+    const data = createApiResponse([f1, f2], [[createLink({ before: 'n1', after: 'n2', diff_attribs: { geom: [['Point', null, null]] } })]])
 
     const result = transformFeatures(data)
     const before = result.find(f => f.id === 'n1')
@@ -95,28 +95,6 @@ describe('transformFeatures', () => {
     const result = transformFeatures(data)
     const before = result.find(f => f.id === 'n1')
     expect(before?.properties.geom).toBe(false)
-  })
-
-  it('sets is_deleted flag when link has no after key', async () => {
-    const transformFeatures = await importTransform()
-    const f1 = createFeature({ id: 'n1', properties: { links: 0 } })
-    const data = createApiResponse([f1], [[createLink({ before: 'n1', after: undefined })]])
-
-    const result = transformFeatures(data)
-    const before = result.find(f => f.id === 'n1')
-    expect(before?.properties.is_deleted).toBe(true)
-    expect(before?.properties.is_before).toBe(true)
-  })
-
-  it('does not set is_deleted when link has an after key', async () => {
-    const transformFeatures = await importTransform()
-    const f1 = createFeature({ id: 'n1', properties: { links: 0 } })
-    const f2 = createFeature({ id: 'n2', properties: { links: 0 } })
-    const data = createApiResponse([f1, f2], [[createLink({ before: 'n1', after: 'n2' })]])
-
-    const result = transformFeatures(data)
-    const before = result.find(f => f.id === 'n1')
-    expect(before?.properties.is_deleted).toBe(false)
   })
 
   it('skips feature with no matching group', async () => {

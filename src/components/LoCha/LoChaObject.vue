@@ -11,11 +11,11 @@ const props = defineProps<{
   josmTarget?: string
   compact?: boolean
   toolsOnly?: boolean
+  dimmed?: boolean
 }>()
 
 defineSlots<{
   'before'?: () => void
-  'object-header'?: () => void
   'object-detail'?: () => void
 }>()
 
@@ -39,7 +39,7 @@ const color = computed(() => loChaColors[status.value])
 </script>
 
 <template>
-  <article class="locha-object">
+  <article class="locha-object" :class="{ 'locha-object--dimmed': dimmed }">
     <div class="header-row">
       <template v-if="$slots.before && !toolsOnly">
         <div class="before-content">
@@ -68,7 +68,6 @@ const color = computed(() => loChaColors[status.value])
           >
             {{ statusContent }}
           </div>
-          <slot v-if="toolsOnly && !compact" name="object-header" />
           <div v-if="!compact" class="fab">
             <button class="fab-toggle" type="button" title="Tools">
               🔧 Tools
@@ -138,6 +137,11 @@ article {
   flex-direction: column;
   gap: 4px;
   padding: 0.25rem;
+}
+
+.locha-object--dimmed {
+  opacity: 0.35;
+  filter: grayscale(1);
 }
 
 .header-row {
