@@ -9,10 +9,12 @@ const props = withDefaults(
   defineProps<{
     bbox?: string
     heatmapData?: GeoJSON.FeatureCollection | null
+    includeRelationTypeRoute?: boolean
   }>(),
   {
     bbox: '',
     heatmapData: null,
+    includeRelationTypeRoute: false,
   },
 )
 
@@ -21,6 +23,7 @@ const emit = defineEmits<{
   (e: 'preset', data: FormData): void
   (e: 'updateBbox', bbox: string): void
   (e: 'viewportChange', bbox: string): void
+  (e: 'update:includeRelationTypeRoute', value: boolean): void
 }>()
 
 const localBbox = reactive({ bbox: '' })
@@ -97,6 +100,16 @@ function handleSubmit(): void {
             >
             <pre v-if="needZoom" class="zoom-warning">Need smaller bbox, zoom more !</pre>
           </div>
+
+          <label class="route-label">
+            <input
+              type="checkbox"
+              class="route-checkbox"
+              :checked="props.includeRelationTypeRoute"
+              @change="emit('update:includeRelationTypeRoute', ($event.target as HTMLInputElement).checked)"
+            >
+            Include route relations
+          </label>
 
           <pre class="required-note">* required fields</pre>
 
@@ -228,6 +241,21 @@ input[type='text'] {
 
 .btn-run:not(:disabled):hover {
   background: #0d4a7a;
+}
+
+.route-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #555;
+  cursor: pointer;
+}
+
+.route-checkbox {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
 }
 
 .presets {

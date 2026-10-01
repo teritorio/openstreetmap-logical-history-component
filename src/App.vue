@@ -173,16 +173,9 @@ function goBack() {
           :min-date="dateRange?.min_date"
           :max-date="dateRange?.max_date"
         />
-        <label class="route-label">
-          <input
-            v-model="formValues.includeRelationTypeRoute"
-            type="checkbox"
-            class="route-checkbox"
-          >
-          Include route relations
-        </label>
       </div>
       <FilterBar
+        v-model:include-relation-type-route="formValues.includeRelationTypeRoute"
         :bbox="formValues.bbox"
         :heatmap-data="heatmapData"
         @update-bbox="handleBboxUpdate"
@@ -255,21 +248,6 @@ function goBack() {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-}
-
-.route-label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  color: #555;
-  cursor: pointer;
-}
-
-.route-checkbox {
-  cursor: pointer;
-  width: 16px;
-  height: 16px;
 }
 
 .results-toolbar {
