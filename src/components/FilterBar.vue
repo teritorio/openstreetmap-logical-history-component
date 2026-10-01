@@ -20,6 +20,7 @@ const emit = defineEmits<{
   (e: 'submit', bbox: string): void
   (e: 'preset', data: FormData): void
   (e: 'updateBbox', bbox: string): void
+  (e: 'viewportChange', bbox: string): void
 }>()
 
 const localBbox = reactive({ bbox: '' })
@@ -78,6 +79,7 @@ function handleSubmit(): void {
           :bbox="localBbox.bbox"
           :heatmap-data="heatmapData"
           @update-bbox="handleBboxChange"
+          @viewport-change="emit('viewportChange', $event)"
         />
       </div>
 
