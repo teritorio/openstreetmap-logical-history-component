@@ -26,7 +26,6 @@ const emit = defineEmits<{
   (e: 'submit', bbox: string): void
   (e: 'preset', data: FormData): void
   (e: 'updateBbox', bbox: string): void
-  (e: 'viewportChange', bbox: string): void
   (e: 'update:includeRelationTypeRoute', value: boolean): void
   (e: 'update:dateStart', value: string): void
   (e: 'update:dateEnd', value: string): void
@@ -91,7 +90,6 @@ function handleSubmit(): void {
           :bbox="localBbox.bbox"
           :heatmap-data="heatmapData"
           @update-bbox="handleBboxChange"
-          @viewport-change="emit('viewportChange', $event)"
         />
       </div>
 
