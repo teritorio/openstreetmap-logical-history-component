@@ -28,7 +28,7 @@ export function useDrawMode(map: ShallowRef<maplibre.Map | null>, options: UseDr
     map.value.off('mousedown', onDrawMouseDown)
     map.value.off('mousemove', onDrawMouseMove)
     map.value.off('mouseup', onDrawMouseUp)
-    map.value.getCanvas().removeEventListener('mouseleave', cancel)
+    map.value.getCanvas().removeEventListener('mouseleave', cancelIfDrawing)
     map.value.getCanvas().style.cursor = ''
     map.value.dragPan.enable()
     isDrawing.value = false
@@ -38,6 +38,11 @@ export function useDrawMode(map: ShallowRef<maplibre.Map | null>, options: UseDr
   function cancel(): void {
     deactivate()
     options.onDrawCancel()
+  }
+
+  function cancelIfDrawing(): void {
+    if (drawStart !== null)
+      cancel()
   }
 
   function onDrawMouseUp(e: maplibre.MapMouseEvent): void {
@@ -72,7 +77,7 @@ export function useDrawMode(map: ShallowRef<maplibre.Map | null>, options: UseDr
       map.value.getCanvas().style.cursor = 'crosshair'
       map.value.dragPan.disable()
       map.value.on('mousedown', onDrawMouseDown)
-      map.value.getCanvas().addEventListener('mouseleave', cancel)
+      map.value.getCanvas().addEventListener('mouseleave', cancelIfDrawing)
     }
   }
 
