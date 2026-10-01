@@ -34,10 +34,10 @@ let skipRouteSync = false
 
 const karmaDateStart = toRef(formValues, 'dateStart')
 const karmaDateEnd = toRef(formValues, 'dateEnd')
-const karmaBbox = toRef(formValues, 'bbox')
+const viewportBbox = ref('')
 
 const { histogramData, heatmapData, dateRange } = useKarmaData({
-  bbox: karmaBbox,
+  bbox: viewportBbox,
   dateStart: karmaDateStart,
   dateEnd: karmaDateEnd,
 })
@@ -186,6 +186,7 @@ function goBack() {
         :bbox="formValues.bbox"
         :heatmap-data="heatmapData"
         @update-bbox="handleBboxUpdate"
+        @viewport-change="viewportBbox = $event"
         @submit="handleFilterSubmit"
         @preset="handlePreset"
       />
