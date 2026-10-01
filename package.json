@@ -57,6 +57,9 @@
     "@turf/helpers": "^7.3.4",
     "@vueuse/components": "^14.2.1",
     "diff": "^8.0.3",
+    "h3-js": "^4.5.0",
+    "hyparquet": "^1.31.2",
+    "hyparquet-compressors": "^1.1.2",
     "underscore": "^1.13.8"
   },
   "devDependencies": {

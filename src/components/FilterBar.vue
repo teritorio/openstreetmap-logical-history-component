@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type * as GeoJSON from 'geojson'
 import type { FormData } from '@/types'
 import { reactive, shallowRef, useTemplateRef, watchEffect } from 'vue'
 import MapBbox from '@/components/MapBbox.vue'
@@ -7,9 +8,11 @@ import { presets } from '@/data/presets'
 const props = withDefaults(
   defineProps<{
     bbox?: string
+    heatmapData?: GeoJSON.FeatureCollection | null
   }>(),
   {
     bbox: '',
+    heatmapData: null,
   },
 )
 
@@ -71,6 +74,7 @@ function handleSubmit(): void {
         <MapBbox
           ref="mapBboxRef"
           :bbox="localBbox.bbox"
+          :heatmap-data="heatmapData"
           @update-bbox="handleBboxChange"
         />
       </div>
