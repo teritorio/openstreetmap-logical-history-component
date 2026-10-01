@@ -17,6 +17,7 @@ const $api = useApiConfig()
 const { error, loading, resetError } = $api
 const geojson = ref<LoChaData>()
 const lastQuery = ref<Record<string, string | undefined>>({})
+const view = ref<'search' | 'results'>('search')
 
 const route = useRoute()
 const router = useRouter()
@@ -54,6 +55,8 @@ watch(
 async function fetchData(query: Record<string, string | undefined>) {
   lastQuery.value = query
   geojson.value = await $api.fetchData(query)
+  if (geojson.value)
+    view.value = 'results'
 }
 
 function handleRetry() {
@@ -78,12 +81,12 @@ function getBeforeFeature(link: ApiLink): IFeature | undefined {
   return geojson.value?.features.find(f => f.id === link.before)
 }
 
-const dateLabel = computed(() => {
+const resultsLabel = computed(() => {
   if (!formValues.dateStart)
-    return 'Select a date range'
+    return ''
   const from = formatDateOnly(formValues.dateStart)
   const to = formValues.dateEnd ? formatDateOnly(formValues.dateEnd) : '—'
-  return `From ${from} → To ${to}`
+  return `${from} → ${to}`
 })
 
 function doSubmit() {
@@ -121,6 +124,10 @@ function handlePreset(data: FormData) {
   Object.assign(formValues, data)
   doSubmit()
 }
+
+function goBack() {
+  view.value = 'search'
+}
 </script>
 
 <template>
@@ -134,13 +141,13 @@ function handlePreset(data: FormData) {
       @close="resetError"
       @retry="handleRetry"
     />
-    <div class="date-bar">
-      <DateRangeSlider
-        v-model:start="formValues.dateStart"
-        v-model:end="formValues.dateEnd"
-      />
-      <div class="date-meta">
-        <span class="date-label">{{ dateLabel }}</span>
+
+    <div v-if="view === 'search'" class="screen">
+      <div class="date-bar">
+        <DateRangeSlider
+          v-model:start="formValues.dateStart"
+          v-model:end="formValues.dateEnd"
+        />
         <label class="route-label">
           <input
             v-model="formValues.includeRelationTypeRoute"
@@ -150,13 +157,20 @@ function handlePreset(data: FormData) {
           Include route relations
         </label>
       </div>
-    </div>
-    <main>
       <FilterBar
         :bbox="formValues.bbox"
         @submit="handleFilterSubmit"
         @preset="handlePreset"
       />
+    </div>
+
+    <div v-else class="screen">
+      <div class="results-toolbar">
+        <button class="btn-back" type="button" @click="goBack">
+          ← Back
+        </button>
+        <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
+      </div>
       <LoCha id="demo" :data="geojson" :reason-collapsed="false">
         <template #object-detail="{ feature, index }">
           <template v-for="(link, i) in getLinks(feature, index)" :key="i">
@@ -188,7 +202,7 @@ function handlePreset(data: FormData) {
           </template>
         </template>
       </LoCha>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -199,23 +213,20 @@ function handlePreset(data: FormData) {
   height: 100%;
 }
 
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .date-bar {
   background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
   border-bottom: 1px solid #d0d0d2;
   padding: 0.5rem 1rem 0.75rem;
-}
-
-.date-meta {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.25rem;
-}
-
-.date-label {
-  font-size: 0.85rem;
-  color: #555;
-  font-weight: 500;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .route-label {
@@ -233,11 +244,34 @@ function handlePreset(data: FormData) {
   height: 16px;
 }
 
-main {
+.results-toolbar {
   display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
+  border-bottom: 1px solid #d0d0d2;
+}
+
+.btn-back {
+  padding: 6px 14px;
+  background: #082e4e;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn-back:hover {
+  background: #0d4a7a;
+}
+
+.results-label {
+  font-size: 0.85rem;
+  color: #555;
+  font-weight: 500;
 }
 
 .before-link {
