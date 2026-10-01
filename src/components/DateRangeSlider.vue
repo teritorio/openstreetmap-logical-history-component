@@ -8,6 +8,8 @@ const props = defineProps<{
   start?: string
   end?: string
   histogramData?: [number, number][]
+  minDate?: string
+  maxDate?: string
 }>()
 
 const emit = defineEmits<{
@@ -136,6 +138,16 @@ watch(
         },
       },
     }, false, false)
+  },
+)
+
+watch(
+  () => [props.minDate, props.maxDate] as const,
+  ([minDate, maxDate]) => {
+    const min = minDate ? dateToMs(minDate) : OSM_EPOCH_MS
+    const max = maxDate ? dateToMs(maxDate) : TODAY_MS
+    ApexCharts.exec('locha-histogram', 'updateOptions', { xaxis: { min, max } }, false, false)
+    ApexCharts.exec('locha-brush', 'updateOptions', { xaxis: { min, max } }, false, false)
   },
 )
 </script>

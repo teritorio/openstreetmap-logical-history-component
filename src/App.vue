@@ -36,7 +36,7 @@ const karmaDateStart = toRef(formValues, 'dateStart')
 const karmaDateEnd = toRef(formValues, 'dateEnd')
 const karmaBbox = toRef(formValues, 'bbox')
 
-const { histogramData, heatmapData } = useKarmaData({
+const { histogramData, heatmapData, dateRange } = useKarmaData({
   bbox: karmaBbox,
   dateStart: karmaDateStart,
   dateEnd: karmaDateEnd,
@@ -171,6 +171,8 @@ function goBack() {
           v-model:start="formValues.dateStart"
           v-model:end="formValues.dateEnd"
           :histogram-data="histogramData"
+          :min-date="dateRange?.min_date"
+          :max-date="dateRange?.max_date"
         />
         <label class="route-label">
           <input
