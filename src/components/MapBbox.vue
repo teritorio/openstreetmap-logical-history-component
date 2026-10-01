@@ -17,7 +17,6 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'updateBbox', bbox: string): void
-  (e: 'viewportChange', bbox: string): void
 }>()
 
 const mapContainer = useTemplateRef<HTMLDivElement>('mapContainer')
@@ -103,13 +102,6 @@ function getZoom(): number {
   if (!map.value)
     throw new Error('Init map first.')
   return map.value.getZoom()
-}
-
-function emitViewport(): void {
-  if (!map.value)
-    return
-  const b = map.value.getBounds()
-  emit('viewportChange', `${b.getWest()},${b.getSouth()},${b.getEast()},${b.getNorth()}`)
 }
 
 function updateHandlePositionsFromBbox(bbox: string): void {
@@ -283,8 +275,6 @@ onMounted(() => {
 
     map.value!.on('move', updateHandlePositions)
     map.value!.on('zoom', updateHandlePositions)
-    map.value!.on('moveend', emitViewport)
-    emitViewport()
 
     if (props.bbox) {
       fitMapToBbox(props.bbox)
