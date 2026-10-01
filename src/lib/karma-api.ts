@@ -18,17 +18,10 @@ export async function loadManifest(baseUrl: string): Promise<KarmaManifest> {
   return res.json()
 }
 
-export function coverageDays(manifest: KarmaManifest): { minDate: string, maxDate: string } | null {
-  const range = manifest.date_range
-  if (!range?.min_date || !range?.max_date)
-    return null
-  return { minDate: range.min_date, maxDate: range.max_date }
-}
-
 export function epochDay(date: Date): number {
   return Math.floor(date.getTime() / 86400000)
 }
 
 export function dayKey(changeDate: number): string {
-  return new Date(Number(changeDate) * 86400000).toISOString().slice(0, 10)
+  return new Date(changeDate * 86400000).toISOString().slice(0, 10)
 }

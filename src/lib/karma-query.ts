@@ -45,7 +45,7 @@ async function queryOneFile(
     change_date: { $gte: startDay, $lte: endDay },
   }
   const rows = await queryRows(baseUrl, path, filter, undefined, footerSize)
-  return rows.filter(row => cellSet.has(BigInt(row.h3_cell as number)))
+  return rows.filter(row => cellSet.has(BigInt(row.h3_cell as bigint | number)))
 }
 
 export interface QueryChangesOptions {
@@ -92,7 +92,7 @@ export async function queryChanges(opts: QueryChangesOptions): Promise<QueryChan
   for (const rows of results) {
     for (const row of rows) {
       const count = Number(row.count)
-      const cell = BigInt(row.h3_cell as number)
+      const cell = BigInt(row.h3_cell as bigint | number)
       byCell.set(cell, (byCell.get(cell) ?? 0) + count)
       const day = dayKey(row.change_date as number)
       byDay.set(day, (byDay.get(day) ?? 0) + count)

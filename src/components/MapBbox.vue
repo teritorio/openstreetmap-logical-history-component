@@ -29,25 +29,23 @@ const H3_SOURCE = 'h3-heatmap'
 const H3_FILL_LAYER = 'h3-fill'
 const H3_OUTLINE_LAYER = 'h3-outline'
 
-function fillColorRamp(): maplibre.FillLayerSpecification['paint'] {
-  return {
-    'fill-color': [
-      'interpolate',
-      ['linear'],
-      ['get', 'count'],
-      0,
-      '#ffffb2',
-      10,
-      '#fecc5c',
-      50,
-      '#fd8d3c',
-      200,
-      '#e31a1c',
-      1000,
-      '#800026',
-    ],
-    'fill-opacity': 0.6,
-  }
+const H3_FILL_PAINT: maplibre.FillLayerSpecification['paint'] = {
+  'fill-color': [
+    'interpolate',
+    ['linear'],
+    ['get', 'count'],
+    0,
+    '#ffffb2',
+    10,
+    '#fecc5c',
+    50,
+    '#fd8d3c',
+    200,
+    '#e31a1c',
+    1000,
+    '#800026',
+  ],
+  'fill-opacity': 0.6,
 }
 
 function parseBbox(bbox: string): [number, number, number, number] | null {
@@ -157,7 +155,7 @@ onMounted(() => {
       id: H3_FILL_LAYER,
       type: 'fill',
       source: H3_SOURCE,
-      paint: fillColorRamp(),
+      paint: H3_FILL_PAINT,
     })
     map.value!.addLayer({
       id: H3_OUTLINE_LAYER,
