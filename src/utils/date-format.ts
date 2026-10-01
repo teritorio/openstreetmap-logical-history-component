@@ -17,6 +17,16 @@ export function toDateOnly(iso: string): string {
   return iso.slice(0, 10)
 }
 
+export function todayDate(): string {
+  return toDateOnly(new Date().toISOString())
+}
+
+export function oneYearAgoDate(): string {
+  const d = new Date()
+  d.setUTCFullYear(d.getUTCFullYear() - 1)
+  return toDateOnly(d.toISOString())
+}
+
 /** Converts a YYYY-MM-DD string to an ISO datetime string (midnight UTC) */
 export function fromDateOnly(date: string): string {
   return new Date(date).toISOString()

@@ -12,7 +12,7 @@ import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
 import { useKarmaData } from '@/composables/useKarmaData'
-import { formatDateOnly, fromDateOnly, toDateOnly } from '@/utils/date-format'
+import { formatDateOnly, fromDateOnly, oneYearAgoDate, toDateOnly, todayDate } from '@/utils/date-format'
 
 const $api = useApiConfig()
 const { error, loading, resetError } = $api
@@ -47,8 +47,8 @@ watchEffect(() => {
     skipRouteSync = false
     return
   }
-  formValues.dateStart = route.query.date_start ? toDateOnly(String(route.query.date_start)) : ''
-  formValues.dateEnd = route.query.date_end ? toDateOnly(String(route.query.date_end)) : ''
+  formValues.dateStart = route.query.date_start ? toDateOnly(String(route.query.date_start)) : oneYearAgoDate()
+  formValues.dateEnd = route.query.date_end ? toDateOnly(String(route.query.date_end)) : todayDate()
   formValues.bbox = route.query.bbox ? String(route.query.bbox) : ''
   formValues.includeRelationTypeRoute = route.query.include_relation_type_route === 'true'
 })
