@@ -175,6 +175,8 @@ function goBack() {
         />
       </div>
       <FilterBar
+        v-model:date-start="formValues.dateStart"
+        v-model:date-end="formValues.dateEnd"
         v-model:include-relation-type-route="formValues.includeRelationTypeRoute"
         :bbox="formValues.bbox"
         :heatmap-data="heatmapData"

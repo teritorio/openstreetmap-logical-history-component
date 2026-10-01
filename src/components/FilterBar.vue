@@ -10,11 +10,15 @@ const props = withDefaults(
     bbox?: string
     heatmapData?: GeoJSON.FeatureCollection | null
     includeRelationTypeRoute?: boolean
+    dateStart?: string
+    dateEnd?: string
   }>(),
   {
     bbox: '',
     heatmapData: null,
     includeRelationTypeRoute: false,
+    dateStart: '',
+    dateEnd: '',
   },
 )
 
@@ -24,11 +28,16 @@ const emit = defineEmits<{
   (e: 'updateBbox', bbox: string): void
   (e: 'viewportChange', bbox: string): void
   (e: 'update:includeRelationTypeRoute', value: boolean): void
+  (e: 'update:dateStart', value: string): void
+  (e: 'update:dateEnd', value: string): void
 }>()
 
 const localBbox = reactive({ bbox: '' })
 const mapBboxRef = useTemplateRef('mapBboxRef')
 const needZoom = shallowRef(false)
+const currentZoom = shallowRef(0)
+
+const MIN_ZOOM = 12
 
 watchEffect(() => {
   localBbox.bbox = props.bbox ?? ''
@@ -53,7 +62,8 @@ function handleBboxChange(bbox: string) {
   if (!mapBboxRef.value)
     return
 
-  needZoom.value = mapBboxRef.value.getZoom() < 14
+  currentZoom.value = mapBboxRef.value.getZoom()
+  needZoom.value = currentZoom.value < MIN_ZOOM
   localBbox.bbox = bbox
   emit('updateBbox', bbox)
 }
@@ -62,12 +72,11 @@ function handleSubmit(): void {
   if (!mapBboxRef.value)
     return
 
-  needZoom.value = false
+  currentZoom.value = mapBboxRef.value.getZoom()
+  needZoom.value = currentZoom.value < MIN_ZOOM
 
-  if (mapBboxRef.value.getZoom() < 14) {
-    needZoom.value = true
+  if (needZoom.value)
     return
-  }
 
   emit('submit', localBbox.bbox)
 }
@@ -88,6 +97,28 @@ function handleSubmit(): void {
 
       <div class="filter-bar-controls">
         <form @submit.prevent="handleSubmit">
+          <div class="form-row">
+            <div class="form-field">
+              <label for="fb_date_start">Start date <span class="required">*</span></label>
+              <input
+                id="fb_date_start"
+                type="date"
+                :value="props.dateStart"
+                required
+                @change="emit('update:dateStart', ($event.target as HTMLInputElement).value)"
+              >
+            </div>
+            <div class="form-field">
+              <label for="fb_date_end">End date</label>
+              <input
+                id="fb_date_end"
+                type="date"
+                :value="props.dateEnd"
+                @change="emit('update:dateEnd', ($event.target as HTMLInputElement).value)"
+              >
+            </div>
+          </div>
+
           <div class="form-field">
             <label for="fb_bbox">Bounding Box <span class="required">*</span></label>
             <input
@@ -98,7 +129,7 @@ function handleSubmit(): void {
               pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
               required
             >
-            <pre v-if="needZoom" class="zoom-warning">Need smaller bbox, zoom more !</pre>
+            <pre v-if="needZoom" class="zoom-warning">Zoom in more to query (current zoom {{ currentZoom.toFixed(1) }}, need at least {{ MIN_ZOOM }})</pre>
           </div>
 
           <label class="route-label">
@@ -175,12 +206,17 @@ form {
   flex: 1;
 }
 
+.form-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .form-field {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
   flex: 1;
-  min-width: 160px;
+  min-width: 120px;
 }
 
 @media (max-width: 768px) {
