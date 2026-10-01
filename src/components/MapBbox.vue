@@ -9,8 +9,10 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 const props = withDefaults(defineProps<{
   bbox?: string
   mapStyleUrl?: string
+  heatmapData?: GeoJSON.FeatureCollection | null
 }>(), {
   mapStyleUrl: MAP_STYLE_URL,
+  heatmapData: null,
 })
 
 const emit = defineEmits<{
@@ -23,6 +25,30 @@ const map = shallowRef<maplibre.Map | null>(null)
 const BBOX_SOURCE = 'bbox-rect'
 const BBOX_FILL_LAYER = 'bbox-fill'
 const BBOX_OUTLINE_LAYER = 'bbox-outline'
+const H3_SOURCE = 'h3-heatmap'
+const H3_FILL_LAYER = 'h3-fill'
+const H3_OUTLINE_LAYER = 'h3-outline'
+
+function fillColorRamp(): maplibre.FillLayerSpecification['paint'] {
+  return {
+    'fill-color': [
+      'interpolate',
+      ['linear'],
+      ['get', 'count'],
+      0,
+      '#ffffb2',
+      10,
+      '#fecc5c',
+      50,
+      '#fd8d3c',
+      200,
+      '#e31a1c',
+      1000,
+      '#800026',
+    ],
+    'fill-opacity': 0.6,
+  }
+}
 
 function parseBbox(bbox: string): [number, number, number, number] | null {
   const parts = bbox.split(',').map(Number)
@@ -102,28 +128,54 @@ watch(
   },
 )
 
+watch(
+  () => props.heatmapData,
+  (data) => {
+    const source = map.value?.getSource(H3_SOURCE) as maplibre.GeoJSONSource | undefined
+    if (!source)
+      return
+    source.setData(data ?? { type: 'FeatureCollection', features: [] })
+  },
+)
+
 onMounted(() => {
   map.value = new maplibre.Map({
     container: mapContainer.value!,
     style: props.mapStyleUrl,
     attributionControl: { compact: false },
+    renderWorldCopies: false,
   })
 
   map.value.addControl(new maplibre.NavigationControl())
 
   map.value.on('load', () => {
+    map.value!.addSource(H3_SOURCE, {
+      type: 'geojson',
+      data: props.heatmapData ?? { type: 'FeatureCollection', features: [] },
+    })
+    map.value!.addLayer({
+      id: H3_FILL_LAYER,
+      type: 'fill',
+      source: H3_SOURCE,
+      paint: fillColorRamp(),
+    })
+    map.value!.addLayer({
+      id: H3_OUTLINE_LAYER,
+      type: 'line',
+      source: H3_SOURCE,
+      paint: { 'line-color': '#333333', 'line-width': 0.5 },
+    })
+
     map.value!.addSource(BBOX_SOURCE, {
       type: 'geojson',
       data: { type: 'FeatureCollection', features: [] },
     })
-
     map.value!.addLayer({
       id: BBOX_FILL_LAYER,
       type: 'fill',
       source: BBOX_SOURCE,
       paint: { 'fill-color': '#082e4e', 'fill-opacity': 0.1 },
     })
-
     map.value!.addLayer({
       id: BBOX_OUTLINE_LAYER,
       type: 'line',

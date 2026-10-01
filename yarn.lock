@@ -1951,6 +1951,9 @@ __metadata:
     diff: "npm:^8.0.3"
     eslint: "npm:^10.0.3"
     eslint-plugin-format: "npm:^2.0.1"
+    h3-js: "npm:^4.5.0"
+    hyparquet: "npm:^1.31.2"
+    hyparquet-compressors: "npm:^1.1.2"
     jsdom: "npm:^29.0.2"
     lint-staged: "npm:^16.4.0"
     maplibre-gl: "npm:^5.24.0"
@@ -5516,6 +5519,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fzstd@npm:0.1.1":
+  version: 0.1.1
+  resolution: "fzstd@npm:0.1.1"
+  checksum: 10c0/c4ae25a4b9e7ac58e9716fcb0c4ec19f3e678d90a67a59e97ce361beb27e4aa4b8666b58b4dc2d715e92db4b65b189c978186a5fedba6fccb5ec9765717dd1cd
+  languageName: node
+  linkType: hard
+
 "gensync@npm:^1.0.0-beta.2":
   version: 1.0.0-beta.2
   resolution: "gensync@npm:1.0.0-beta.2"
@@ -5661,6 +5671,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"h3-js@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "h3-js@npm:4.5.0"
+  checksum: 10c0/93138b438bc7b50578c6cd6d17e6486ecf3e21438f41d39bd54935591196d50096ae4028cb90e3ae81a3a54035106a189e0cdf9fe0b252f45fbe4f8b10e9fa5d
+  languageName: node
+  linkType: hard
+
 "has-flag@npm:^4.0.0":
   version: 4.0.0
   resolution: "has-flag@npm:4.0.0"
@@ -5723,6 +5740,30 @@ __metadata:
     agent-base: "npm:6"
     debug: "npm:4"
   checksum: 10c0/6dd639f03434003577c62b27cafdb864784ef19b2de430d8ae2a1d45e31c4fd60719e5637b44db1a88a046934307da7089e03d6089ec3ddacc1189d8de8897d1
+  languageName: node
+  linkType: hard
+
+"hyparquet-compressors@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "hyparquet-compressors@npm:1.1.2"
+  dependencies:
+    fzstd: "npm:0.1.1"
+    hysnappy: "npm:1.1.1"
+  checksum: 10c0/f2d9d93c3910c9cf24cb54bc648af17af669ae41cc37e78130d8d629abc79228d28b29c2e489041089d813a7d15273a4e0e16d3bef8f0533aeaafc128f51158b
+  languageName: node
+  linkType: hard
+
+"hyparquet@npm:^1.31.2":
+  version: 1.31.2
+  resolution: "hyparquet@npm:1.31.2"
+  checksum: 10c0/62b9e8d5e4323a5f4573882c4e86edbceb797254fff5833b8e0b1286a37bb097291ea08340234c752b8b2b4004a71356cab75c60b0a8b1340194cc7fddff072e
+  languageName: node
+  linkType: hard
+
+"hysnappy@npm:1.1.1":
+  version: 1.1.1
+  resolution: "hysnappy@npm:1.1.1"
+  checksum: 10c0/d8e2f098ee0452992c13bf77e5d83fbc59247ad67f1310e0d880996e5eba4f26d5a620c9a2366415521c69e8dd38f2fec70fe22fcc5bfcb533b63764e21f5f04
   languageName: node
   linkType: hard
 
