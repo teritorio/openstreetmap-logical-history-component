@@ -2,7 +2,7 @@ import type * as GeoJSON from 'geojson'
 import type { Ref } from 'vue'
 import type { KarmaManifest } from '@/lib/karma-api'
 import { cellToBoundary } from 'h3-js'
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { bboxToCells, cellsMinMaxSet } from '@/lib/h3-bbox'
 import { loadManifest } from '@/lib/karma-api'
 import { queryChanges } from '@/lib/karma-query'
@@ -33,11 +33,12 @@ export function useKarmaData(opts: UseKarmaDataOptions): { histogramData: Ref<[n
   const histogramData = ref<[number, number][]>([])
   const heatmapData = ref<GeoJSON.FeatureCollection | null>(null)
   const manifest = ref<KarmaManifest | null>(null)
-
-  if (!KARMA_BASE_URL)
-    return { histogramData, heatmapData }
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined
+  let currentQueryId = 0
 
   onMounted(async () => {
+    if (!KARMA_BASE_URL)
+      return
     try {
       manifest.value = await loadManifest(KARMA_BASE_URL)
     }
@@ -46,14 +47,17 @@ export function useKarmaData(opts: UseKarmaDataOptions): { histogramData: Ref<[n
     }
   })
 
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined
-
   watch([opts.bbox, opts.dateStart, opts.dateEnd, manifest], () => {
+    if (!KARMA_BASE_URL)
+      return
     clearTimeout(debounceTimer)
     debounceTimer = setTimeout(runQuery, 500)
   })
 
+  onUnmounted(() => clearTimeout(debounceTimer))
+
   async function runQuery(): Promise<void> {
+    const queryId = ++currentQueryId
     const bboxVal = opts.bbox.value
     const dateStartVal = opts.dateStart.value
     const dateEndVal = opts.dateEnd.value
@@ -93,6 +97,9 @@ export function useKarmaData(opts: UseKarmaDataOptions): { histogramData: Ref<[n
         startMonth,
         endMonth,
       })
+
+      if (queryId !== currentQueryId)
+        return
 
       histogramData.value = Array.from(byDay.entries(), ([day, count]): [number, number] => [new Date(`${day}T00:00:00Z`).getTime(), count])
         .sort(([a], [b]) => a - b)

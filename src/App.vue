@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
-import { computed, reactive, ref, watch, watchEffect } from 'vue'
+import { computed, reactive, ref, toRef, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DateRangeSlider from '@/components/DateRangeSlider.vue'
 import FilterBar from '@/components/FilterBar.vue'
@@ -32,9 +32,9 @@ const formValues = reactive<FormData>({
 
 let skipRouteSync = false
 
-const karmaDateStart = computed(() => formValues.dateStart)
-const karmaDateEnd = computed(() => formValues.dateEnd)
-const karmaBbox = computed(() => formValues.bbox)
+const karmaDateStart = toRef(formValues, 'dateStart')
+const karmaDateEnd = toRef(formValues, 'dateEnd')
+const karmaBbox = toRef(formValues, 'bbox')
 
 const { histogramData, heatmapData } = useKarmaData({
   bbox: karmaBbox,
