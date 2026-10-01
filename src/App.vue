@@ -11,6 +11,7 @@ import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
+import { useKarmaData } from '@/composables/useKarmaData'
 import { formatDateOnly, fromDateOnly, toDateOnly } from '@/utils/date-format'
 
 const $api = useApiConfig()
@@ -30,6 +31,16 @@ const formValues = reactive<FormData>({
 })
 
 let skipRouteSync = false
+
+const karmaDateStart = computed(() => formValues.dateStart)
+const karmaDateEnd = computed(() => formValues.dateEnd)
+const karmaBbox = computed(() => formValues.bbox)
+
+const { histogramData, heatmapData } = useKarmaData({
+  bbox: karmaBbox,
+  dateStart: karmaDateStart,
+  dateEnd: karmaDateEnd,
+})
 
 watchEffect(() => {
   if (skipRouteSync) {
@@ -155,6 +166,7 @@ function goBack() {
         <DateRangeSlider
           v-model:start="formValues.dateStart"
           v-model:end="formValues.dateEnd"
+          :histogram-data="histogramData"
         />
         <label class="route-label">
           <input
@@ -167,6 +179,7 @@ function goBack() {
       </div>
       <FilterBar
         :bbox="formValues.bbox"
+        :heatmap-data="heatmapData"
         @submit="handleFilterSubmit"
         @preset="handlePreset"
       />
