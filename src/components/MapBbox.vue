@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type * as GeoJSON from 'geojson'
 import maplibre from 'maplibre-gl'
-import { onMounted, onUnmounted, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { onMounted, onUnmounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { useDrawMode } from '@/composables/useDrawMode'
 import { MAP_STYLE_URL } from '@/constants/map'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -20,6 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const mapContainer = useTemplateRef<HTMLDivElement>('mapContainer')
+const wrapperRef = useTemplateRef<HTMLDivElement>('bboxWrapper')
 const map = shallowRef<maplibre.Map | null>(null)
 
 const BBOX_SOURCE = 'bbox-rect'
@@ -51,7 +52,8 @@ const H3_FILL_PAINT: maplibre.FillLayerSpecification['paint'] = {
 type Corner = 'nw' | 'ne' | 'sw' | 'se'
 type HandlePositions = Record<Corner, { x: number, y: number }>
 
-const handlePositions = ref<HandlePositions | null>(null)
+const handlePositions = shallowRef<HandlePositions | null>(null)
+let cleanupDrag: (() => void) | undefined
 
 function parseBbox(bbox: string): [number, number, number, number] | null {
   const parts = bbox.split(',').map(Number)
@@ -132,7 +134,7 @@ function updateHandlePositions(): void {
 function startResize(corner: Corner, e: MouseEvent): void {
   e.preventDefault()
   e.stopPropagation()
-  if (!map.value || !props.bbox)
+  if (!map.value || !props.bbox || !wrapperRef.value)
     return
 
   const parsed = parseBbox(props.bbox)
@@ -150,7 +152,7 @@ function startResize(corner: Corner, e: MouseEvent): void {
 
   map.value.dragPan.disable()
 
-  const wrapperEl = (e.target as HTMLElement).parentElement!
+  const wrapperEl = wrapperRef.value
 
   function onMove(ev: MouseEvent): void {
     if (!map.value)
@@ -165,11 +167,20 @@ function startResize(corner: Corner, e: MouseEvent): void {
   function onUp(ev: MouseEvent): void {
     document.removeEventListener('mousemove', onMove)
     document.removeEventListener('mouseup', onUp)
-    map.value?.dragPan.enable()
+    cleanupDrag = undefined
+    if (!map.value)
+      return
+    map.value.dragPan.enable()
     const rect = wrapperEl.getBoundingClientRect()
-    const pt = map.value!.unproject([ev.clientX - rect.left, ev.clientY - rect.top] as [number, number])
+    const pt = map.value.unproject([ev.clientX - rect.left, ev.clientY - rect.top] as [number, number])
     const newBbox = `${Math.min(anchor[0], pt.lng)},${Math.min(anchor[1], pt.lat)},${Math.max(anchor[0], pt.lng)},${Math.max(anchor[1], pt.lat)}`
     emit('updateBbox', newBbox)
+  }
+
+  cleanupDrag = () => {
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onUp)
+    map.value?.dragPan.enable()
   }
 
   document.addEventListener('mousemove', onMove)
@@ -274,6 +285,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  cleanupDrag?.()
   map.value?.remove()
 })
 
@@ -281,7 +293,7 @@ defineExpose({ getZoom })
 </script>
 
 <template>
-  <div class="map-bbox-wrapper">
+  <div ref="bboxWrapper" class="map-bbox-wrapper">
     <div ref="mapContainer" class="map-bbox" />
     <button
       class="draw-bbox-btn"
