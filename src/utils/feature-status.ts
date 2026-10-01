@@ -10,7 +10,7 @@ export function isUnchangedFeature(feature: IFeature, links: ApiLink[]): boolean
   const featureLinks = links.filter(l => l.before === feature.id || l.after === feature.id)
   if (!featureLinks.length)
     return false
-  return featureLinks.every(l => isEmptyActions(l.diff_tags) && isEmptyActions(l.diff_attribs))
+  return !feature.properties.geom && featureLinks.every(l => isEmptyActions(l.diff_tags) && isEmptyActions(l.diff_attribs))
 }
 
 export function isMinorGeomOnly(feature: IFeature, links: ApiLink[], threshold = 2): boolean {
