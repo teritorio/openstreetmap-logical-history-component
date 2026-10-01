@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { FormData } from '@/types'
-import { Collapsible } from '@ark-ui/vue'
-import { computed, reactive, shallowRef, useTemplateRef, watchEffect } from 'vue'
+import { reactive, shallowRef, useTemplateRef, watchEffect } from 'vue'
 import MapBbox from '@/components/MapBbox.vue'
 import { presets } from '@/data/presets'
 
@@ -19,17 +18,12 @@ const emit = defineEmits<{
   (e: 'preset', data: FormData): void
 }>()
 
-const isEditing = shallowRef(false)
 const localBbox = reactive({ bbox: '' })
 const mapBboxRef = useTemplateRef('mapBboxRef')
 const needZoom = shallowRef(false)
 
 watchEffect(() => {
   localBbox.bbox = props.bbox ?? ''
-})
-
-const readSummary = computed<string>(() => {
-  return props.bbox ? 'Bounding box defined' : 'No bounding box'
 })
 
 const EXTRA_PARAM_DEFAULTS: Partial<FormData> = {
@@ -44,7 +38,6 @@ function setPreset(index: number) {
     dateEnd: preset.dateEnd ? preset.dateEnd.slice(0, 10) : '',
     bbox: preset.bbox,
   }
-  isEditing.value = false
   emit('preset', data)
 }
 
@@ -67,29 +60,15 @@ function handleSubmit(): void {
     return
   }
 
-  isEditing.value = false
   emit('submit', localBbox.bbox)
 }
 
-function handleCancel(): void {
-  localBbox.bbox = props.bbox ?? ''
-  needZoom.value = false
-  isEditing.value = false
-}
+defineExpose({ getZoom: () => mapBboxRef.value?.getZoom() })
 </script>
 
 <template>
-  <Collapsible.Root v-model:open="isEditing" class="filter-bar">
-    <div class="filter-bar-read">
-      <span class="filter-summary">{{ readSummary }}</span>
-      <Collapsible.Trigger as-child>
-        <button class="edit-button">
-          Edit
-        </button>
-      </Collapsible.Trigger>
-    </div>
-
-    <Collapsible.Content class="filter-bar-edit">
+  <div class="filter-bar">
+    <div class="filter-bar-content">
       <div class="filter-bar-map">
         <MapBbox
           ref="mapBboxRef"
@@ -119,9 +98,6 @@ function handleCancel(): void {
             <button type="submit" class="btn-run" :disabled="needZoom">
               Run
             </button>
-            <button type="button" class="btn-cancel" @click="handleCancel">
-              Cancel
-            </button>
           </div>
         </form>
 
@@ -140,58 +116,31 @@ function handleCancel(): void {
           </ul>
         </div>
       </div>
-    </Collapsible.Content>
-  </Collapsible.Root>
+    </div>
+  </div>
 </template>
 
 <style lang="css" scoped>
 .filter-bar {
-  border-bottom: 1px solid #d0d0d2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
 }
 
-.filter-bar-read {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.6rem 1rem;
-  gap: 1rem;
-}
-
-.filter-summary {
-  font-size: 0.9rem;
-  color: #333;
-  font-weight: 500;
-}
-
-.edit-button {
-  padding: 6px 16px;
-  background: #082e4e;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  white-space: nowrap;
-  font-family: inherit;
-}
-
-.edit-button:hover {
-  background: #0d4a7a;
-}
-
-.filter-bar-edit {
-  border-top: 1px solid #d0d0d2;
+.filter-bar-content {
+  flex: 1;
+  min-height: 0;
   padding: 1rem;
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 1rem;
-  min-height: 350px;
 }
 
 .filter-bar-map {
-  height: 100%;
-  min-height: 350px;
+  flex: 1;
+  min-height: 0;
 }
 
 .filter-bar-controls {
@@ -216,12 +165,8 @@ form {
 }
 
 @media (max-width: 768px) {
-  .filter-bar-edit {
+  .filter-bar-content {
     grid-template-columns: 1fr;
-  }
-
-  .filter-bar-map {
-    min-height: 250px;
   }
 }
 
@@ -277,20 +222,6 @@ input[type='text'] {
 
 .btn-run:not(:disabled):hover {
   background: #0d4a7a;
-}
-
-.btn-cancel {
-  padding: 8px 16px;
-  background: transparent;
-  color: #555;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.btn-cancel:hover {
-  background: #f5f5f5;
 }
 
 .presets {
