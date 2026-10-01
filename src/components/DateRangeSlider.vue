@@ -150,6 +150,18 @@ watch(
     ApexCharts.exec('locha-brush', 'updateOptions', { xaxis: { min, max } }, false, false)
   },
 )
+
+watch(
+  () => props.histogramData,
+  (data) => {
+    if (!data || data.length === 0)
+      return
+    const min = data.reduce((acc, [t]) => Math.min(acc, t), Infinity)
+    const max = data.reduce((acc, [t]) => Math.max(acc, t), -Infinity)
+    ApexCharts.exec('locha-histogram', 'updateOptions', { xaxis: { min, max } }, false, false)
+    ApexCharts.exec('locha-brush', 'updateOptions', { xaxis: { min, max } }, false, false)
+  },
+)
 </script>
 
 <template>
