@@ -62,8 +62,6 @@ function handleSubmit(): void {
 
   emit('submit', localBbox.bbox)
 }
-
-defineExpose({ getZoom: () => mapBboxRef.value?.getZoom() })
 </script>
 
 <template>
@@ -135,11 +133,11 @@ defineExpose({ getZoom: () => mapBboxRef.value?.getZoom() })
   padding: 1rem;
   display: grid;
   grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr;
   gap: 1rem;
 }
 
 .filter-bar-map {
-  flex: 1;
   min-height: 0;
 }
 
