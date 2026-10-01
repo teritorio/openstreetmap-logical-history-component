@@ -29,7 +29,13 @@ const formValues = reactive<FormData>({
   includeRelationTypeRoute: false,
 })
 
+let skipRouteSync = false
+
 watchEffect(() => {
+  if (skipRouteSync) {
+    skipRouteSync = false
+    return
+  }
   formValues.dateStart = route.query.date_start ? toDateOnly(String(route.query.date_start)) : ''
   formValues.dateEnd = route.query.date_end ? toDateOnly(String(route.query.date_end)) : ''
   formValues.bbox = route.query.bbox ? String(route.query.bbox) : ''
@@ -127,6 +133,8 @@ function handlePreset(data: FormData) {
 
 function goBack() {
   view.value = 'search'
+  skipRouteSync = true
+  router.replace({ path: route.path })
 }
 </script>
 
