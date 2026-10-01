@@ -132,6 +132,10 @@ function doSubmit() {
   }
 }
 
+function handleBboxUpdate(bbox: string) {
+  formValues.bbox = bbox
+}
+
 function handleFilterSubmit(bbox: string) {
   formValues.bbox = bbox
   doSubmit()
@@ -180,6 +184,7 @@ function goBack() {
       <FilterBar
         :bbox="formValues.bbox"
         :heatmap-data="heatmapData"
+        @update-bbox="handleBboxUpdate"
         @submit="handleFilterSubmit"
         @preset="handlePreset"
       />

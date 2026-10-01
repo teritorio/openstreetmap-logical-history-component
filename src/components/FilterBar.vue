@@ -19,6 +19,7 @@ const props = withDefaults(
 const emit = defineEmits<{
   (e: 'submit', bbox: string): void
   (e: 'preset', data: FormData): void
+  (e: 'updateBbox', bbox: string): void
 }>()
 
 const localBbox = reactive({ bbox: '' })
@@ -50,6 +51,7 @@ function handleBboxChange(bbox: string) {
 
   needZoom.value = mapBboxRef.value.getZoom() < 14
   localBbox.bbox = bbox
+  emit('updateBbox', bbox)
 }
 
 function handleSubmit(): void {
