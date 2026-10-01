@@ -21,6 +21,7 @@ const TODAY_MS = Date.UTC(
   new Date().getUTCMonth(),
   new Date().getUTCDate(),
 )
+const MAX_RANGE_MS = 365 * 24 * 60 * 60 * 1000
 
 function dateToMs(date: string): number {
   return new Date(date).getTime()
@@ -93,8 +94,10 @@ const brushOptions: ApexOptions = {
     },
     events: {
       selection(_ctx: unknown, { xaxis }: { xaxis: { min: number, max: number } }) {
-        emit('update:start', msToDate(xaxis.min))
-        emit('update:end', msToDate(xaxis.max))
+        const min = xaxis.min
+        const max = xaxis.max - xaxis.min > MAX_RANGE_MS ? xaxis.min + MAX_RANGE_MS : xaxis.max
+        emit('update:start', msToDate(min))
+        emit('update:end', msToDate(max))
       },
     },
     toolbar: { show: false },
