@@ -27,6 +27,12 @@ export function oneYearAgoDate(): string {
   return toDateOnly(d.toISOString())
 }
 
+export function nMonthsBeforeDate(date: string, n: number): string {
+  const d = new Date(`${date}T00:00:00Z`)
+  d.setUTCMonth(d.getUTCMonth() - n)
+  return toDateOnly(d.toISOString())
+}
+
 /** Converts a YYYY-MM-DD string to an ISO datetime string (midnight UTC) */
 export function fromDateOnly(date: string): string {
   return new Date(date).toISOString()

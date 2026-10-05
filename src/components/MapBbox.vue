@@ -3,7 +3,7 @@ import type * as GeoJSON from 'geojson'
 import maplibre from 'maplibre-gl'
 import { onMounted, onUnmounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { useDrawMode } from '@/composables/useDrawMode'
-import { MAP_STYLE_URL } from '@/constants/map'
+import { MAP_STYLE_URL, MIN_ZOOM } from '@/constants/map'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 const props = withDefaults(defineProps<{
@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   (e: 'updateBbox', bbox: string): void
+  (e: 'viewportChange', bbox: string): void
 }>()
 
 const mapContainer = useTemplateRef<HTMLDivElement>('mapContainer')
@@ -102,6 +103,17 @@ function getZoom(): number {
   if (!map.value)
     throw new Error('Init map first.')
   return map.value.getZoom()
+}
+
+function getViewportBbox(): string {
+  if (!map.value)
+    return ''
+  const bounds = map.value.getBounds()
+  return `${bounds.getWest()},${bounds.getSouth()},${bounds.getEast()},${bounds.getNorth()}`
+}
+
+function emitViewport(): void {
+  emit('viewportChange', map.value && map.value.getZoom() >= MIN_ZOOM ? getViewportBbox() : '')
 }
 
 function updateHandlePositionsFromBbox(bbox: string): void {
@@ -274,12 +286,15 @@ onMounted(() => {
 
     map.value!.on('move', updateHandlePositions)
     map.value!.on('zoom', updateHandlePositions)
+    map.value!.on('moveend', emitViewport)
 
     if (props.bbox) {
       fitMapToBbox(props.bbox)
       drawRect(props.bbox)
       updateHandlePositionsFromBbox(props.bbox)
     }
+
+    emitViewport()
   })
 })
 
@@ -288,7 +303,7 @@ onUnmounted(() => {
   map.value?.remove()
 })
 
-defineExpose({ getZoom })
+defineExpose({ getZoom, getViewportBbox })
 </script>
 
 <template>

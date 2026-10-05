@@ -2,7 +2,7 @@ import type * as GeoJSON from 'geojson'
 import type { ComputedRef, Ref } from 'vue'
 import type { KarmaManifest } from '@/lib/karma-api'
 import { cellToBoundary, cellToParent } from 'h3-js'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { bboxToCells, cellsMinMaxSet } from '@/lib/h3-bbox'
 import { loadManifest } from '@/lib/karma-api'
 import { queryChanges } from '@/lib/karma-query'
@@ -44,7 +44,21 @@ function h3CellsToGeoJSON(byCell: Map<bigint, number>): GeoJSON.FeatureCollectio
   return { type: 'FeatureCollection', features }
 }
 
+function buildHeatmap(byCell: Map<bigint, number>, manifestRes: number): GeoJSON.FeatureCollection {
+  const displayRes = getDisplayRes(byCell.size, manifestRes)
+  const displayCells = displayRes === manifestRes ? byCell : aggregateCells(byCell, displayRes)
+  return h3CellsToGeoJSON(displayCells)
+}
+
+function buildHistogram(byDay: Map<string, number>): [number, number][] {
+  return Array.from(
+    byDay.entries(),
+    ([day, count]): [number, number] => [new Date(`${day}T00:00:00Z`).getTime(), count],
+  ).sort(([a], [b]) => a - b)
+}
+
 export interface UseKarmaDataOptions {
+  viewportBbox: Ref<string>
   bbox: Ref<string | undefined>
   dateStart: Ref<string | undefined>
   dateEnd: Ref<string | undefined>
@@ -58,8 +72,8 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
   const histogramData = ref<[number, number][]>([])
   const heatmapData = ref<GeoJSON.FeatureCollection | null>(null)
   const manifest = ref<KarmaManifest | null>(null)
-  let debounceTimer: ReturnType<typeof setTimeout> | undefined
-  let currentQueryId = 0
+  let queryInFlight = false
+  let queryQueued = false
 
   const dateRange = computed(() => manifest.value?.date_range ?? null)
 
@@ -74,53 +88,58 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
     }
   })
 
-  watch([opts.bbox, opts.dateStart, opts.dateEnd, manifest], () => {
+  watch([opts.viewportBbox, opts.bbox, opts.dateStart, opts.dateEnd, manifest], scheduleQuery)
+
+  function scheduleQuery(): void {
     if (!KARMA_BASE_URL)
       return
-    clearTimeout(debounceTimer)
-    debounceTimer = setTimeout(runQuery, 500)
-  })
-
-  onUnmounted(() => clearTimeout(debounceTimer))
+    if (queryInFlight) {
+      queryQueued = true
+      return
+    }
+    void runQuery()
+  }
 
   async function runQuery(): Promise<void> {
-    histogramData.value = []
-    heatmapData.value = null
+    queryInFlight = true
+    try {
+      await doQuery()
+    }
+    finally {
+      queryInFlight = false
+      if (queryQueued) {
+        queryQueued = false
+        await runQuery()
+      }
+    }
+  }
 
-    const queryId = ++currentQueryId
-    const bboxVal = opts.bbox.value
-    const dateStartVal = opts.dateStart.value
-    const dateEndVal = opts.dateEnd.value
-    if (!manifest.value || !bboxVal || !dateStartVal)
-      return
-
-    const manifestRes = manifest.value.h3_resolution
-
-    const parts = bboxVal.split(',').map(Number)
+  async function fetchBboxData(
+    bboxStr: string,
+    manifestSnap: KarmaManifest,
+    startDate: Date,
+    endDate: Date,
+    startMonth: string,
+    endMonth: string,
+  ): Promise<{ byCell: Map<bigint, number>, byDay: Map<string, number> } | null> {
+    const parts = bboxStr.split(',').map(Number)
     if (parts.length !== 4 || parts.some(Number.isNaN))
-      return
+      return null
     const bbox = parts as [number, number, number, number]
-
     let hexCells: string[]
     try {
-      hexCells = bboxToCells(bbox, manifestRes)
+      hexCells = bboxToCells(bbox, manifestSnap.h3_resolution)
     }
     catch {
-      return
+      return null
     }
     if (!hexCells.length || hexCells.length > MAX_QUERY_CELLS)
-      return
-
+      return null
     const { min, max, set } = cellsMinMaxSet(hexCells)
-    const startDate = new Date(dateStartVal)
-    const endDate = dateEndVal ? new Date(dateEndVal) : new Date()
-    const startMonth = dateStartVal.slice(0, 7)
-    const endMonth = endDate.toISOString().slice(0, 7)
-
     try {
-      const { byCell, byDay } = await queryChanges({
+      return await queryChanges({
         baseUrl: KARMA_BASE_URL!,
-        manifest: manifest.value,
+        manifest: manifestSnap,
         cellMin: min,
         cellMax: max,
         cellSet: set,
@@ -129,21 +148,51 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
         startMonth,
         endMonth,
       })
-
-      if (queryId !== currentQueryId)
-        return
-
-      histogramData.value = Array.from(byDay.entries(), ([day, count]): [number, number] => [new Date(`${day}T00:00:00Z`).getTime(), count])
-        .sort(([a], [b]) => a - b)
-
-      const displayRes = getDisplayRes(byCell.size, manifestRes)
-      const displayCells = displayRes === manifestRes
-        ? byCell
-        : aggregateCells(byCell, displayRes)
-      heatmapData.value = h3CellsToGeoJSON(displayCells)
     }
     catch (err) {
       console.warn('KarmaMap query failed:', err)
+      return null
+    }
+  }
+
+  async function doQuery(): Promise<void> {
+    const viewportBboxVal = opts.viewportBbox.value
+    const bboxVal = opts.bbox.value || ''
+    const dateStartVal = opts.dateStart.value
+    const dateEndVal = opts.dateEnd.value
+
+    if (!manifest.value || !dateStartVal || (!viewportBboxVal && !bboxVal)) {
+      histogramData.value = []
+      heatmapData.value = null
+      return
+    }
+
+    const manifestSnap = manifest.value
+    const startDate = new Date(dateStartVal)
+    const endDate = dateEndVal ? new Date(dateEndVal) : new Date()
+    const startMonth = dateStartVal.slice(0, 7)
+    const endMonth = endDate.toISOString().slice(0, 7)
+
+    if (bboxVal && viewportBboxVal) {
+      // Drawn bbox: viewport for heatmap, bbox for histogram — run in parallel
+      const [viewportResult, bboxResult] = await Promise.all([
+        fetchBboxData(viewportBboxVal, manifestSnap, startDate, endDate, startMonth, endMonth),
+        fetchBboxData(bboxVal, manifestSnap, startDate, endDate, startMonth, endMonth),
+      ])
+      heatmapData.value = viewportResult ? buildHeatmap(viewportResult.byCell, manifestSnap.h3_resolution) : null
+      histogramData.value = bboxResult ? buildHistogram(bboxResult.byDay) : []
+    }
+    else if (bboxVal) {
+      // Viewport unavailable (zoom < 12) but bbox drawn: histogram only
+      const result = await fetchBboxData(bboxVal, manifestSnap, startDate, endDate, startMonth, endMonth)
+      histogramData.value = result ? buildHistogram(result.byDay) : []
+      heatmapData.value = null
+    }
+    else {
+      // No bbox: single viewport query for both
+      const result = await fetchBboxData(viewportBboxVal, manifestSnap, startDate, endDate, startMonth, endMonth)
+      heatmapData.value = result ? buildHeatmap(result.byCell, manifestSnap.h3_resolution) : null
+      histogramData.value = result ? buildHistogram(result.byDay) : []
     }
   }
 

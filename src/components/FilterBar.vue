@@ -3,6 +3,7 @@ import type * as GeoJSON from 'geojson'
 import type { FormData } from '@/types'
 import { reactive, shallowRef, useTemplateRef, watchEffect } from 'vue'
 import MapBbox from '@/components/MapBbox.vue'
+import { MIN_ZOOM } from '@/constants/map'
 import { presets } from '@/data/presets'
 
 const props = withDefaults(
@@ -26,6 +27,7 @@ const emit = defineEmits<{
   (e: 'submit', bbox: string): void
   (e: 'preset', data: FormData): void
   (e: 'updateBbox', bbox: string): void
+  (e: 'viewportChange', bbox: string): void
   (e: 'update:includeRelationTypeRoute', value: boolean): void
   (e: 'update:dateStart', value: string): void
   (e: 'update:dateEnd', value: string): void
@@ -35,8 +37,6 @@ const localBbox = reactive({ bbox: '' })
 const mapBboxRef = useTemplateRef('mapBboxRef')
 const needZoom = shallowRef(false)
 const currentZoom = shallowRef(0)
-
-const MIN_ZOOM = 12
 
 watchEffect(() => {
   localBbox.bbox = props.bbox ?? ''
@@ -90,6 +90,7 @@ function handleSubmit(): void {
           :bbox="localBbox.bbox"
           :heatmap-data="heatmapData"
           @update-bbox="handleBboxChange"
+          @viewport-change="emit('viewportChange', $event)"
         />
       </div>
 
