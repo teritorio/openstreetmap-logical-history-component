@@ -207,7 +207,6 @@ watch(
     if (!map.value)
       return
     if (newBbox) {
-      fitMapToBbox(newBbox)
       drawRect(newBbox)
       updateHandlePositionsFromBbox(newBbox)
     }
