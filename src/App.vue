@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
-import { computed, reactive, ref, toRef, watch, watchEffect } from 'vue'
+import { computed, reactive, ref, shallowRef, toRef, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DateRangeSlider from '@/components/DateRangeSlider.vue'
 import FilterBar from '@/components/FilterBar.vue'
@@ -12,7 +12,7 @@ import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
 import { useKarmaData } from '@/composables/useKarmaData'
-import { formatDateOnly, fromDateOnly, oneYearAgoDate, toDateOnly, todayDate } from '@/utils/date-format'
+import { formatDateOnly, fromDateOnly, nMonthsBeforeDate, oneYearAgoDate, toDateOnly, todayDate } from '@/utils/date-format'
 
 const $api = useApiConfig()
 const { error, loading, resetError } = $api
@@ -32,11 +32,13 @@ const formValues = reactive<FormData>({
 
 let skipRouteSync = false
 
+const viewportBbox = shallowRef('')
 const karmaDateStart = toRef(formValues, 'dateStart')
 const karmaDateEnd = toRef(formValues, 'dateEnd')
 const karmaBbox = toRef(formValues, 'bbox')
 
-const { histogramData, heatmapData } = useKarmaData({
+const { histogramData, heatmapData, dateRange } = useKarmaData({
+  viewportBbox,
   bbox: karmaBbox,
   dateStart: karmaDateStart,
   dateEnd: karmaDateEnd,
@@ -52,6 +54,15 @@ watchEffect(() => {
   formValues.bbox = route.query.bbox ? String(route.query.bbox) : ''
   formValues.includeRelationTypeRoute = route.query.include_relation_type_route === 'true'
 })
+
+watch(dateRange, (range) => {
+  if (!range)
+    return
+  if (!route.query.date_start)
+    formValues.dateStart = nMonthsBeforeDate(range.max_date.slice(0, 10), 4)
+  if (!route.query.date_end)
+    formValues.dateEnd = range.max_date.slice(0, 10)
+}, { once: true })
 
 watch(
   () => JSON.stringify(route.query),
@@ -136,6 +147,10 @@ function handleBboxUpdate(bbox: string) {
   formValues.bbox = bbox
 }
 
+function handleViewportChange(bbox: string) {
+  viewportBbox.value = bbox
+}
+
 function handleFilterSubmit(_bbox: string) {
   doSubmit()
 }
@@ -179,6 +194,7 @@ function goBack() {
         :bbox="formValues.bbox"
         :heatmap-data="heatmapData"
         @update-bbox="handleBboxUpdate"
+        @viewport-change="handleViewportChange"
         @submit="handleFilterSubmit"
         @preset="handlePreset"
       />
