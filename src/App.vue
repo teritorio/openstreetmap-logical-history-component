@@ -185,6 +185,7 @@ function goBack() {
           v-model:start="formValues.dateStart"
           v-model:end="formValues.dateEnd"
           :histogram-data="histogramData"
+          :date-range="dateRange"
         />
       </div>
       <FilterBar

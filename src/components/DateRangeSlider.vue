@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { ApexOptions } from 'apexcharts'
-import ApexCharts from 'apexcharts'
-import { computed, watch } from 'vue'
-import VueApexCharts from 'vue3-apexcharts'
+import * as echarts from 'echarts'
+import { onMounted, onUnmounted, useTemplateRef, watch } from 'vue'
 
 const props = defineProps<{
   start?: string
   end?: string
   histogramData?: [number, number][]
+  dateRange?: { min_date: string, max_date: string } | null
 }>()
 
 const emit = defineEmits<{
@@ -15,152 +14,166 @@ const emit = defineEmits<{
   (e: 'update:end', value: string): void
 }>()
 
-const OSM_EPOCH_MS = new Date('2009-04-21').getTime()
-const TODAY_MS = Date.UTC(
-  new Date().getUTCFullYear(),
-  new Date().getUTCMonth(),
-  new Date().getUTCDate(),
-)
-const MAX_RANGE_MS = 365 * 24 * 60 * 60 * 1000
+const containerRef = useTemplateRef<HTMLDivElement>('container')
+let chart: echarts.ECharts | null = null
+let resizeObserver: ResizeObserver | null = null
+
+// Prevents the programmatic dispatchAction from looping back into the emit.
+let isProgrammaticZoom = false
+
+// Fixed x-axis bounds (full dataset coverage from manifest).
+let axisMin: number | undefined
+let axisMax: number | undefined
 
 function dateToMs(date: string): number {
-  return new Date(date).getTime()
+  return new Date(`${date}T00:00:00Z`).getTime()
 }
 
 function msToDate(ms: number): string {
   const d = new Date(ms)
-  const pad = (n: number) => n.toString().padStart(2, '0')
+  const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`
 }
 
-const FLAT_SERIES = [[OSM_EPOCH_MS, 0], [TODAY_MS, 0]] as [number, number][]
-
-const histogramSeries = computed(() => [{
-  name: 'changes',
-  data: props.histogramData ?? FLAT_SERIES,
-}])
-
-const histogramOptions: ApexOptions = {
-  chart: {
-    id: 'locha-histogram',
-    type: 'bar',
-    height: 100,
-    background: 'transparent',
-    toolbar: { show: false },
-    zoom: { enabled: false },
-    animations: { enabled: false },
-    selection: { enabled: false },
-  },
-  xaxis: {
-    type: 'datetime',
-    min: props.start ? dateToMs(props.start) : OSM_EPOCH_MS,
-    max: props.end ? dateToMs(props.end) : TODAY_MS,
-    labels: {
-      style: { fontSize: '10px', colors: '#888' },
-      datetimeUTC: true,
-    },
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-  },
-  yaxis: { show: false, min: 0 },
-  grid: { show: false },
-  dataLabels: { enabled: false },
-  legend: { show: false },
-  tooltip: { enabled: false },
-  plotOptions: { bar: { columnWidth: '80%' } },
-  colors: ['#082e4e'],
-  fill: { opacity: 0.35 },
+function computeAxisBounds(): void {
+  if (props.dateRange) {
+    axisMin = dateToMs(props.dateRange.min_date.slice(0, 10))
+    axisMax = dateToMs(props.dateRange.max_date.slice(0, 10))
+  }
+  else if (props.histogramData?.length) {
+    axisMin = props.histogramData[0][0]
+    axisMax = props.histogramData.at(-1)![0]
+  }
 }
 
-const brushOptions: ApexOptions = {
-  chart: {
-    id: 'locha-brush',
-    type: 'area',
-    height: 70,
-    background: 'transparent',
-    brush: {
-      target: 'locha-histogram',
-      enabled: true,
-    },
-    selection: {
-      enabled: true,
-      fill: { color: '#082e4e', opacity: 0.1 },
-      stroke: { width: 1, color: '#082e4e', dashArray: 0, opacity: 0.9 },
-      // Initial selection from props; subsequent changes handled by the watch below
-      xaxis: {
-        min: props.start ? dateToMs(props.start) : OSM_EPOCH_MS,
-        max: props.end ? dateToMs(props.end) : TODAY_MS,
-      },
-    },
-    events: {
-      selection(_ctx: unknown, { xaxis }: { xaxis: { min: number, max: number } }) {
-        const min = xaxis.min
-        const max = xaxis.max - xaxis.min > MAX_RANGE_MS ? xaxis.min + MAX_RANGE_MS : xaxis.max
-        emit('update:start', msToDate(min))
-        emit('update:end', msToDate(max))
-      },
-    },
-    toolbar: { show: false },
-    animations: { enabled: false },
-  },
-  xaxis: {
-    type: 'datetime',
-    min: props.start ? dateToMs(props.start) : OSM_EPOCH_MS,
-    max: props.end ? dateToMs(props.end) : TODAY_MS,
-    tooltip: { enabled: false },
-    labels: { show: false },
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-  },
-  yaxis: { show: false, min: 0, max: 1 },
-  fill: { opacity: 0 },
-  stroke: { width: 0 },
-  dataLabels: { enabled: false },
-  legend: { show: false },
-  grid: { show: false },
-  tooltip: { enabled: false },
+function setWindow(start: string, end: string): void {
+  if (!chart)
+    return
+  isProgrammaticZoom = true
+  chart.dispatchAction({
+    type: 'dataZoom',
+    startValue: dateToMs(start),
+    endValue: dateToMs(end),
+  })
 }
 
-const brushSeries = [{ name: '', data: FLAT_SERIES }]
+onMounted(() => {
+  if (!containerRef.value)
+    return
 
-watch(
-  () => [props.start, props.end] as const,
-  ([start, end]) => {
-    const min = start ? dateToMs(start) : OSM_EPOCH_MS
-    const max = end ? dateToMs(end) : TODAY_MS
-    ApexCharts.exec('locha-histogram', 'updateOptions', { xaxis: { min, max } }, false, false)
-    ApexCharts.exec('locha-brush', 'updateOptions', {
-      xaxis: { min, max },
-      chart: { selection: { xaxis: { min, max } } },
-    }, false, false)
-  },
-)
+  computeAxisBounds()
+
+  chart = echarts.init(containerRef.value)
+  chart.setOption({
+    backgroundColor: 'transparent',
+    grid: { left: 4, right: 4, top: 2, bottom: 38 },
+    xAxis: {
+      type: 'time',
+      min: axisMin,
+      max: axisMax,
+      axisLabel: { fontSize: 10, color: '#888' },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      splitLine: { show: false },
+    },
+    yAxis: { show: false, type: 'log', logBase: 10, min: 1 },
+    tooltip: { trigger: 'axis' },
+    dataZoom: [
+      {
+        type: 'slider',
+        xAxisIndex: 0,
+        height: 16,
+        bottom: 4,
+        handleStyle: { color: '#082e4e' },
+        selectedDataBackground: { lineStyle: { color: '#082e4e' }, areaStyle: { color: '#082e4e' } },
+        fillerColor: 'rgba(8, 46, 78, 0.15)',
+        borderColor: '#c0c0c8',
+        dataBackground: { lineStyle: { color: '#bbb' }, areaStyle: { color: '#ddd' } },
+        showDetail: false,
+      },
+      { type: 'inside', xAxisIndex: 0 },
+    ],
+    series: [{
+      type: 'bar',
+      name: 'Changes',
+      data: props.histogramData ?? [],
+      itemStyle: { color: '#082e4e', opacity: 0.6 },
+    }],
+  })
+
+  chart.on('dataZoom', () => {
+    if (isProgrammaticZoom) {
+      isProgrammaticZoom = false
+      return
+    }
+    const option = chart!.getOption() as { dataZoom: { start?: number, end?: number, startValue?: number, endValue?: number }[] }
+    const dz = option.dataZoom[0]
+    let startTs: number | undefined
+    let endTs: number | undefined
+    if (axisMin != null && axisMax != null && dz.start != null && dz.end != null) {
+      startTs = axisMin + ((axisMax - axisMin) * dz.start) / 100
+      endTs = axisMin + ((axisMax - axisMin) * dz.end) / 100
+    }
+    else if (dz.startValue != null && dz.endValue != null) {
+      startTs = dz.startValue
+      endTs = dz.endValue
+    }
+    if (startTs == null || endTs == null)
+      return
+    emit('update:start', msToDate(startTs))
+    emit('update:end', msToDate(endTs))
+  })
+
+  resizeObserver = new ResizeObserver(() => chart?.resize())
+  resizeObserver.observe(containerRef.value)
+
+  if (props.start && props.end)
+    setWindow(props.start, props.end)
+})
+
+onUnmounted(() => {
+  resizeObserver?.disconnect()
+  chart?.dispose()
+  chart = null
+})
+
+// When new histogram data arrives, update series and recalibrate axis.
+watch(() => props.histogramData, (data) => {
+  if (!chart)
+    return
+  computeAxisBounds()
+  chart.setOption({
+    xAxis: { min: axisMin, max: axisMax },
+    series: [{ data: data ?? [] }],
+  })
+  if (props.start && props.end)
+    setWindow(props.start, props.end)
+})
+
+// When manifest date range arrives, fix the full-coverage x-axis.
+watch(() => props.dateRange, (range) => {
+  if (!chart || !range)
+    return
+  axisMin = dateToMs(range.min_date.slice(0, 10))
+  axisMax = dateToMs(range.max_date.slice(0, 10))
+  chart.setOption({ xAxis: { min: axisMin, max: axisMax } })
+  if (props.start && props.end)
+    setWindow(props.start, props.end)
+})
+
+// When selected dates change externally (inputs, presets), sync the dataZoom window.
+watch(() => [props.start, props.end] as const, ([start, end]) => {
+  if (start && end)
+    setWindow(start, end)
+}, { flush: 'post' })
 </script>
 
 <template>
-  <div class="date-range-slider">
-    <VueApexCharts
-      type="bar"
-      height="100"
-      :options="histogramOptions"
-      :series="histogramSeries"
-    />
-    <VueApexCharts
-      type="area"
-      height="70"
-      :options="brushOptions"
-      :series="brushSeries"
-    />
-  </div>
+  <div ref="container" class="date-range-slider" />
 </template>
 
 <style scoped>
 .date-range-slider {
-  display: flex;
-  flex-direction: column;
-}
-
-:deep(.apexcharts-canvas) {
-  background: transparent !important;
+  height: 140px;
 }
 </style>
