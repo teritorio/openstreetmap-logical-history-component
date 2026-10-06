@@ -68,40 +68,15 @@ onMounted(() => {
 
   chart = echarts.init(containerRef.value)
   chart.setOption({
-    backgroundColor: 'transparent',
-    grid: { left: 4, right: 4, top: 2, bottom: 38 },
-    xAxis: {
-      type: 'time',
-      min: axisMin,
-      max: axisMax,
-      axisLabel: { fontSize: 10, color: '#888' },
-      axisLine: { show: false },
-      axisTick: { show: false },
-      splitLine: { show: false },
-    },
-    yAxis: { show: false, type: 'log', logBase: 10, min: 1 },
+    grid: { left: 44, right: 16, top: 12, bottom: 44 },
+    xAxis: { type: 'time', min: axisMin, max: axisMax },
+    yAxis: { type: 'log', logBase: 10, min: 1 },
     tooltip: { trigger: 'axis' },
     dataZoom: [
-      {
-        type: 'slider',
-        xAxisIndex: 0,
-        height: 16,
-        bottom: 4,
-        handleStyle: { color: '#082e4e' },
-        selectedDataBackground: { lineStyle: { color: '#082e4e' }, areaStyle: { color: '#082e4e' } },
-        fillerColor: 'rgba(8, 46, 78, 0.15)',
-        borderColor: '#c0c0c8',
-        dataBackground: { lineStyle: { color: '#bbb' }, areaStyle: { color: '#ddd' } },
-        showDetail: false,
-      },
+      { type: 'slider', xAxisIndex: 0, height: 20, bottom: 10 },
       { type: 'inside', xAxisIndex: 0 },
     ],
-    series: [{
-      type: 'bar',
-      name: 'Changes',
-      data: props.histogramData ?? [],
-      itemStyle: { color: '#082e4e', opacity: 0.6 },
-    }],
+    series: [{ type: 'bar', name: 'Changes', data: props.histogramData ?? [] }],
   })
 
   chart.on('dataZoom', () => {
