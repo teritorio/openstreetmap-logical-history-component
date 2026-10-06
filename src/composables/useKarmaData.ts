@@ -6,9 +6,17 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { bboxToCells, cellsMinMaxSet } from '@/lib/h3-bbox'
 import { loadManifest } from '@/lib/karma-api'
 import { queryChanges } from '@/lib/karma-query'
+import { parseBbox } from '@/utils/bbox'
 
 const KARMA_BASE_URL = import.meta.env.VITE_KARMA_DATASET_URL as string | undefined
 const MAX_QUERY_CELLS = 20000
+
+interface QueryDates {
+  startDate: Date
+  endDate: Date
+  startMonth: string
+  endMonth: string
+}
 
 function getDisplayRes(resultSize: number, manifestRes: number): number {
   if (resultSize > 3500)
@@ -117,15 +125,11 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
   async function fetchBboxData(
     bboxStr: string,
     manifestSnap: KarmaManifest,
-    startDate: Date,
-    endDate: Date,
-    startMonth: string,
-    endMonth: string,
+    dates: QueryDates,
   ): Promise<{ byCell: Map<bigint, number>, byDay: Map<string, number> } | null> {
-    const parts = bboxStr.split(',').map(Number)
-    if (parts.length !== 4 || parts.some(Number.isNaN))
+    const bbox = parseBbox(bboxStr)
+    if (!bbox)
       return null
-    const bbox = parts as [number, number, number, number]
     let hexCells: string[]
     try {
       hexCells = bboxToCells(bbox, manifestSnap.h3_resolution)
@@ -143,10 +147,10 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
         cellMin: min,
         cellMax: max,
         cellSet: set,
-        startDate,
-        endDate,
-        startMonth,
-        endMonth,
+        startDate: dates.startDate,
+        endDate: dates.endDate,
+        startMonth: dates.startMonth,
+        endMonth: dates.endMonth,
       })
     }
     catch (err) {
@@ -168,29 +172,32 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
     }
 
     const manifestSnap = manifest.value
-    const startDate = new Date(dateStartVal)
     const endDate = dateEndVal ? new Date(dateEndVal) : new Date()
-    const startMonth = dateStartVal.slice(0, 7)
-    const endMonth = endDate.toISOString().slice(0, 7)
+    const dates: QueryDates = {
+      startDate: new Date(dateStartVal),
+      endDate,
+      startMonth: dateStartVal.slice(0, 7),
+      endMonth: endDate.toISOString().slice(0, 7),
+    }
 
     if (bboxVal && viewportBboxVal) {
       // Drawn bbox: viewport for heatmap, bbox for histogram — run in parallel
       const [viewportResult, bboxResult] = await Promise.all([
-        fetchBboxData(viewportBboxVal, manifestSnap, startDate, endDate, startMonth, endMonth),
-        fetchBboxData(bboxVal, manifestSnap, startDate, endDate, startMonth, endMonth),
+        fetchBboxData(viewportBboxVal, manifestSnap, dates),
+        fetchBboxData(bboxVal, manifestSnap, dates),
       ])
       heatmapData.value = viewportResult ? buildHeatmap(viewportResult.byCell, manifestSnap.h3_resolution) : null
       histogramData.value = bboxResult ? buildHistogram(bboxResult.byDay) : []
     }
     else if (bboxVal) {
       // Viewport unavailable (zoom < 12) but bbox drawn: histogram only
-      const result = await fetchBboxData(bboxVal, manifestSnap, startDate, endDate, startMonth, endMonth)
+      const result = await fetchBboxData(bboxVal, manifestSnap, dates)
       histogramData.value = result ? buildHistogram(result.byDay) : []
       heatmapData.value = null
     }
     else {
       // No bbox: single viewport query for both
-      const result = await fetchBboxData(viewportBboxVal, manifestSnap, startDate, endDate, startMonth, endMonth)
+      const result = await fetchBboxData(viewportBboxVal, manifestSnap, dates)
       heatmapData.value = result ? buildHeatmap(result.byCell, manifestSnap.h3_resolution) : null
       histogramData.value = result ? buildHistogram(result.byDay) : []
     }

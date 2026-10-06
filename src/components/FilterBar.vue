@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type * as GeoJSON from 'geojson'
 import type { FormData } from '@/types'
-import { reactive, shallowRef, useTemplateRef, watchEffect } from 'vue'
+import { ref, useTemplateRef, watchEffect } from 'vue'
 import MapBbox from '@/components/MapBbox.vue'
 import { MIN_ZOOM } from '@/constants/map'
 import { presets } from '@/data/presets'
@@ -24,7 +24,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  (e: 'submit', bbox: string): void
+  (e: 'submit'): void
   (e: 'preset', data: FormData): void
   (e: 'updateBbox', bbox: string): void
   (e: 'viewportChange', bbox: string): void
@@ -33,57 +33,45 @@ const emit = defineEmits<{
   (e: 'update:dateEnd', value: string): void
 }>()
 
-const localBbox = reactive({ bbox: '' })
+const localBbox = ref('')
 const mapBboxRef = useTemplateRef('mapBboxRef')
-const needZoom = shallowRef(false)
-const currentZoom = shallowRef(0)
+const needZoom = ref(false)
+const currentZoom = ref(0)
 
 watchEffect(() => {
-  localBbox.bbox = props.bbox ?? ''
+  localBbox.value = props.bbox ?? ''
 })
 
-const EXTRA_PARAM_DEFAULTS: Partial<FormData> = {
-  includeRelationTypeRoute: false,
-}
-
-function setPreset(index: number) {
-  const { title, ...preset } = presets[index]
-  const data: FormData = {
-    ...EXTRA_PARAM_DEFAULTS,
-    dateStart: preset.dateStart ? preset.dateStart.slice(0, 10) : '',
-    dateEnd: preset.dateEnd ? preset.dateEnd.slice(0, 10) : '',
-    bbox: preset.bbox,
-  }
-  emit('preset', data)
-}
-
-function handleBboxChange(bbox: string) {
-  if (!mapBboxRef.value)
-    return
-
-  currentZoom.value = mapBboxRef.value.getZoom()
+function refreshZoom(): void {
+  currentZoom.value = mapBboxRef.value?.getZoom() ?? 0
   needZoom.value = currentZoom.value < MIN_ZOOM
-  localBbox.bbox = bbox
+}
+
+function setPreset(index: number): void {
+  const preset = presets[index]
+  emit('preset', {
+    dateStart: preset.dateStart?.slice(0, 10) ?? '',
+    dateEnd: preset.dateEnd?.slice(0, 10) ?? '',
+    bbox: preset.bbox,
+    includeRelationTypeRoute: false,
+  })
+}
+
+function handleBboxChange(bbox: string): void {
+  refreshZoom()
+  localBbox.value = bbox
   emit('updateBbox', bbox)
 }
 
 function handleViewportChange(bbox: string): void {
-  currentZoom.value = mapBboxRef.value?.getZoom() ?? 0
-  needZoom.value = currentZoom.value < MIN_ZOOM
+  refreshZoom()
   emit('viewportChange', bbox)
 }
 
 function handleSubmit(): void {
-  if (!mapBboxRef.value)
-    return
-
-  currentZoom.value = mapBboxRef.value.getZoom()
-  needZoom.value = currentZoom.value < MIN_ZOOM
-
-  if (needZoom.value)
-    return
-
-  emit('submit', localBbox.bbox)
+  refreshZoom()
+  if (!needZoom.value)
+    emit('submit')
 }
 </script>
 
@@ -93,7 +81,7 @@ function handleSubmit(): void {
       <div class="filter-bar-map">
         <MapBbox
           ref="mapBboxRef"
-          :bbox="localBbox.bbox"
+          :bbox="localBbox"
           :heatmap-data="heatmapData"
           @update-bbox="handleBboxChange"
           @viewport-change="handleViewportChange"
@@ -128,7 +116,7 @@ function handleSubmit(): void {
             <label for="fb_bbox">Bounding Box <span class="required">*</span></label>
             <input
               id="fb_bbox"
-              v-model="localBbox.bbox"
+              v-model="localBbox"
               type="text"
               placeholder="west, south, east, north"
               pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
