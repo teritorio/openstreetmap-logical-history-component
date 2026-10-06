@@ -199,6 +199,10 @@ function goBack() {
           ← Back
         </button>
         <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
+        <label class="results-route">
+          <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
+          Include route relations
+        </label>
       </div>
       <LoCha id="demo" :data="geojson" :reason-collapsed="false">
         <template #object-detail="{ feature, index }">
@@ -286,6 +290,15 @@ function goBack() {
   font-size: 0.85rem;
   color: #555;
   font-weight: 500;
+}
+
+.results-route {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #555;
+  cursor: default;
 }
 
 .before-link {
