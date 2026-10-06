@@ -19,6 +19,7 @@ defineSlots<{
   'header-center'?: (props: GroupSlotProps) => void
   'header-end'?: (props: GroupSlotProps) => void
   'content-start'?: (props: GroupSlotProps) => void
+  'filters'?: () => void
 }>()
 
 const { groups } = inject(LOCHA_KEY)!
@@ -111,6 +112,7 @@ onUnmounted(() => {
         <input v-model="localHideMinorGeom" type="checkbox">
         Gray out minor geometry changes
       </label>
+      <slot name="filters" />
     </div>
     <ul ref="scrollRef">
       <li v-for="(group, index) in groups" :key="group[0].properties.links" :class="{ selected: currentHash === `#${groupId(index)}` }">

@@ -29,6 +29,7 @@ defineSlots<{
   'header-center'?: (props: GroupSlotProps) => void
   'header-end'?: (props: GroupSlotProps) => void
   'content-start'?: (props: GroupSlotProps) => void
+  'filters'?: () => void
 }>()
 
 provide(REASON_COLLAPSED_KEY, props.reasonCollapsed)
@@ -81,6 +82,9 @@ watch(() => props.data, (newValue) => {
       </template>
       <template v-if="$slots['content-start']" #content-start="slotProps">
         <slot name="content-start" v-bind="slotProps" />
+      </template>
+      <template v-if="$slots.filters" #filters>
+        <slot name="filters" />
       </template>
     </LoChaGroupList>
   </section>
