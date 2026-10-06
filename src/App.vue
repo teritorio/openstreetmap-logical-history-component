@@ -199,12 +199,14 @@ function goBack() {
           ← Back
         </button>
         <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
-        <label class="results-route">
-          <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
-          Include route relations
-        </label>
       </div>
       <LoCha id="demo" :data="geojson" :reason-collapsed="false">
+        <template #filters>
+          <label class="results-route">
+            <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
+            Include route relations
+          </label>
+        </template>
         <template #object-detail="{ feature, index }">
           <template v-for="(link, i) in getLinks(feature, index)" :key="i">
             <template v-if="feature.properties.is_after">
