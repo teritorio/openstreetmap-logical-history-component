@@ -30,9 +30,7 @@ function dateToMs(date: string): number {
 }
 
 function msToDate(ms: number): string {
-  const d = new Date(ms)
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`
+  return new Date(ms).toISOString().slice(0, 10)
 }
 
 function computeAxisBounds(): void {
@@ -55,6 +53,11 @@ function setWindow(start: string, end: string): void {
     startValue: dateToMs(start),
     endValue: dateToMs(end),
   })
+}
+
+function syncWindowToProp(): void {
+  if (props.start && props.end)
+    setWindow(props.start, props.end)
 }
 
 onMounted(() => {
@@ -127,8 +130,7 @@ onMounted(() => {
   resizeObserver = new ResizeObserver(() => chart?.resize())
   resizeObserver.observe(containerRef.value)
 
-  if (props.start && props.end)
-    setWindow(props.start, props.end)
+  syncWindowToProp()
 })
 
 onUnmounted(() => {
@@ -137,7 +139,6 @@ onUnmounted(() => {
   chart = null
 })
 
-// When new histogram data arrives, update series and recalibrate axis.
 watch(() => props.histogramData, (data) => {
   if (!chart)
     return
@@ -146,19 +147,15 @@ watch(() => props.histogramData, (data) => {
     xAxis: { min: axisMin, max: axisMax },
     series: [{ data: data ?? [] }],
   })
-  if (props.start && props.end)
-    setWindow(props.start, props.end)
+  syncWindowToProp()
 })
 
-// When manifest date range arrives, fix the full-coverage x-axis.
 watch(() => props.dateRange, (range) => {
   if (!chart || !range)
     return
-  axisMin = dateToMs(range.min_date.slice(0, 10))
-  axisMax = dateToMs(range.max_date.slice(0, 10))
+  computeAxisBounds()
   chart.setOption({ xAxis: { min: axisMin, max: axisMax } })
-  if (props.start && props.end)
-    setWindow(props.start, props.end)
+  syncWindowToProp()
 })
 
 // When selected dates change externally (inputs, presets), sync the dataZoom window.

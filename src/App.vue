@@ -143,15 +143,7 @@ function doSubmit() {
   }
 }
 
-function handleBboxUpdate(bbox: string) {
-  formValues.bbox = bbox
-}
-
-function handleViewportChange(bbox: string) {
-  viewportBbox.value = bbox
-}
-
-function handleFilterSubmit(_bbox: string) {
+function handleFilterSubmit() {
   doSubmit()
 }
 
@@ -194,8 +186,8 @@ function goBack() {
         v-model:include-relation-type-route="formValues.includeRelationTypeRoute"
         :bbox="formValues.bbox"
         :heatmap-data="heatmapData"
-        @update-bbox="handleBboxUpdate"
-        @viewport-change="handleViewportChange"
+        @update-bbox="(v: string) => formValues.bbox = v"
+        @viewport-change="(v: string) => viewportBbox = v"
         @submit="handleFilterSubmit"
         @preset="handlePreset"
       />
