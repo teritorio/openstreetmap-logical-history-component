@@ -67,6 +67,12 @@ function handleBboxChange(bbox: string) {
   emit('updateBbox', bbox)
 }
 
+function handleViewportChange(bbox: string): void {
+  currentZoom.value = mapBboxRef.value?.getZoom() ?? 0
+  needZoom.value = currentZoom.value < MIN_ZOOM
+  emit('viewportChange', bbox)
+}
+
 function handleSubmit(): void {
   if (!mapBboxRef.value)
     return
@@ -90,7 +96,7 @@ function handleSubmit(): void {
           :bbox="localBbox.bbox"
           :heatmap-data="heatmapData"
           @update-bbox="handleBboxChange"
-          @viewport-change="emit('viewportChange', $event)"
+          @viewport-change="handleViewportChange"
         />
       </div>
 
@@ -140,8 +146,6 @@ function handleSubmit(): void {
             >
             Include route relations
           </label>
-
-          <pre class="required-note">* required fields</pre>
 
           <div class="form-actions">
             <button type="submit" class="btn-run" :disabled="needZoom">
@@ -202,7 +206,6 @@ form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  flex: 1;
 }
 
 .form-row {
@@ -232,13 +235,6 @@ label {
 
 .required {
   color: red;
-}
-
-.required-note {
-  color: red;
-  font-size: 0.75rem;
-  text-align: right;
-  margin: 0;
 }
 
 .zoom-warning {
