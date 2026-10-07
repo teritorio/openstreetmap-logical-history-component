@@ -4,7 +4,7 @@ import { inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } 
 import LoChaGroupComponent from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
-import { isMinorGeomOnly, isUnchangedFeature } from '@/utils/feature-status'
+import { isMinorChange } from '@/utils/feature-status'
 import { scrollToSection } from '@/utils/scrollToSection'
 
 const props = defineProps<{
@@ -31,9 +31,7 @@ function shouldDimGroup(group: LoChaGroup, index: number): boolean {
   if (props.grayOutThreshold === undefined)
     return false
   const links = loCha.value?.metadata.links[index] ?? []
-  return group.every(feature =>
-    isUnchangedFeature(feature, links) || isMinorGeomOnly(feature, links, props.grayOutThreshold!),
-  )
+  return group.every(feature => isMinorChange(feature, links, props.grayOutThreshold!))
 }
 const currentHash = ref<string>()
 const listRef = useTemplateRef<HTMLElement>('listRef')
