@@ -31,7 +31,10 @@ function shouldDimGroup(group: LoChaGroup, index: number): boolean {
   if (props.grayOutThreshold === undefined)
     return false
   const links = loCha.value?.metadata.links[index] ?? []
-  return group.every(feature => isMinorChange(feature, links, props.grayOutThreshold!))
+  const afterFeatures = group.filter(f => !f.properties.is_before)
+  if (!afterFeatures.length)
+    return false
+  return afterFeatures.every(feature => isMinorChange(feature, links, props.grayOutThreshold!))
 }
 const currentHash = ref<string>()
 const listRef = useTemplateRef<HTMLElement>('listRef')
