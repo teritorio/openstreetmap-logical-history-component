@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as echarts from 'echarts'
-import { onMounted, onUnmounted, useTemplateRef, watch } from 'vue'
+import { nextTick, onMounted, onUnmounted, useTemplateRef, watch } from 'vue'
 
 const props = defineProps<{
   start?: string
@@ -78,6 +78,8 @@ onMounted(() => {
     ],
     series: [{ type: 'bar', name: 'Changes', data: props.histogramData ?? [] }],
   })
+
+  nextTick(() => chart?.resize())
 
   chart.on('dataZoom', () => {
     if (isProgrammaticZoom) {
