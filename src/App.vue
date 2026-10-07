@@ -156,6 +156,8 @@ function goBack() {
   skipRouteSync = true
   router.replace({ path: route.path })
 }
+
+const grayOutThreshold = ref(2)
 </script>
 
 <template>
@@ -199,11 +201,15 @@ function goBack() {
         </button>
         <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
       </div>
-      <LoCha id="demo" :data="geojson" :reason-collapsed="false">
+      <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
         <template #filters>
           <label class="results-route">
             <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
             Include route relations
+          </label>
+          <label class="results-grayout">
+            Gray out threshold (m)
+            <input v-model.number="grayOutThreshold" type="number" min="0" max="100" step="1">
           </label>
         </template>
         <template #object-detail="{ feature, index }">
@@ -300,6 +306,22 @@ function goBack() {
   font-size: 0.85rem;
   color: #555;
   cursor: default;
+}
+
+.results-grayout {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.results-grayout input[type='number'] {
+  width: 4rem;
+  font-size: 0.85rem;
+  padding: 2px 4px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
 }
 
 .before-link {

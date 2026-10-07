@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import type { GroupSlotProps, ObjectDetailSlotProps } from '@/types'
+import type { GroupSlotProps, LoChaGroup, ObjectDetailSlotProps } from '@/types'
 import { inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
-import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
+import LoChaGroupComponent from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
+import { isMinorGeomOnly, isUnchangedFeature } from '@/utils/feature-status'
 import { scrollToSection } from '@/utils/scrollToSection'
 
 const props = defineProps<{
   hash?: string
-  hideUnchanged?: boolean
-  hideMinorGeom?: boolean
+  grayOutThreshold?: number
 }>()
 
 defineSlots<{
@@ -22,12 +22,19 @@ defineSlots<{
   'filters'?: () => void
 }>()
 
-const { groups } = inject(LOCHA_KEY)!
+const { groups, loCha } = inject(LOCHA_KEY)!
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
-const localHideUnchanged = ref(props.hideUnchanged ?? true)
-const localHideMinorGeom = ref(props.hideMinorGeom ?? true)
 const highlightBorderColor = loChaColors.delete
+
+function shouldDimGroup(group: LoChaGroup, index: number): boolean {
+  if (props.grayOutThreshold === undefined)
+    return false
+  const links = loCha.value?.metadata.links[index] ?? []
+  return group.every(feature =>
+    isUnchangedFeature(feature, links) || isMinorGeomOnly(feature, links, props.grayOutThreshold!),
+  )
+}
 const currentHash = ref<string>()
 const listRef = useTemplateRef<HTMLElement>('listRef')
 const scrollRef = useTemplateRef<HTMLElement>('scrollRef')
@@ -104,19 +111,11 @@ onUnmounted(() => {
 <template>
   <div ref="listRef" class="locha-group-list">
     <div class="locha-filters">
-      <label>
-        <input v-model="localHideUnchanged" type="checkbox">
-        Gray out unchanged
-      </label>
-      <label>
-        <input v-model="localHideMinorGeom" type="checkbox">
-        Gray out minor geometry changes
-      </label>
       <slot name="filters" />
     </div>
     <ul ref="scrollRef">
       <li v-for="(group, index) in groups" :key="group[0].properties.links" :class="{ selected: currentHash === `#${groupId(index)}` }">
-        <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" :hide-unchanged="localHideUnchanged" :hide-minor-geom="localHideMinorGeom" @navigate="navigateToHash">
+        <LoChaGroupComponent :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" :dimmed="shouldDimGroup(group, index)" @navigate="navigateToHash">
           <template v-if="$slots['object-header']" #object-header="slotProps">
             <slot name="object-header" v-bind="slotProps" />
           </template>
@@ -135,7 +134,7 @@ onUnmounted(() => {
           <template v-if="$slots['content-start']" #content-start="slotProps">
             <slot name="content-start" v-bind="slotProps" />
           </template>
-        </LoChaGroup>
+        </LoChaGroupComponent>
       </li>
     </ul>
     <iframe :name="josmTargetName()" style="display: none" />
@@ -183,13 +182,5 @@ ul {
   gap: 1rem;
   flex-wrap: wrap;
   font-size: 0.85rem;
-}
-
-.locha-filters label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  cursor: pointer;
-  user-select: none;
 }
 </style>
