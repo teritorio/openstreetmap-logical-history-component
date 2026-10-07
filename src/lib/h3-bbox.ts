@@ -1,6 +1,6 @@
 // Port of KarmaMap web/changes/h3-bbox.js — canonical source:
 // https://github.com/teritorio/KarmaMap/blob/main/web/changes/h3-bbox.js
-import { cellToBoundary, gridDisk, polygonToCells } from 'h3-js'
+import { cellToBoundary, gridDisk, latLngToCell, polygonToCells } from 'h3-js'
 
 type BBox = [number, number, number, number]
 type Point = [number, number]
@@ -16,7 +16,10 @@ export function bboxToCells(bbox: BBox, resolution: number): string[] {
     [minLng, minLat],
   ]
 
-  const seeds = polygonToCells([ring], resolution, true)
+  let seeds = polygonToCells([ring], resolution, true)
+  if (seeds.length === 0)
+    seeds = [latLngToCell((minLat + maxLat) / 2, (minLng + maxLng) / 2, resolution)]
+
   const candidates = new Set<string>()
   for (const seed of seeds) {
     candidates.add(seed)
