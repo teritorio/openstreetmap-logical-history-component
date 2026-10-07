@@ -49,7 +49,7 @@ const H3_FILL_PAINT: maplibre.FillLayerSpecification['paint'] = {
     1000,
     '#800026',
   ],
-  'fill-opacity': 0.6,
+  'fill-opacity': 0.35,
 }
 
 type Corner = 'nw' | 'ne' | 'sw' | 'se'
