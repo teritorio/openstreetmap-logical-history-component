@@ -331,16 +331,15 @@ onMounted(() => {
       }
     })
 
-    map.value!.on('moveend', emitViewport)
-
     if (props.bbox) {
-      map.value!.once('moveend', emitViewport)
       fitMapToBbox(props.bbox)
       syncBboxLayers(props.bbox)
     }
     else {
       emitViewport()
     }
+
+    map.value!.on('moveend', emitViewport)
   })
 })
 
