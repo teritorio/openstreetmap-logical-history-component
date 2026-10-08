@@ -8,7 +8,6 @@ const props = withDefaults(
   defineProps<{
     bbox?: string
     needZoom?: boolean
-    isDrawing?: boolean
     includeRelationTypeRoute?: boolean
     dateStart?: string
     dateEnd?: string
@@ -16,7 +15,6 @@ const props = withDefaults(
   {
     bbox: '',
     needZoom: false,
-    isDrawing: false,
     includeRelationTypeRoute: false,
     dateStart: '',
     dateEnd: '',
@@ -27,7 +25,6 @@ const emit = defineEmits<{
   (e: 'submit'): void
   (e: 'preset', data: FormData): void
   (e: 'updateBbox', bbox: string): void
-  (e: 'toggleDraw'): void
   (e: 'update:includeRelationTypeRoute', value: boolean): void
   (e: 'update:dateStart', value: string): void
   (e: 'update:dateEnd', value: string): void
@@ -95,14 +92,6 @@ function handleSubmit(): void {
           pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
           required
         >
-        <button
-          class="btn-draw"
-          :class="{ 'btn-draw--active': isDrawing }"
-          type="button"
-          @click="emit('toggleDraw')"
-        >
-          {{ isDrawing ? '✕ Cancel draw' : '✏ Draw on map' }}
-        </button>
         <p v-if="needZoom" class="zoom-warning" role="alert">
           Zoom in more to query (min. zoom {{ MIN_ZOOM }})
         </p>
@@ -190,28 +179,6 @@ input[type='date'] {
   font-size: var(--text-sm);
   background: var(--color-bg);
   font-family: inherit;
-}
-
-.btn-draw {
-  padding: var(--space-1) var(--space-2);
-  background: var(--color-bg);
-  border: 1px solid var(--color-border-light);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  cursor: pointer;
-  font-family: inherit;
-  text-align: left;
-}
-
-.btn-draw--active {
-  background: var(--color-primary);
-  color: var(--color-primary-fg);
-  border-color: var(--color-primary);
-}
-
-.btn-draw:not(.btn-draw--active):hover {
-  background: var(--color-bg-hover);
-  border-color: var(--color-primary);
 }
 
 .zoom-warning {
