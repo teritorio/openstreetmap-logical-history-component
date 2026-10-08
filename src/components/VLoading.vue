@@ -41,7 +41,7 @@
 }
 
 span {
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   letter-spacing: 0.05em;
 }
 </style>

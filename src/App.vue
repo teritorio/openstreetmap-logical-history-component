@@ -319,7 +319,7 @@ const grayOutThreshold = ref(2)
 .results-grayout input[type='number'] {
   width: 4rem;
   font-size: var(--text-sm);
-  padding: 2px var(--space-1);
+  padding: var(--space-1);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
 }

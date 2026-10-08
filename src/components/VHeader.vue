@@ -46,7 +46,7 @@ img {
 
 .info-button {
   margin-left: auto;
-  font-size: var(--text-lg);
+  font-size: var(--text-xl);
   background: none;
   border: none;
   color: var(--color-primary-fg);

@@ -11,7 +11,7 @@ defineEmits<{
   (e: 'retry'): void
 }>()
 
-const colorVars: Record<string, string> = {
+const colorVars: Record<ErrorType, string> = {
   error: 'var(--color-error)',
   warning: 'var(--color-warning)',
   info: 'var(--color-info)',
@@ -37,7 +37,7 @@ const colorVars: Record<string, string> = {
   top: var(--space-4);
   left: 50%;
   transform: translateX(-50%);
-  color: var(--color-primary-fg);
+  color: var(--color-fg-on-color);
   padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
@@ -65,9 +65,9 @@ button {
 .btn-retry {
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--radius-sm);
-  color: var(--color-primary-fg);
+  color: var(--color-fg-on-color);
   font-size: var(--text-sm);
-  padding: 2px var(--space-2);
+  padding: var(--space-1) var(--space-2);
   font-family: inherit;
 }
 

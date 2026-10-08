@@ -27,6 +27,7 @@
   --color-success-bg: #e8f5e9;
   --color-info: #1565c0;
   --color-info-bg: #e3f2fd;
+  --color-fg-on-color: #ffffff;
 
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
