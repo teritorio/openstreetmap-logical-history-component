@@ -354,7 +354,7 @@ onUnmounted(() => {
   map.value?.remove()
 })
 
-defineExpose({ getZoom, getViewportBbox })
+defineExpose({ getZoom, getViewportBbox, toggleDrawMode })
 </script>
 
 <template>
@@ -366,7 +366,7 @@ defineExpose({ getZoom, getViewportBbox })
       type="button"
       @click="toggleDrawMode"
     >
-      {{ isDrawing ? 'Cancel draw' : 'Draw bbox' }}
+      {{ isDrawing ? '✕ Cancel draw' : '✏ Draw on map' }}
     </button>
   </div>
 </template>
@@ -379,34 +379,34 @@ defineExpose({ getZoom, getViewportBbox })
 }
 
 .map-bbox {
-  border: 1px solid grey;
+  border: 1px solid var(--color-border);
   height: 100%;
   width: 100%;
 }
 
 .draw-bbox-btn {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: var(--space-2);
+  left: var(--space-2);
   z-index: 10;
-  padding: 6px 12px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .draw-bbox-btn--active {
-  background: #082e4e;
-  color: #fff;
-  border-color: #082e4e;
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
+  border-color: var(--color-primary);
 }
 
 .draw-bbox-btn:not(.draw-bbox-btn--active):hover {
-  background: #f0f4f8;
-  border-color: #082e4e;
+  background: var(--color-bg-hover);
+  border-color: var(--color-primary);
 }
 </style>

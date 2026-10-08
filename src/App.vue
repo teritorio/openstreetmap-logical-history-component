@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
-import { computed, reactive, ref, shallowRef, toRef, watch, watchEffect } from 'vue'
+import { Splitter } from '@ark-ui/vue'
+import { computed, onMounted, onUnmounted, reactive, ref, shallowRef, toRef, useTemplateRef, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DateRangeSlider from '@/components/DateRangeSlider.vue'
 import FilterBar from '@/components/FilterBar.vue'
 import LoCha from '@/components/LoCha/LoCha.vue'
 import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import LoChaReason from '@/components/LoCha/LoChaReason.vue'
+import MapBbox from '@/components/MapBbox.vue'
 import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
 import { useKarmaData } from '@/composables/useKarmaData'
+import { MIN_ZOOM } from '@/constants/map'
 import { formatDateOnly, fromDateOnly, nMonthsBeforeDate, oneYearAgoDate, toDateOnly, todayDate } from '@/utils/date-format'
 
 const $api = useApiConfig()
@@ -43,6 +46,15 @@ const { histogramData, heatmapData, dateRange } = useKarmaData({
   dateStart: karmaDateStart,
   dateEnd: karmaDateEnd,
 })
+
+const mapBboxRef = useTemplateRef<InstanceType<typeof MapBbox>>('mapBboxRef')
+const currentZoom = ref(0)
+const needZoom = computed(() => currentZoom.value < MIN_ZOOM)
+
+const splitterPanels = [
+  { id: 'sidebar', minSize: 15 },
+  { id: 'map', minSize: 30 },
+]
 
 watchEffect(() => {
   if (skipRouteSync) {
@@ -90,6 +102,16 @@ async function fetchData(query: Record<string, string | undefined>) {
 function handleRetry() {
   if (Object.keys(lastQuery.value).length > 0)
     fetchData(lastQuery.value)
+}
+
+function handleViewportChange(bbox: string): void {
+  viewportBbox.value = bbox
+  if (mapBboxRef.value)
+    currentZoom.value = mapBboxRef.value.getZoom()
+}
+
+function handleMapBboxChange(bbox: string): void {
+  formValues.bbox = bbox
 }
 
 function getLinks(feature: IFeature, index: number): ApiLink[] {
@@ -158,6 +180,15 @@ function goBack() {
 }
 
 const grayOutThreshold = ref(2)
+
+const isMobile = ref(window.innerWidth < 768)
+
+function handleResize(): void {
+  isMobile.value = window.innerWidth < 768
+}
+
+onMounted(() => window.addEventListener('resize', handleResize))
+onUnmounted(() => window.removeEventListener('resize', handleResize))
 </script>
 
 <template>
@@ -173,45 +204,95 @@ const grayOutThreshold = ref(2)
     />
 
     <div v-if="view === 'search'" class="screen">
-      <div class="date-bar">
+      <section class="histogram">
         <DateRangeSlider
           v-model:start="formValues.dateStart"
           v-model:end="formValues.dateEnd"
           :histogram-data="histogramData"
           :date-range="dateRange"
         />
+      </section>
+      <!-- Mobile: stacked layout -->
+      <div v-if="isMobile" class="mobile-search">
+        <aside class="mobile-sidebar">
+          <FilterBar
+            :bbox="formValues.bbox"
+            :need-zoom="needZoom"
+            :include-relation-type-route="formValues.includeRelationTypeRoute"
+            :date-start="formValues.dateStart"
+            :date-end="formValues.dateEnd"
+            @update-bbox="(v: string) => formValues.bbox = v"
+            @submit="handleFilterSubmit"
+            @preset="handlePreset"
+            @update:include-relation-type-route="(v: boolean) => formValues.includeRelationTypeRoute = v"
+            @update:date-start="(v: string) => formValues.dateStart = v"
+            @update:date-end="(v: string) => formValues.dateEnd = v"
+          />
+        </aside>
+        <div class="mobile-map">
+          <MapBbox
+            ref="mapBboxRef"
+            :bbox="formValues.bbox"
+            :heatmap-data="heatmapData"
+            @update-bbox="handleMapBboxChange"
+            @viewport-change="handleViewportChange"
+          />
+        </div>
       </div>
-      <FilterBar
-        v-model:date-start="formValues.dateStart"
-        v-model:date-end="formValues.dateEnd"
-        v-model:include-relation-type-route="formValues.includeRelationTypeRoute"
-        :bbox="formValues.bbox"
-        :heatmap-data="heatmapData"
-        @update-bbox="(v: string) => formValues.bbox = v"
-        @viewport-change="(v: string) => viewportBbox = v"
-        @submit="handleFilterSubmit"
-        @preset="handlePreset"
-      />
+
+      <!-- Desktop: Splitter layout -->
+      <Splitter.Root v-else class="main-split" :panels="splitterPanels" :default-size="[25, 75]">
+        <Splitter.Panel id="sidebar">
+          <aside class="sidebar">
+            <FilterBar
+              :bbox="formValues.bbox"
+              :need-zoom="needZoom"
+              :include-relation-type-route="formValues.includeRelationTypeRoute"
+              :date-start="formValues.dateStart"
+              :date-end="formValues.dateEnd"
+              @update-bbox="(v: string) => formValues.bbox = v"
+              @submit="handleFilterSubmit"
+              @preset="handlePreset"
+              @update:include-relation-type-route="(v: boolean) => formValues.includeRelationTypeRoute = v"
+              @update:date-start="(v: string) => formValues.dateStart = v"
+              @update:date-end="(v: string) => formValues.dateEnd = v"
+            />
+          </aside>
+        </Splitter.Panel>
+        <Splitter.ResizeTrigger id="sidebar:map" aria-label="Resize sidebar" />
+        <Splitter.Panel id="map">
+          <MapBbox
+            ref="mapBboxRef"
+            :bbox="formValues.bbox"
+            :heatmap-data="heatmapData"
+            @update-bbox="handleMapBboxChange"
+            @viewport-change="handleViewportChange"
+          />
+        </Splitter.Panel>
+      </Splitter.Root>
     </div>
 
-    <div v-else class="screen">
+    <div v-else class="screen results-screen">
       <div class="results-toolbar">
-        <button class="btn-back" type="button" @click="goBack">
-          ← Back
-        </button>
-        <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
-      </div>
-      <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
-        <template #filters>
+        <div class="toolbar-left">
+          <button class="btn-back" type="button" @click="goBack">
+            ← Back
+          </button>
+          <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
+        </div>
+        <div class="toolbar-sep" aria-hidden="true" />
+        <div class="toolbar-right">
           <label class="results-route">
             <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
-            Include route relations
+            Routes
           </label>
           <label class="results-grayout">
-            Gray out threshold (m)
+            Threshold (m)
             <input v-model.number="grayOutThreshold" type="number" min="0" max="100" step="1">
           </label>
-        </template>
+        </div>
+      </div>
+      <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
         <template #object-detail="{ feature, index }">
           <template v-for="(link, i) in getLinks(feature, index)" :key="i">
             <template v-if="feature.properties.is_after">
@@ -260,13 +341,29 @@ const grayOutThreshold = ref(2)
   min-height: 0;
 }
 
-.date-bar {
+.histogram {
   background: var(--color-bg-surface);
   border-bottom: 1px solid var(--color-border);
   padding: var(--space-2) var(--space-4) var(--space-3);
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+}
+
+.main-split {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.sidebar {
+  height: 100%;
+  overflow: hidden;
+}
+
+.results-screen {
+  display: flex;
+  flex-direction: column;
 }
 
 .results-toolbar {
@@ -276,6 +373,27 @@ const grayOutThreshold = ref(2)
   padding: var(--space-2) var(--space-4);
   background: var(--color-bg-surface);
   border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 1.25rem;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
 }
 
 .btn-back {
@@ -327,5 +445,30 @@ const grayOutThreshold = ref(2)
 .before-link {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
+}
+
+.mobile-search {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.mobile-sidebar {
+  max-height: 45vh;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.mobile-map {
+  flex: 1;
+  min-height: 200px;
+}
+
+@media (max-width: 767px) {
+  .toolbar-sep {
+    display: none;
+  }
 }
 </style>

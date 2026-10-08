@@ -87,3 +87,17 @@ h3 {
 a[type='button'] {
   text-decoration: none;
 }
+
+/* Splitter resize handle */
+[data-scope='splitter'][data-part='resize-trigger'] {
+  width: 4px;
+  background: var(--color-border);
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+[data-scope='splitter'][data-part='resize-trigger']:hover,
+[data-scope='splitter'][data-part='resize-trigger'][data-focus] {
+  background: var(--color-primary);
+}
