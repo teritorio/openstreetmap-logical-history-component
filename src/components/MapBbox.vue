@@ -19,6 +19,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   (e: 'updateBbox', bbox: string): void
   (e: 'viewportChange', bbox: string): void
+  (e: 'drawChange', drawing: boolean): void
 }>()
 
 const mapContainer = useTemplateRef<HTMLDivElement>('mapContainer')
@@ -223,6 +224,8 @@ const { isDrawing, toggle: toggleDrawMode } = useDrawMode(map, {
   onDrawCancel: () => syncBboxLayers(props.bbox),
 })
 
+watch(isDrawing, val => emit('drawChange', val))
+
 watch(
   () => props.bbox,
   (newBbox, oldBbox) => {
@@ -354,59 +357,24 @@ onUnmounted(() => {
   map.value?.remove()
 })
 
-defineExpose({ getZoom, getViewportBbox })
+defineExpose({ getZoom, getViewportBbox, toggleDrawMode })
 </script>
 
 <template>
   <div class="map-bbox-wrapper">
     <div ref="mapContainer" class="map-bbox" />
-    <button
-      class="draw-bbox-btn"
-      :class="{ 'draw-bbox-btn--active': isDrawing }"
-      type="button"
-      @click="toggleDrawMode"
-    >
-      {{ isDrawing ? 'Cancel draw' : 'Draw bbox' }}
-    </button>
   </div>
 </template>
 
 <style scoped>
 .map-bbox-wrapper {
-  position: relative;
   height: 100%;
   width: 100%;
 }
 
 .map-bbox {
-  border: 1px solid grey;
+  border: 1px solid var(--color-border);
   height: 100%;
   width: 100%;
-}
-
-.draw-bbox-btn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-  padding: 6px 12px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  font-family: inherit;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-}
-
-.draw-bbox-btn--active {
-  background: #082e4e;
-  color: #fff;
-  border-color: #082e4e;
-}
-
-.draw-bbox-btn:not(.draw-bbox-btn--active):hover {
-  background: #f0f4f8;
-  border-color: #082e4e;
 }
 </style>
