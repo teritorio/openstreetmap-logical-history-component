@@ -87,3 +87,47 @@ h3 {
 a[type='button'] {
   text-decoration: none;
 }
+
+/* Splitter resize handle */
+[data-scope='splitter'][data-part='resize-trigger'] {
+  width: 4px;
+  background: var(--color-border);
+  cursor: col-resize;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+[data-scope='splitter'][data-part='resize-trigger']:hover,
+[data-scope='splitter'][data-part='resize-trigger'][data-focus] {
+  background: var(--color-primary);
+}
+
+/* Drawer (mobile sidebar) */
+[data-scope='drawer'][data-part='backdrop'] {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 40;
+}
+
+[data-scope='drawer'][data-part='positioner'] {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+[data-scope='drawer'][data-part='content'] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 320px;
+  max-width: 88vw;
+  height: 100%;
+  background: var(--color-bg-surface);
+  box-shadow: var(--shadow-md);
+  pointer-events: all;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
