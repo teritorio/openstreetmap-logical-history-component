@@ -261,71 +261,71 @@ const grayOutThreshold = ref(2)
 }
 
 .date-bar {
-  background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
-  border-bottom: 1px solid #d0d0d2;
-  padding: 0.5rem 1rem 0.75rem;
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-2) var(--space-4) var(--space-3);
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-1);
 }
 
 .results-toolbar {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(to bottom, #e8e8ea, #f0f0f2);
-  border-bottom: 1px solid #d0d0d2;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .btn-back {
-  padding: 6px 14px;
-  background: #082e4e;
-  color: #fff;
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
   border: none;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
   font-family: inherit;
   cursor: pointer;
 }
 
 .btn-back:hover {
-  background: #0d4a7a;
+  background: var(--color-primary-hover);
 }
 
 .results-label {
-  font-size: 0.85rem;
-  color: #555;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .results-route {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  color: #555;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
   cursor: default;
 }
 
 .results-grayout {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  color: #555;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
 }
 
 .results-grayout input[type='number'] {
   width: 4rem;
-  font-size: 0.85rem;
-  padding: 2px 4px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+  font-size: var(--text-sm);
+  padding: 2px var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
 }
 
 .before-link {
-  font-size: 0.75em;
-  color: #888;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
 }
 </style>

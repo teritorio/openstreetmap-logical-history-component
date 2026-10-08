@@ -29,13 +29,13 @@ onMounted(() => {
 
 <style lang="css" scoped>
 header {
-  background-color: #082e4e;
-  color: #fff;
+  background-color: var(--color-primary);
+  color: var(--color-primary-fg);
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0.5em;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: var(--space-2);
+  padding: var(--space-2);
+  box-shadow: var(--shadow-sm);
   width: 100%;
 }
 
@@ -46,11 +46,11 @@ img {
 
 .info-button {
   margin-left: auto;
-  font-size: 1.25em;
+  font-size: var(--text-lg);
   background: none;
   border: none;
-  color: #fff;
-  padding: 0.5em;
+  color: var(--color-primary-fg);
+  padding: var(--space-2);
   cursor: pointer;
   line-height: 1;
 }

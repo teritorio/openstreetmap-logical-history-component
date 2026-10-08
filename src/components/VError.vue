@@ -11,16 +11,16 @@ defineEmits<{
   (e: 'retry'): void
 }>()
 
-const colors = {
-  error: '#ff4d4f',
-  warning: '#faad14',
-  info: '#1890ff',
-  success: '#52c41a',
+const colorVars: Record<string, string> = {
+  error: 'var(--color-error)',
+  warning: 'var(--color-warning)',
+  info: 'var(--color-info)',
+  success: 'var(--color-success)',
 }
 </script>
 
 <template>
-  <div class="alert" :style="{ backgroundColor: colors[type] }">
+  <div class="alert" :style="{ backgroundColor: colorVars[type] }">
     {{ message }}
     <button class="btn-retry" @click="$emit('retry')">
       ↻ Retry
@@ -34,18 +34,18 @@ const colors = {
 <style lang="css" scoped>
 .alert {
   position: absolute;
-  top: 20px;
+  top: var(--space-4);
   left: 50%;
   transform: translateX(-50%);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 8px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  font-size: 16px;
+  color: var(--color-primary-fg);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  font-size: var(--text-base);
   font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
   z-index: 20;
   opacity: 0;
   animation: slideIn 0.5s ease-out forwards;
@@ -58,22 +58,22 @@ button {
   line-height: 1;
   display: flex;
   align-items: center;
-  font-size: 1rem;
+  font-size: var(--text-base);
   cursor: pointer;
 }
 
 .btn-retry {
   border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 4px;
-  color: #fff;
-  font-size: 0.85rem;
-  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--color-primary-fg);
+  font-size: var(--text-sm);
+  padding: 2px var(--space-2);
   font-family: inherit;
 }
 
 .alert::before {
   content: '⚠️';
-  font-size: 18px;
+  font-size: var(--text-lg);
 }
 
 @keyframes slideIn {

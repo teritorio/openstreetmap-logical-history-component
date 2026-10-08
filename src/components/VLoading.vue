@@ -13,12 +13,12 @@
   width: 100%;
   height: 100%;
   z-index: 15;
-  color: #ffffff;
+  color: var(--color-primary-fg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
   background-color: rgba(0, 0, 0, 0.6);
 }
 
@@ -26,7 +26,7 @@
   width: 50px;
   height: 50px;
   border: 6px solid rgba(255, 255, 255, 0.2);
-  border-top: 6px solid #fff;
+  border-top: 6px solid var(--color-primary-fg);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -41,7 +41,7 @@
 }
 
 span {
-  font-size: 1.2rem;
+  font-size: var(--text-lg);
   letter-spacing: 0.05em;
 }
 </style>

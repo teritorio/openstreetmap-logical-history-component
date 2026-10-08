@@ -87,9 +87,12 @@ dialog {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  padding: 1rem;
+  padding: var(--space-4);
   max-height: 80%;
   overflow-y: scroll;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
 }
 
 button {
@@ -97,12 +100,12 @@ button {
 }
 
 ol {
-  padding-left: 1rem;
+  padding-left: var(--space-4);
 }
 
 h2,
 section,
 header {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 </style>
