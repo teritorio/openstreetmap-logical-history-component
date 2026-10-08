@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
-import { Drawer, Splitter } from '@ark-ui/vue'
-import { computed, onMounted, onUnmounted, reactive, ref, shallowRef, toRef, useTemplateRef, watch, watchEffect } from 'vue'
+import { Splitter } from '@ark-ui/vue'
+import { computed, reactive, ref, shallowRef, toRef, useTemplateRef, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DateRangeSlider from '@/components/DateRangeSlider.vue'
 import FilterBar from '@/components/FilterBar.vue'
@@ -47,18 +47,10 @@ const { histogramData, heatmapData, dateRange } = useKarmaData({
   dateEnd: karmaDateEnd,
 })
 
-// Map state
 const mapBboxRef = useTemplateRef<InstanceType<typeof MapBbox>>('mapBboxRef')
 const currentZoom = ref(0)
 const needZoom = computed(() => currentZoom.value < MIN_ZOOM)
 
-// Responsive layout
-const isMobile = ref(false)
-function checkMobile() {
-  isMobile.value = window.innerWidth < 768
-}
-
-// Splitter panel config
 const splitterPanels = [
   { id: 'sidebar', minSize: 15 },
   { id: 'map', minSize: 30 },
@@ -99,15 +91,6 @@ watch(
   },
   { immediate: true },
 )
-
-onMounted(() => {
-  checkMobile()
-  window.addEventListener('resize', checkMobile)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', checkMobile)
-})
 
 async function fetchData(query: Record<string, string | undefined>) {
   lastQuery.value = query
@@ -201,27 +184,29 @@ const grayOutThreshold = ref(2)
 
 <template>
   <div class="app">
-    <!-- Mobile layout: Drawer-based sidebar -->
-    <template v-if="isMobile">
-      <Drawer.Root swipe-direction="start">
-        <VHeader>
-          <template #leading>
-            <Drawer.Trigger class="menu-btn" aria-label="Open filters">
-              ☰
-            </Drawer.Trigger>
-          </template>
-        </VHeader>
-        <Drawer.Backdrop />
-        <Drawer.Positioner>
-          <Drawer.Content>
-            <div class="drawer-header">
-              <span class="drawer-title">Filters</span>
-              <Drawer.CloseTrigger class="drawer-close" aria-label="Close filters">
-                ✕
-              </Drawer.CloseTrigger>
-            </div>
+    <VHeader />
+    <VLoading v-if="loading" />
+    <VError
+      v-if="error.message"
+      :message="error.message"
+      :type="error.type"
+      @close="resetError"
+      @retry="handleRetry"
+    />
+
+    <div v-if="view === 'search'" class="screen">
+      <section class="histogram">
+        <DateRangeSlider
+          v-model:start="formValues.dateStart"
+          v-model:end="formValues.dateEnd"
+          :histogram-data="histogramData"
+          :date-range="dateRange"
+        />
+      </section>
+      <Splitter.Root class="main-split" :panels="splitterPanels" :default-size="[25, 75]">
+        <Splitter.Panel id="sidebar">
+          <aside class="sidebar">
             <FilterBar
-              v-if="view === 'search'"
               :bbox="formValues.bbox"
               :need-zoom="needZoom"
               :include-relation-type-route="formValues.includeRelationTypeRoute"
@@ -234,29 +219,10 @@ const grayOutThreshold = ref(2)
               @update:date-start="(v: string) => formValues.dateStart = v"
               @update:date-end="(v: string) => formValues.dateEnd = v"
             />
-          </Drawer.Content>
-        </Drawer.Positioner>
-      </Drawer.Root>
-
-      <VLoading v-if="loading" />
-      <VError
-        v-if="error.message"
-        :message="error.message"
-        :type="error.type"
-        @close="resetError"
-        @retry="handleRetry"
-      />
-
-      <div v-if="view === 'search'" class="screen">
-        <section class="histogram">
-          <DateRangeSlider
-            v-model:start="formValues.dateStart"
-            v-model:end="formValues.dateEnd"
-            :histogram-data="histogramData"
-            :date-range="dateRange"
-          />
-        </section>
-        <main class="map-mobile">
+          </aside>
+        </Splitter.Panel>
+        <Splitter.ResizeTrigger id="sidebar:map" aria-label="Resize sidebar" />
+        <Splitter.Panel id="map">
           <MapBbox
             ref="mapBboxRef"
             :bbox="formValues.bbox"
@@ -264,169 +230,62 @@ const grayOutThreshold = ref(2)
             @update-bbox="handleMapBboxChange"
             @viewport-change="handleViewportChange"
           />
-        </main>
-      </div>
+        </Splitter.Panel>
+      </Splitter.Root>
+    </div>
 
-      <div v-else class="screen results-screen">
-        <div class="results-toolbar">
-          <div class="toolbar-left">
-            <button class="btn-back" type="button" @click="goBack">
-              ← Back
-            </button>
-            <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
-          </div>
-          <div class="toolbar-sep" aria-hidden="true" />
-          <div class="toolbar-right">
-            <label class="results-route">
-              <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
-              Routes
-            </label>
-            <label class="results-grayout">
-              Threshold (m)
-              <input v-model.number="grayOutThreshold" type="number" min="0" max="100" step="1">
-            </label>
-          </div>
+    <div v-else class="screen results-screen">
+      <div class="results-toolbar">
+        <div class="toolbar-left">
+          <button class="btn-back" type="button" @click="goBack">
+            ← Back
+          </button>
+          <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
         </div>
-        <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
-          <template #object-detail="{ feature, index }">
-            <template v-for="(link, i) in getLinks(feature, index)" :key="i">
-              <template v-if="feature.properties.is_after">
-                <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
-                  <span v-if="before && geojson!.metadata.links[index].length > 1" class="before-link">
-                    🔗 {{ `${before.properties.objtype}${before.properties.id}-v${before.properties.version}` }}
-                  </span>
-                  <LoChaDiff
-                    v-if="!feature.properties.deleted"
-                    :diff="link.diff_tags"
-                    :dst="feature.properties"
-                    :src="before?.properties"
-                  />
-                  <LoChaReason :reason="link.conflation_reason" />
-                </template>
-              </template>
-              <template v-else-if="feature.properties.is_new">
+        <div class="toolbar-sep" aria-hidden="true" />
+        <div class="toolbar-right">
+          <label class="results-route">
+            <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
+            Routes
+          </label>
+          <label class="results-grayout">
+            Threshold (m)
+            <input v-model.number="grayOutThreshold" type="number" min="0" max="100" step="1">
+          </label>
+        </div>
+      </div>
+      <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
+        <template #object-detail="{ feature, index }">
+          <template v-for="(link, i) in getLinks(feature, index)" :key="i">
+            <template v-if="feature.properties.is_after">
+              <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
+                <span v-if="before && geojson!.metadata.links[index].length > 1" class="before-link">
+                  🔗 {{ `${before.properties.objtype}${before.properties.id}-v${before.properties.version}` }}
+                </span>
                 <LoChaDiff
+                  v-if="!feature.properties.deleted"
                   :diff="link.diff_tags"
                   :dst="feature.properties"
+                  :src="before?.properties"
                 />
-              </template>
-              <template v-else>
-                <LoChaDiff
-                  :src="feature.properties"
-                />
+                <LoChaReason :reason="link.conflation_reason" />
               </template>
             </template>
-          </template>
-        </LoCha>
-      </div>
-    </template>
-
-    <!-- Desktop layout: Splitter-based sidebar -->
-    <template v-else>
-      <VHeader />
-
-      <VLoading v-if="loading" />
-      <VError
-        v-if="error.message"
-        :message="error.message"
-        :type="error.type"
-        @close="resetError"
-        @retry="handleRetry"
-      />
-
-      <div v-if="view === 'search'" class="screen">
-        <section class="histogram">
-          <DateRangeSlider
-            v-model:start="formValues.dateStart"
-            v-model:end="formValues.dateEnd"
-            :histogram-data="histogramData"
-            :date-range="dateRange"
-          />
-        </section>
-        <Splitter.Root class="main-split" :panels="splitterPanels" :default-size="[25, 75]">
-          <Splitter.Panel id="sidebar">
-            <aside class="sidebar">
-              <FilterBar
-                :bbox="formValues.bbox"
-                :need-zoom="needZoom"
-                :include-relation-type-route="formValues.includeRelationTypeRoute"
-                :date-start="formValues.dateStart"
-                :date-end="formValues.dateEnd"
-                @update-bbox="(v: string) => formValues.bbox = v"
-                @submit="handleFilterSubmit"
-                @preset="handlePreset"
-                @update:include-relation-type-route="(v: boolean) => formValues.includeRelationTypeRoute = v"
-                @update:date-start="(v: string) => formValues.dateStart = v"
-                @update:date-end="(v: string) => formValues.dateEnd = v"
+            <template v-else-if="feature.properties.is_new">
+              <LoChaDiff
+                :diff="link.diff_tags"
+                :dst="feature.properties"
               />
-            </aside>
-          </Splitter.Panel>
-          <Splitter.ResizeTrigger id="sidebar:map" aria-label="Resize sidebar" />
-          <Splitter.Panel id="map">
-            <MapBbox
-              ref="mapBboxRef"
-              :bbox="formValues.bbox"
-              :heatmap-data="heatmapData"
-              @update-bbox="handleMapBboxChange"
-              @viewport-change="handleViewportChange"
-            />
-          </Splitter.Panel>
-        </Splitter.Root>
-      </div>
-
-      <div v-else class="screen results-screen">
-        <div class="results-toolbar">
-          <div class="toolbar-left">
-            <button class="btn-back" type="button" @click="goBack">
-              ← Back
-            </button>
-            <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
-          </div>
-          <div class="toolbar-sep" aria-hidden="true" />
-          <div class="toolbar-right">
-            <label class="results-route">
-              <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
-              Routes
-            </label>
-            <label class="results-grayout">
-              Threshold (m)
-              <input v-model.number="grayOutThreshold" type="number" min="0" max="100" step="1">
-            </label>
-          </div>
-        </div>
-        <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
-          <template #object-detail="{ feature, index }">
-            <template v-for="(link, i) in getLinks(feature, index)" :key="i">
-              <template v-if="feature.properties.is_after">
-                <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
-                  <span v-if="before && geojson!.metadata.links[index].length > 1" class="before-link">
-                    🔗 {{ `${before.properties.objtype}${before.properties.id}-v${before.properties.version}` }}
-                  </span>
-                  <LoChaDiff
-                    v-if="!feature.properties.deleted"
-                    :diff="link.diff_tags"
-                    :dst="feature.properties"
-                    :src="before?.properties"
-                  />
-                  <LoChaReason :reason="link.conflation_reason" />
-                </template>
-              </template>
-              <template v-else-if="feature.properties.is_new">
-                <LoChaDiff
-                  :diff="link.diff_tags"
-                  :dst="feature.properties"
-                />
-              </template>
-              <template v-else>
-                <LoChaDiff
-                  :src="feature.properties"
-                />
-              </template>
+            </template>
+            <template v-else>
+              <LoChaDiff
+                :src="feature.properties"
+              />
             </template>
           </template>
-        </LoCha>
-      </div>
-    </template>
+        </template>
+      </LoCha>
+    </div>
   </div>
 </template>
 
@@ -453,7 +312,6 @@ const grayOutThreshold = ref(2)
   gap: var(--space-1);
 }
 
-/* Desktop Splitter */
 .main-split {
   flex: 1;
   min-height: 0;
@@ -465,51 +323,6 @@ const grayOutThreshold = ref(2)
   overflow: hidden;
 }
 
-/* Mobile map */
-.map-mobile {
-  flex: 1;
-  min-height: 300px;
-}
-
-/* Drawer header */
-.drawer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-border-light);
-  background: var(--color-primary);
-  color: var(--color-primary-fg);
-  flex-shrink: 0;
-}
-
-.drawer-title {
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-
-.drawer-close {
-  background: none;
-  border: none;
-  color: var(--color-primary-fg);
-  font-size: var(--text-lg);
-  cursor: pointer;
-  padding: var(--space-1);
-  line-height: 1;
-}
-
-/* Mobile menu trigger */
-.menu-btn {
-  background: none;
-  border: none;
-  color: var(--color-primary-fg);
-  font-size: var(--text-xl);
-  cursor: pointer;
-  padding: var(--space-2);
-  line-height: 1;
-}
-
-/* Results screen */
 .results-screen {
   display: flex;
   flex-direction: column;

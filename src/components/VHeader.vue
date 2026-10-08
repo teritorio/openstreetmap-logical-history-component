@@ -18,7 +18,6 @@ onMounted(() => {
 
 <template>
   <header>
-    <slot name="leading" />
     <img src="/teritorio.png" alt="Logo Teritorio">
     <h1>OpenStreetMap Logical History</h1>
     <button class="info-button" @click="showDialog = true">
