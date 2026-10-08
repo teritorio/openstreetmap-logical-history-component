@@ -225,7 +225,13 @@ const { isDrawing, toggle: toggleDrawMode } = useDrawMode(map, {
 
 watch(
   () => props.bbox,
-  newBbox => map.value && syncBboxLayers(newBbox),
+  (newBbox, oldBbox) => {
+    if (!map.value)
+      return
+    syncBboxLayers(newBbox)
+    if (newBbox && newBbox !== oldBbox)
+      fitMapToBbox(newBbox)
+  },
 )
 
 watch(
