@@ -49,7 +49,6 @@ const { histogramData, heatmapData, dateRange } = useKarmaData({
 
 // Map state
 const mapBboxRef = useTemplateRef<InstanceType<typeof MapBbox>>('mapBboxRef')
-const isDrawing = ref(false)
 const currentZoom = ref(0)
 const needZoom = computed(() => currentZoom.value < MIN_ZOOM)
 
@@ -130,11 +129,6 @@ function handleViewportChange(bbox: string): void {
 
 function handleMapBboxChange(bbox: string): void {
   formValues.bbox = bbox
-}
-
-function handleToggleDraw(): void {
-  if (mapBboxRef.value)
-    mapBboxRef.value.toggleDrawMode()
 }
 
 function getLinks(feature: IFeature, index: number): ApiLink[] {
@@ -230,12 +224,10 @@ const grayOutThreshold = ref(2)
               v-if="view === 'search'"
               :bbox="formValues.bbox"
               :need-zoom="needZoom"
-              :is-drawing="isDrawing"
               :include-relation-type-route="formValues.includeRelationTypeRoute"
               :date-start="formValues.dateStart"
               :date-end="formValues.dateEnd"
               @update-bbox="(v: string) => formValues.bbox = v"
-              @toggle-draw="handleToggleDraw"
               @submit="handleFilterSubmit"
               @preset="handlePreset"
               @update:include-relation-type-route="(v: boolean) => formValues.includeRelationTypeRoute = v"
@@ -271,7 +263,6 @@ const grayOutThreshold = ref(2)
             :heatmap-data="heatmapData"
             @update-bbox="handleMapBboxChange"
             @viewport-change="handleViewportChange"
-            @draw-change="(v: boolean) => isDrawing = v"
           />
         </main>
       </div>
@@ -358,12 +349,10 @@ const grayOutThreshold = ref(2)
               <FilterBar
                 :bbox="formValues.bbox"
                 :need-zoom="needZoom"
-                :is-drawing="isDrawing"
                 :include-relation-type-route="formValues.includeRelationTypeRoute"
                 :date-start="formValues.dateStart"
                 :date-end="formValues.dateEnd"
                 @update-bbox="(v: string) => formValues.bbox = v"
-                @toggle-draw="handleToggleDraw"
                 @submit="handleFilterSubmit"
                 @preset="handlePreset"
                 @update:include-relation-type-route="(v: boolean) => formValues.includeRelationTypeRoute = v"
@@ -380,7 +369,6 @@ const grayOutThreshold = ref(2)
               :heatmap-data="heatmapData"
               @update-bbox="handleMapBboxChange"
               @viewport-change="handleViewportChange"
-              @draw-change="(v: boolean) => isDrawing = v"
             />
           </Splitter.Panel>
         </Splitter.Root>
