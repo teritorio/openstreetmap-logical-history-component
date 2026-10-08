@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
 import { Splitter } from '@ark-ui/vue'
-import { computed, reactive, ref, shallowRef, toRef, useTemplateRef, watch, watchEffect } from 'vue'
+import { computed, onMounted, onUnmounted, reactive, ref, shallowRef, toRef, useTemplateRef, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DateRangeSlider from '@/components/DateRangeSlider.vue'
 import FilterBar from '@/components/FilterBar.vue'
@@ -180,6 +180,15 @@ function goBack() {
 }
 
 const grayOutThreshold = ref(2)
+
+const isMobile = ref(window.innerWidth < 768)
+
+function handleResize(): void {
+  isMobile.value = window.innerWidth < 768
+}
+
+onMounted(() => window.addEventListener('resize', handleResize))
+onUnmounted(() => window.removeEventListener('resize', handleResize))
 </script>
 
 <template>
@@ -203,7 +212,36 @@ const grayOutThreshold = ref(2)
           :date-range="dateRange"
         />
       </section>
-      <Splitter.Root class="main-split" :panels="splitterPanels" :default-size="[25, 75]">
+      <!-- Mobile: stacked layout -->
+      <div v-if="isMobile" class="mobile-search">
+        <aside class="mobile-sidebar">
+          <FilterBar
+            :bbox="formValues.bbox"
+            :need-zoom="needZoom"
+            :include-relation-type-route="formValues.includeRelationTypeRoute"
+            :date-start="formValues.dateStart"
+            :date-end="formValues.dateEnd"
+            @update-bbox="(v: string) => formValues.bbox = v"
+            @submit="handleFilterSubmit"
+            @preset="handlePreset"
+            @update:include-relation-type-route="(v: boolean) => formValues.includeRelationTypeRoute = v"
+            @update:date-start="(v: string) => formValues.dateStart = v"
+            @update:date-end="(v: string) => formValues.dateEnd = v"
+          />
+        </aside>
+        <div class="mobile-map">
+          <MapBbox
+            ref="mapBboxRef"
+            :bbox="formValues.bbox"
+            :heatmap-data="heatmapData"
+            @update-bbox="handleMapBboxChange"
+            @viewport-change="handleViewportChange"
+          />
+        </div>
+      </div>
+
+      <!-- Desktop: Splitter layout -->
+      <Splitter.Root v-else class="main-split" :panels="splitterPanels" :default-size="[25, 75]">
         <Splitter.Panel id="sidebar">
           <aside class="sidebar">
             <FilterBar
@@ -407,5 +445,30 @@ const grayOutThreshold = ref(2)
 .before-link {
   font-size: var(--text-xs);
   color: var(--color-text-muted);
+}
+
+.mobile-search {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.mobile-sidebar {
+  max-height: 45vh;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.mobile-map {
+  flex: 1;
+  min-height: 200px;
+}
+
+@media (max-width: 767px) {
+  .toolbar-sep {
+    display: none;
+  }
 }
 </style>
