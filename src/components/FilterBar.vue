@@ -227,7 +227,7 @@ label {
 
 .zoom-warning {
   color: var(--color-warning);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   margin: 0;
 }
 
@@ -306,7 +306,7 @@ input[type='text'] {
   background: var(--color-bg);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   cursor: pointer;
   font-family: inherit;
 }
