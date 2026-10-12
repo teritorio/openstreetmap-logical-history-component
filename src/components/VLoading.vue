@@ -1,7 +1,7 @@
 <template>
-  <div class="loading-container">
-    <div class="spinner" />
-    <span>Fetch OSM History data from remote API, then compute logical history conflation...</span>
+  <div class="loading-container" role="status" aria-live="polite">
+    <div class="spinner" aria-hidden="true" />
+    <span>Computing history, this may take a moment…</span>
   </div>
 </template>
 
