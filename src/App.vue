@@ -194,98 +194,100 @@ const grayOutThreshold = ref(2)
       @retry="handleRetry"
     />
 
-    <div v-if="view === 'search'" class="screen">
-      <section class="histogram">
-        <DateRangeSlider
-          v-model:start="formValues.dateStart"
-          v-model:end="formValues.dateEnd"
-          :histogram-data="histogramData"
-          :date-range="dateRange"
-        />
-      </section>
-      <Splitter.Root class="main-split" :panels="splitterPanels" :default-size="[25, 75]">
-        <Splitter.Panel id="sidebar">
-          <aside class="sidebar">
-            <FilterBar
-              :bbox="formValues.bbox"
-              :need-zoom="needZoom"
-              :include-relation-type-route="formValues.includeRelationTypeRoute"
-              :date-start="formValues.dateStart"
-              :date-end="formValues.dateEnd"
-              @update-bbox="(v: string) => formValues.bbox = v"
-              @submit="handleFilterSubmit"
-              @preset="handlePreset"
-              @update:include-relation-type-route="(v: boolean) => formValues.includeRelationTypeRoute = v"
-              @update:date-start="(v: string) => formValues.dateStart = v"
-              @update:date-end="(v: string) => formValues.dateEnd = v"
-            />
-          </aside>
-        </Splitter.Panel>
-        <Splitter.ResizeTrigger id="sidebar:map" aria-label="Resize sidebar" />
-        <Splitter.Panel id="map">
-          <MapBbox
-            ref="mapBboxRef"
-            :bbox="formValues.bbox"
-            :heatmap-data="heatmapData"
-            @update-bbox="handleMapBboxChange"
-            @viewport-change="handleViewportChange"
+    <main>
+      <div v-if="view === 'search'" class="screen">
+        <section class="histogram">
+          <DateRangeSlider
+            v-model:start="formValues.dateStart"
+            v-model:end="formValues.dateEnd"
+            :histogram-data="histogramData"
+            :date-range="dateRange"
           />
-        </Splitter.Panel>
-      </Splitter.Root>
-    </div>
-
-    <div v-else class="screen results-screen">
-      <div class="results-toolbar">
-        <div class="toolbar-left">
-          <button class="btn-back" type="button" @click="goBack">
-            ← Back
-          </button>
-          <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
-        </div>
-        <div class="toolbar-sep" aria-hidden="true" />
-        <div class="toolbar-right">
-          <label class="results-route">
-            <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
-            Routes
-          </label>
-          <label class="results-grayout">
-            Threshold (m)
-            <input v-model.number="grayOutThreshold" type="number" min="0" max="100" step="1">
-          </label>
-        </div>
+        </section>
+        <Splitter.Root class="main-split" :panels="splitterPanels" :default-size="[25, 75]">
+          <Splitter.Panel id="sidebar">
+            <aside class="sidebar">
+              <FilterBar
+                :bbox="formValues.bbox"
+                :need-zoom="needZoom"
+                :include-relation-type-route="formValues.includeRelationTypeRoute"
+                :date-start="formValues.dateStart"
+                :date-end="formValues.dateEnd"
+                @update-bbox="(v: string) => formValues.bbox = v"
+                @submit="handleFilterSubmit"
+                @preset="handlePreset"
+                @update:include-relation-type-route="(v: boolean) => formValues.includeRelationTypeRoute = v"
+                @update:date-start="(v: string) => formValues.dateStart = v"
+                @update:date-end="(v: string) => formValues.dateEnd = v"
+              />
+            </aside>
+          </Splitter.Panel>
+          <Splitter.ResizeTrigger id="sidebar:map" aria-label="Resize sidebar" />
+          <Splitter.Panel id="map">
+            <MapBbox
+              ref="mapBboxRef"
+              :bbox="formValues.bbox"
+              :heatmap-data="heatmapData"
+              @update-bbox="handleMapBboxChange"
+              @viewport-change="handleViewportChange"
+            />
+          </Splitter.Panel>
+        </Splitter.Root>
       </div>
-      <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
-        <template #object-detail="{ feature, index }">
-          <template v-for="(link, i) in getLinks(feature, index)" :key="i">
-            <template v-if="feature.properties.is_after">
-              <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
-                <span v-if="before && geojson!.metadata.links[index].length > 1" class="before-link">
-                  🔗 {{ `${before.properties.objtype}${before.properties.id}-v${before.properties.version}` }}
-                </span>
+
+      <div v-else class="screen results-screen">
+        <div class="results-toolbar">
+          <div class="toolbar-left">
+            <button class="btn-back" type="button" @click="goBack">
+              ← Back
+            </button>
+            <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
+          </div>
+          <div class="toolbar-sep" aria-hidden="true" />
+          <div class="toolbar-right">
+            <label class="results-route">
+              <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
+              Routes
+            </label>
+            <label class="results-grayout">
+              Threshold (m)
+              <input v-model.number="grayOutThreshold" type="number" min="0" max="100" step="1">
+            </label>
+          </div>
+        </div>
+        <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
+          <template #object-detail="{ feature, index }">
+            <template v-for="(link, i) in getLinks(feature, index)" :key="i">
+              <template v-if="feature.properties.is_after">
+                <template v-for="(before, _) in [getBeforeFeature(link)]" :key="_">
+                  <span v-if="before && geojson!.metadata.links[index].length > 1" class="before-link">
+                    🔗 {{ `${before.properties.objtype}${before.properties.id}-v${before.properties.version}` }}
+                  </span>
+                  <LoChaDiff
+                    v-if="!feature.properties.deleted"
+                    :diff="link.diff_tags"
+                    :dst="feature.properties"
+                    :src="before?.properties"
+                  />
+                  <LoChaReason :reason="link.conflation_reason" />
+                </template>
+              </template>
+              <template v-else-if="feature.properties.is_new">
                 <LoChaDiff
-                  v-if="!feature.properties.deleted"
                   :diff="link.diff_tags"
                   :dst="feature.properties"
-                  :src="before?.properties"
                 />
-                <LoChaReason :reason="link.conflation_reason" />
+              </template>
+              <template v-else>
+                <LoChaDiff
+                  :src="feature.properties"
+                />
               </template>
             </template>
-            <template v-else-if="feature.properties.is_new">
-              <LoChaDiff
-                :diff="link.diff_tags"
-                :dst="feature.properties"
-              />
-            </template>
-            <template v-else>
-              <LoChaDiff
-                :src="feature.properties"
-              />
-            </template>
           </template>
-        </template>
-      </LoCha>
-    </div>
+        </LoCha>
+      </div>
+    </main>
   </div>
 </template>
 
@@ -294,6 +296,13 @@ const grayOutThreshold = ref(2)
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .screen {
