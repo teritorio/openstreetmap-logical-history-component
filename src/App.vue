@@ -33,8 +33,6 @@ const formValues = reactive<FormData>({
   includeRelationTypeRoute: false,
 })
 
-let skipRouteSync = false
-
 const viewportBbox = shallowRef('')
 const karmaDateStart = toRef(formValues, 'dateStart')
 const karmaDateEnd = toRef(formValues, 'dateEnd')
@@ -57,10 +55,6 @@ const splitterPanels = [
 ]
 
 watchEffect(() => {
-  if (skipRouteSync) {
-    skipRouteSync = false
-    return
-  }
   formValues.dateStart = route.query.date_start ? toDateOnly(String(route.query.date_start)) : oneYearAgoDate()
   formValues.dateEnd = route.query.date_end ? toDateOnly(String(route.query.date_end)) : todayDate()
   formValues.bbox = route.query.bbox ? String(route.query.bbox) : ''
@@ -175,8 +169,6 @@ function handlePreset(data: FormData) {
 
 function goBack() {
   view.value = 'search'
-  skipRouteSync = true
-  router.replace({ path: route.path })
 }
 
 const grayOutThreshold = ref(2)
