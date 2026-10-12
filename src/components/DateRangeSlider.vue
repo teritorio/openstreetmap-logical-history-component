@@ -170,7 +170,7 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
       role="img"
       aria-label="Change frequency histogram — use the date inputs below to adjust the range"
     />
-    <div class="date-range-empty" aria-live="polite" aria-atomic="true">
+    <div class="date-range-empty" :class="{ 'date-range-empty--visible': isEmpty }" aria-live="polite" aria-atomic="true">
       <span v-if="isEmpty">No change data available for this area</span>
     </div>
   </div>
@@ -191,9 +191,12 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none;
+}
+
+.date-range-empty--visible {
   background: var(--color-bg, #fff);
   color: var(--color-text-muted, #888);
   font-size: var(--text-sm, 0.875rem);
-  pointer-events: none;
 }
 </style>
