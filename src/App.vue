@@ -160,6 +160,7 @@ function handleFilterSubmit() {
 
 function handlePreset(data: FormData) {
   Object.assign(formValues, data)
+  doSubmit()
 }
 
 function goBack() {
