@@ -16,6 +16,13 @@ const emit = defineEmits<{
 
 const isEmpty = computed(() => !props.histogramData?.length)
 
+const AXIS_STYLE = {
+  axisLine: { lineStyle: { color: '#d0d2d5' } },
+  axisTick: { lineStyle: { color: '#d0d2d5' } },
+  axisLabel: { color: '#555555' },
+  splitLine: { lineStyle: { color: '#d0d2d5' } },
+}
+
 const containerRef = useTemplateRef<HTMLDivElement>('container')
 let chart: echarts.ECharts | null = null
 let resizeObserver: ResizeObserver | null = null
@@ -71,24 +78,8 @@ onMounted(() => {
   chart = echarts.init(containerRef.value)
   chart.setOption({
     grid: { left: 44, right: 16, top: 12, bottom: 44 },
-    xAxis: {
-      type: 'time',
-      min: axisMin,
-      max: axisMax,
-      axisLine: { lineStyle: { color: '#d0d2d5' } },
-      axisTick: { lineStyle: { color: '#d0d2d5' } },
-      axisLabel: { color: '#555555' },
-      splitLine: { lineStyle: { color: '#d0d2d5' } },
-    },
-    yAxis: {
-      type: 'log',
-      logBase: 10,
-      min: 1,
-      axisLine: { lineStyle: { color: '#d0d2d5' } },
-      axisTick: { lineStyle: { color: '#d0d2d5' } },
-      axisLabel: { color: '#555555' },
-      splitLine: { lineStyle: { color: '#d0d2d5' } },
-    },
+    xAxis: { type: 'time', min: axisMin, max: axisMax, ...AXIS_STYLE },
+    yAxis: { type: 'log', logBase: 10, min: 1, ...AXIS_STYLE },
     tooltip: { trigger: 'axis' },
     dataZoom: [
       {
@@ -100,7 +91,7 @@ onMounted(() => {
         fillerColor: 'rgba(8, 46, 78, 0.1)',
         handleStyle: { color: '#082e4e' },
         moveHandleStyle: { color: '#082e4e' },
-        selectedDataBackground: { lineStyle: { color: '#082e4e' }, areaStyle: { color: '#082e4e' } },
+        selectedDataBackground: { lineStyle: { color: '#082e4e' }, areaStyle: { color: 'rgba(8, 46, 78, 0.3)' } },
         textStyle: { color: '#555555' },
       },
       { type: 'inside', xAxisIndex: 0 },
