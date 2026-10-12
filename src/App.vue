@@ -71,9 +71,15 @@ watch(dateRange, (range) => {
     formValues.dateEnd = range.max_date.slice(0, 10)
 }, { once: true })
 
+let skipNextFetch = false
+
 watch(
   () => JSON.stringify(route.query),
   async () => {
+    if (skipNextFetch) {
+      skipNextFetch = false
+      return
+    }
     const query = route.query
     if (query.date_start && query.bbox) {
       await fetchData({
@@ -160,7 +166,16 @@ function handleFilterSubmit() {
 
 function handlePreset(data: FormData) {
   Object.assign(formValues, data)
-  doSubmit()
+  skipNextFetch = true
+  router.push({
+    path: route.path,
+    query: {
+      date_start: fromDateOnly(formValues.dateStart),
+      date_end: formValues.dateEnd ? fromDateOnly(formValues.dateEnd) : undefined,
+      bbox: formValues.bbox ?? '',
+      include_relation_type_route: formValues.includeRelationTypeRoute ? 'true' : undefined,
+    },
+  })
 }
 
 function goBack() {
