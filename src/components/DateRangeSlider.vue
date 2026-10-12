@@ -71,14 +71,41 @@ onMounted(() => {
   chart = echarts.init(containerRef.value)
   chart.setOption({
     grid: { left: 44, right: 16, top: 12, bottom: 44 },
-    xAxis: { type: 'time', min: axisMin, max: axisMax },
-    yAxis: { type: 'log', logBase: 10, min: 1 },
+    xAxis: {
+      type: 'time',
+      min: axisMin,
+      max: axisMax,
+      axisLine: { lineStyle: { color: '#d0d2d5' } },
+      axisTick: { lineStyle: { color: '#d0d2d5' } },
+      axisLabel: { color: '#555555' },
+      splitLine: { lineStyle: { color: '#d0d2d5' } },
+    },
+    yAxis: {
+      type: 'log',
+      logBase: 10,
+      min: 1,
+      axisLine: { lineStyle: { color: '#d0d2d5' } },
+      axisTick: { lineStyle: { color: '#d0d2d5' } },
+      axisLabel: { color: '#555555' },
+      splitLine: { lineStyle: { color: '#d0d2d5' } },
+    },
     tooltip: { trigger: 'axis' },
     dataZoom: [
-      { type: 'slider', xAxisIndex: 0, height: 20, bottom: 10 },
+      {
+        type: 'slider',
+        xAxisIndex: 0,
+        height: 20,
+        bottom: 10,
+        borderColor: '#d0d2d5',
+        fillerColor: 'rgba(8, 46, 78, 0.1)',
+        handleStyle: { color: '#082e4e' },
+        moveHandleStyle: { color: '#082e4e' },
+        selectedDataBackground: { lineStyle: { color: '#082e4e' }, areaStyle: { color: '#082e4e' } },
+        textStyle: { color: '#555555' },
+      },
       { type: 'inside', xAxisIndex: 0 },
     ],
-    series: [{ type: 'bar', name: 'Changes', data: props.histogramData ?? [] }],
+    series: [{ type: 'bar', name: 'Changes', data: props.histogramData ?? [], itemStyle: { color: '#1565c0' } }],
   })
 
   nextTick(() => chart?.resize())
