@@ -145,9 +145,6 @@ watch(() => props.histogramData, (data) => {
     series: [{ data: data ?? [] }],
   })
   syncWindowToProp()
-  // v-show re-displays the container when data arrives; resize after DOM update.
-  if (data?.length)
-    nextTick(() => chart?.resize())
 })
 
 watch(() => props.dateRange, (range) => {
@@ -168,13 +165,12 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
 <template>
   <div class="date-range-slider-wrapper">
     <div
-      v-show="!isEmpty"
       ref="container"
       class="date-range-slider"
       role="img"
       aria-label="Change frequency histogram — use the date inputs below to adjust the range"
     />
-    <div class="date-range-empty" :class="{ 'date-range-empty--visible': isEmpty }" aria-live="polite" aria-atomic="true">
+    <div class="date-range-empty" aria-live="polite" aria-atomic="true">
       <span v-if="isEmpty">No change data available for this area</span>
     </div>
   </div>
@@ -183,11 +179,10 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
 <style scoped>
 .date-range-slider-wrapper {
   position: relative;
-  height: 140px;
 }
 
 .date-range-slider {
-  height: 100%;
+  height: 140px;
 }
 
 .date-range-empty {
@@ -196,12 +191,9 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: none;
-}
-
-.date-range-empty--visible {
   background: rgba(255, 255, 255, 0.85);
   color: var(--color-text-muted, #888);
   font-size: var(--text-sm, 0.875rem);
+  pointer-events: none;
 }
 </style>
