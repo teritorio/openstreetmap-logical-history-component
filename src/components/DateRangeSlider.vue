@@ -191,7 +191,7 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--color-bg, #fff);
   color: var(--color-text-muted, #888);
   font-size: var(--text-sm, 0.875rem);
   pointer-events: none;
