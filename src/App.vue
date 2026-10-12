@@ -408,4 +408,14 @@ const grayOutThreshold = ref(2)
   font-size: var(--text-xs);
   color: var(--color-text-muted);
 }
+
+@media (max-width: 767px) {
+  .main-split {
+    flex-direction: column !important;
+  }
+
+  .toolbar-sep {
+    display: none;
+  }
+}
 </style>
