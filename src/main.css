@@ -101,3 +101,20 @@ a[type='button'] {
 [data-scope='splitter'][data-part='resize-trigger'][data-focus] {
   background: var(--color-primary);
 }
+
+/* On mobile: stack sidebar above map, hide the resize handle */
+@media (max-width: 767px) {
+  [data-scope='splitter'][data-part='panel'][data-id='sidebar'] {
+    flex-basis: 45% !important;
+    overflow-y: auto !important;
+  }
+
+  [data-scope='splitter'][data-part='panel'][data-id='map'] {
+    flex-basis: 55% !important;
+    min-height: 200px !important;
+  }
+
+  [data-scope='splitter'][data-part='resize-trigger'] {
+    display: none !important;
+  }
+}
