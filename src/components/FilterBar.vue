@@ -88,9 +88,6 @@ function handleSubmit(): void {
           placeholder="west, south, east, north"
           pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
         />
-        <p v-if="needZoom" class="zoom-warning" role="alert">
-          Zoom in more to query (min. zoom {{ MIN_ZOOM }})
-        </p>
       </Field.Root>
 
       <Checkbox.Root
@@ -108,6 +105,9 @@ function handleSubmit(): void {
       </Checkbox.Root>
 
       <div class="form-actions">
+        <p v-if="needZoom" class="zoom-warning" role="alert">
+          Zoom in more to query (min. zoom {{ MIN_ZOOM }})
+        </p>
         <button type="submit" class="btn-run" :disabled="needZoom">
           Run
         </button>
@@ -183,15 +183,18 @@ form {
   box-sizing: border-box;
 }
 
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
 .zoom-warning {
+  flex: 1;
   color: var(--color-warning);
   font-size: var(--text-sm);
   margin: 0;
-}
-
-.form-actions {
-  display: flex;
-  gap: var(--space-2);
 }
 
 .btn-run {
