@@ -196,16 +196,18 @@ const grayOutThreshold = ref(2)
             <Toast.Title class="toast-title">
               {{ toast.title }}
             </Toast.Title>
-            <Toast.ActionTrigger v-if="toast.action" class="toast-action">
-              {{ toast.action.label }}
-            </Toast.ActionTrigger>
+            <Toast.CloseTrigger class="toast-close">
+              ✕
+            </Toast.CloseTrigger>
           </div>
           <Toast.Description v-if="toast.description" class="toast-description">
             {{ toast.description }}
           </Toast.Description>
-          <Toast.CloseTrigger class="toast-close">
-            ✕
-          </Toast.CloseTrigger>
+          <div v-if="toast.action" class="toast-footer">
+            <Toast.ActionTrigger class="toast-action">
+              {{ toast.action.label }}
+            </Toast.ActionTrigger>
+          </div>
         </Toast.Root>
       </template>
     </Toaster>
@@ -541,7 +543,6 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding-right: var(--space-6);
 }
 
 .toast-title {
@@ -571,10 +572,13 @@ main {
   background: #fff;
 }
 
+.toast-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-1);
+}
+
 .toast-close {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
   background: none;
   border: none;
   color: var(--color-fg-on-color);
@@ -584,6 +588,7 @@ main {
   padding: var(--space-1);
   border-radius: var(--radius-sm);
   opacity: 0.7;
+  flex-shrink: 0;
 }
 
 .toast-close:hover {
