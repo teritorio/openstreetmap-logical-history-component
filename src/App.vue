@@ -10,6 +10,7 @@ import LoCha from '@/components/LoCha/LoCha.vue'
 import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import LoChaReason from '@/components/LoCha/LoChaReason.vue'
 import MapBbox from '@/components/MapBbox.vue'
+import VFooter from '@/components/VFooter.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
@@ -309,6 +310,7 @@ const grayOutThreshold = ref(2)
         </LoCha>
       </div>
     </main>
+    <VFooter />
   </div>
 </template>
 
