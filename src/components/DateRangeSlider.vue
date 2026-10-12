@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import * as echarts from 'echarts'
-import { nextTick, onMounted, onUnmounted, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, useTemplateRef, watch } from 'vue'
 
 const props = defineProps<{
   start?: string
@@ -13,6 +13,8 @@ const emit = defineEmits<{
   (e: 'update:start', value: string): void
   (e: 'update:end', value: string): void
 }>()
+
+const isEmpty = computed(() => !props.histogramData?.length)
 
 const containerRef = useTemplateRef<HTMLDivElement>('container')
 let chart: echarts.ECharts | null = null
@@ -143,16 +145,36 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
 </script>
 
 <template>
-  <div
-    ref="container"
-    class="date-range-slider"
-    role="img"
-    aria-label="Change frequency histogram — use the date inputs below to adjust the range"
-  />
+  <div class="date-range-slider-wrapper">
+    <div
+      ref="container"
+      class="date-range-slider"
+      role="img"
+      aria-label="Change frequency histogram — use the date inputs below to adjust the range"
+    />
+    <div v-if="isEmpty" class="date-range-empty" aria-live="polite">
+      No change data available for this area
+    </div>
+  </div>
 </template>
 
 <style scoped>
+.date-range-slider-wrapper {
+  position: relative;
+}
+
 .date-range-slider {
   height: 140px;
+}
+
+.date-range-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted, #888);
+  font-size: var(--text-sm, 0.875rem);
+  pointer-events: none;
 }
 </style>
