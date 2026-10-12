@@ -145,6 +145,9 @@ watch(() => props.histogramData, (data) => {
     series: [{ data: data ?? [] }],
   })
   syncWindowToProp()
+  // v-show re-displays the container when data arrives; resize after DOM update.
+  if (data?.length)
+    nextTick(() => chart?.resize())
 })
 
 watch(() => props.dateRange, (range) => {
