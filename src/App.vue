@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import type { CreateToasterReturn } from '@ark-ui/vue'
 import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
-import { Splitter } from '@ark-ui/vue'
-import { computed, reactive, ref, shallowRef, toRef, useTemplateRef, watch, watchEffect } from 'vue'
+import { Checkbox, NumberInput, Splitter, Toast, Toaster } from '@ark-ui/vue'
+import { computed, inject, reactive, ref, shallowRef, toRef, useTemplateRef, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DateRangeSlider from '@/components/DateRangeSlider.vue'
 import FilterBar from '@/components/FilterBar.vue'
@@ -9,7 +10,6 @@ import LoCha from '@/components/LoCha/LoCha.vue'
 import LoChaDiff from '@/components/LoCha/LoChaDiff.vue'
 import LoChaReason from '@/components/LoCha/LoChaReason.vue'
 import MapBbox from '@/components/MapBbox.vue'
-import VError from '@/components/VError.vue'
 import VHeader from '@/components/VHeader.vue'
 import VLoading from '@/components/VLoading.vue'
 import { useApiConfig } from '@/composables/useApi'
@@ -17,10 +17,10 @@ import { useKarmaData } from '@/composables/useKarmaData'
 import { MIN_ZOOM } from '@/constants/map'
 import { formatDateOnly, fromDateOnly, nMonthsBeforeDate, oneYearAgoDate, toDateOnly, todayDate } from '@/utils/date-format'
 
+const toaster = inject<CreateToasterReturn>('toaster')!
 const $api = useApiConfig()
-const { error, loading, resetError } = $api
+const { loading } = $api
 const geojson = ref<LoChaData>()
-const lastQuery = ref<Record<string, string | undefined>>({})
 const view = ref<'search' | 'results'>('search')
 
 const route = useRoute()
@@ -87,15 +87,9 @@ watch(
 )
 
 async function fetchData(query: Record<string, string | undefined>) {
-  lastQuery.value = query
   geojson.value = await $api.fetchData(query)
   if (geojson.value)
     view.value = 'results'
-}
-
-function handleRetry() {
-  if (Object.keys(lastQuery.value).length > 0)
-    fetchData(lastQuery.value)
 }
 
 function handleViewportChange(bbox: string): void {
@@ -178,13 +172,26 @@ const grayOutThreshold = ref(2)
   <div class="app">
     <VHeader />
     <VLoading v-if="loading" />
-    <VError
-      v-if="error.message"
-      :message="error.message"
-      :type="error.type"
-      @close="resetError"
-      @retry="handleRetry"
-    />
+    <Toaster :toaster="toaster">
+      <template #default="toast">
+        <Toast.Root class="toast-root" :class="`toast-${toast.type}`">
+          <div class="toast-header">
+            <Toast.Title class="toast-title">
+              {{ toast.title }}
+            </Toast.Title>
+            <Toast.ActionTrigger v-if="toast.action" class="toast-action">
+              {{ toast.action.label }}
+            </Toast.ActionTrigger>
+          </div>
+          <Toast.Description v-if="toast.description" class="toast-description">
+            {{ toast.description }}
+          </Toast.Description>
+          <Toast.CloseTrigger class="toast-close">
+            ✕
+          </Toast.CloseTrigger>
+        </Toast.Root>
+      </template>
+    </Toaster>
 
     <main>
       <div v-if="view === 'search'" class="screen">
@@ -231,20 +238,42 @@ const grayOutThreshold = ref(2)
         <div class="results-toolbar">
           <div class="toolbar-left">
             <button class="btn-back" type="button" @click="goBack">
-              ← Back
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+              Back
             </button>
             <span v-if="resultsLabel" class="results-label">{{ resultsLabel }}</span>
           </div>
           <div class="toolbar-sep" aria-hidden="true" />
           <div class="toolbar-right">
-            <label class="results-route">
-              <input type="checkbox" :checked="formValues.includeRelationTypeRoute" disabled>
-              Routes
-            </label>
-            <label class="results-grayout">
-              Threshold (m)
-              <input v-model.number="grayOutThreshold" type="number" min="0" max="100" step="1">
-            </label>
+            <Checkbox.Root class="results-route" :checked="formValues.includeRelationTypeRoute" disabled>
+              <Checkbox.Control class="checkbox-control">
+                <Checkbox.Indicator class="checkbox-indicator">
+                  ✓
+                </Checkbox.Indicator>
+              </Checkbox.Control>
+              <Checkbox.Label>Include route relations</Checkbox.Label>
+              <Checkbox.HiddenInput />
+            </Checkbox.Root>
+            <NumberInput.Root
+              class="results-grayout"
+              :model-value="String(grayOutThreshold)"
+              :min="0"
+              :max="100"
+              @update:model-value="grayOutThreshold = Number($event)"
+            >
+              <NumberInput.Label>Dim minor changes below (m)</NumberInput.Label>
+              <NumberInput.Control class="number-input-control">
+                <NumberInput.DecrementTrigger class="number-input-trigger">
+                  −
+                </NumberInput.DecrementTrigger>
+                <NumberInput.Input class="number-input-field" />
+                <NumberInput.IncrementTrigger class="number-input-trigger">
+                  +
+                </NumberInput.IncrementTrigger>
+              </NumberInput.Control>
+            </NumberInput.Root>
           </div>
         </div>
         <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
@@ -360,14 +389,18 @@ main {
 }
 
 .btn-back {
-  padding: var(--space-1) var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-4);
   background: var(--color-primary);
   color: var(--color-primary-fg);
   border: none;
   border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
+  font-size: var(--text-base);
   font-family: inherit;
   cursor: pointer;
+  line-height: 1;
 }
 
 .btn-back:hover {
@@ -389,20 +422,155 @@ main {
   cursor: default;
 }
 
+.checkbox-control {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs, 2px);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+:deep([data-scope='checkbox'][data-part='control'][data-state='checked']) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.checkbox-indicator {
+  font-size: 10px;
+  color: var(--color-primary-fg);
+  line-height: 1;
+}
+
 .results-grayout {
   display: flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
 
-.results-grayout input[type='number'] {
-  width: 4rem;
-  font-size: var(--text-sm);
-  padding: var(--space-1);
+.number-input-control {
+  display: flex;
+  align-items: center;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.number-input-field {
+  width: 3rem;
+  text-align: center;
+  font-size: var(--text-sm);
+  padding: var(--space-1);
+  border: none;
+  border-left: 1px solid var(--color-border);
+  border-right: 1px solid var(--color-border);
+  background: var(--color-bg);
+  font-family: inherit;
+}
+
+.number-input-trigger {
+  padding: var(--space-1) var(--space-2);
+  background: var(--color-bg-surface);
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  line-height: 1;
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.number-input-trigger:hover {
+  background: var(--color-bg-hover);
+}
+
+.toast-root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md, var(--radius-sm));
+  box-shadow: var(--shadow-md);
+  color: var(--color-fg-on-color);
+  min-width: 280px;
+  max-width: 420px;
+  margin-bottom: var(--space-2);
+}
+
+.toast-error {
+  background: var(--color-error);
+}
+
+.toast-info {
+  background: var(--color-info);
+}
+
+.toast-success {
+  background: var(--color-success);
+}
+
+.toast-warning {
+  background: var(--color-warning);
+}
+
+.toast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-right: var(--space-6);
+}
+
+.toast-title {
+  font-weight: 600;
+  font-size: var(--text-sm);
+}
+
+.toast-description {
+  font-size: var(--text-sm);
+  opacity: 0.9;
+}
+
+.toast-action {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.toast-action:hover {
+  background: #fff;
+}
+
+.toast-close {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  background: none;
+  border: none;
+  color: var(--color-fg-on-color);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  line-height: 1;
+  padding: var(--space-1);
+  border-radius: var(--radius-sm);
+  opacity: 0.7;
+}
+
+.toast-close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .before-link {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { FormData } from '@/types'
+import { Checkbox, Field } from '@ark-ui/vue'
 import { ref, watch, watchEffect } from 'vue'
 import { MIN_ZOOM } from '@/constants/map'
 import { presets } from '@/data/presets'
@@ -61,51 +62,50 @@ function handleSubmit(): void {
   <div class="filter-bar">
     <form @submit.prevent="handleSubmit">
       <div class="form-row">
-        <div class="form-field">
-          <label for="fb_date_start">Start date <span class="required">*</span></label>
-          <input
-            id="fb_date_start"
+        <Field.Root class="form-field" required>
+          <Field.Label>Start date <Field.RequiredIndicator /></Field.Label>
+          <Field.Input
             type="date"
             :value="props.dateStart"
-            required
             @change="emit('update:dateStart', ($event.target as HTMLInputElement).value)"
-          >
-        </div>
-        <div class="form-field">
-          <label for="fb_date_end">End date</label>
-          <input
-            id="fb_date_end"
+          />
+        </Field.Root>
+        <Field.Root class="form-field">
+          <Field.Label>End date</Field.Label>
+          <Field.Input
             type="date"
             :value="props.dateEnd"
             @change="emit('update:dateEnd', ($event.target as HTMLInputElement).value)"
-          >
-        </div>
+          />
+        </Field.Root>
       </div>
 
-      <div class="form-field">
-        <label for="fb_bbox">Bounding Box <span class="required">*</span></label>
-        <input
-          id="fb_bbox"
+      <Field.Root class="form-field" required>
+        <Field.Label>Bounding Box <Field.RequiredIndicator /></Field.Label>
+        <Field.Input
           v-model="localBbox"
           type="text"
           placeholder="west, south, east, north"
           pattern="^-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+,-?\d+\.\d+$"
-          required
-        >
+        />
         <p v-if="needZoom" class="zoom-warning" role="alert">
           Zoom in more to query (min. zoom {{ MIN_ZOOM }})
         </p>
-      </div>
+      </Field.Root>
 
-      <label class="route-label">
-        <input
-          type="checkbox"
-          class="route-checkbox"
-          :checked="props.includeRelationTypeRoute"
-          @change="emit('update:includeRelationTypeRoute', ($event.target as HTMLInputElement).checked)"
-        >
-        Include route relations
-      </label>
+      <Checkbox.Root
+        class="route-label"
+        :checked="props.includeRelationTypeRoute"
+        @update:checked="emit('update:includeRelationTypeRoute', $event === true)"
+      >
+        <Checkbox.Control class="route-checkbox-control">
+          <Checkbox.Indicator class="route-checkbox-indicator">
+            ✓
+          </Checkbox.Indicator>
+        </Checkbox.Control>
+        <Checkbox.Label>Include route relations</Checkbox.Label>
+        <Checkbox.HiddenInput />
+      </Checkbox.Root>
 
       <div class="form-actions">
         <button type="submit" class="btn-run" :disabled="needZoom">
@@ -161,24 +161,26 @@ form {
   min-width: 120px;
 }
 
-label {
+:deep([data-scope='field'][data-part='label']),
+:deep([data-scope='checkbox'][data-part='label']) {
   font-size: var(--text-sm);
   color: var(--color-text);
   font-weight: 500;
 }
 
-.required {
+:deep([data-scope='field'][data-part='required-indicator']) {
   color: var(--color-error);
 }
 
-input[type='text'],
-input[type='date'] {
+:deep([data-scope='field'][data-part='input']) {
   padding: var(--space-2);
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   background: var(--color-bg);
   font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .zoom-warning {
@@ -221,10 +223,27 @@ input[type='date'] {
   cursor: pointer;
 }
 
-.route-checkbox {
-  cursor: pointer;
+.route-checkbox-control {
   width: 16px;
   height: 16px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-xs, 2px);
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+:deep([data-scope='checkbox'][data-part='control'][data-state='checked']) {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.route-checkbox-indicator {
+  font-size: 11px;
+  color: var(--color-primary-fg);
+  line-height: 1;
 }
 
 .presets {
