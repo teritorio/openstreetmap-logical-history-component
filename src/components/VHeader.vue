@@ -1,30 +1,31 @@
 <script setup lang="ts">
+import { Dialog } from '@ark-ui/vue'
 import { onMounted, shallowRef } from 'vue'
 import VDialog from './VDialog.vue'
 
 const showDialog = shallowRef(true)
 
 onMounted(() => {
-  const hasSeenDialog = localStorage.getItem('seenDialog')
-
-  if (!hasSeenDialog) {
-    localStorage.setItem('seenDialog', 'true')
+  if (localStorage.getItem('seenDialog')) {
+    showDialog.value = false
   }
   else {
-    showDialog.value = false
+    localStorage.setItem('seenDialog', 'true')
   }
 })
 </script>
 
 <template>
-  <header>
-    <img src="/teritorio.png" alt="Logo Teritorio">
-    <h1>OpenStreetMap Logical History</h1>
-    <button class="info-button" @click="showDialog = true">
-      &#x1f6c8; How it works ?
-    </button>
-  </header>
-  <VDialog v-if="showDialog" @close="showDialog = false" />
+  <Dialog.Root v-model:open="showDialog">
+    <header>
+      <img src="/teritorio.png" alt="Logo Teritorio">
+      <h1>OpenStreetMap Logical History</h1>
+      <Dialog.Trigger class="info-button">
+        &#x1f6c8; How it works?
+      </Dialog.Trigger>
+    </header>
+    <VDialog v-if="showDialog" />
+  </Dialog.Root>
 </template>
 
 <style lang="css" scoped>
