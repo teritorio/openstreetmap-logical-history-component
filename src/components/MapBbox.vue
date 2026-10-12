@@ -363,6 +363,7 @@ defineExpose({ getZoom, getViewportBbox, toggleDrawMode })
     <button
       class="draw-bbox-btn"
       :class="{ 'draw-bbox-btn--active': isDrawing }"
+      :aria-label="isDrawing ? 'Cancel drawing' : 'Draw bounding box on map'"
       type="button"
       @click="toggleDrawMode"
     >

@@ -143,7 +143,12 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
 </script>
 
 <template>
-  <div ref="container" class="date-range-slider" />
+  <div
+    ref="container"
+    class="date-range-slider"
+    role="img"
+    aria-label="Change frequency histogram — use the date inputs below to adjust the range"
+  />
 </template>
 
 <style scoped>
