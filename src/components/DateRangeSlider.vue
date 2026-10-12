@@ -165,6 +165,7 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
 <template>
   <div class="date-range-slider-wrapper">
     <div
+      v-show="!isEmpty"
       ref="container"
       class="date-range-slider"
       role="img"
@@ -179,10 +180,11 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
 <style scoped>
 .date-range-slider-wrapper {
   position: relative;
+  height: 140px;
 }
 
 .date-range-slider {
-  height: 140px;
+  height: 100%;
 }
 
 .date-range-empty {
