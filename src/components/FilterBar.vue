@@ -208,7 +208,7 @@ form {
 
 .btn-run {
   padding: var(--space-2) var(--space-4);
-  background: linear-gradient(135deg, var(--color-primary) 0%, #0d4a7a 100%);
+  background: var(--color-primary);
   color: var(--color-primary-fg);
   border: none;
   border-radius: var(--radius-sm);
@@ -228,6 +228,7 @@ form {
 }
 
 .btn-run:not(:disabled):hover {
+  background: var(--color-primary-hover);
   box-shadow: var(--shadow-md);
 }
 
@@ -245,7 +246,7 @@ form {
   height: 16px;
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-xs, 2px);
-  background: var(--color-bg);
+  background: var(--color-bg-white);
   display: flex;
   align-items: center;
   justify-content: center;
