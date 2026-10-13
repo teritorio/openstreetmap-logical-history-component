@@ -354,7 +354,7 @@ main {
 }
 
 .histogram {
-  background: var(--color-bg-surface);
+  background: var(--color-bg-white);
   border-bottom: 1px solid var(--color-border);
   padding: var(--space-2) var(--space-4) var(--space-3);
   display: flex;

@@ -30,13 +30,13 @@ onMounted(() => {
 
 <style lang="css" scoped>
 header {
-  background-color: var(--color-primary);
+  background: var(--color-primary);
   color: var(--color-primary-fg);
   display: flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   width: 100%;
 }
 
@@ -47,12 +47,18 @@ img {
 
 .info-button {
   margin-left: auto;
-  font-size: var(--text-xl);
-  background: none;
-  border: none;
+  font-size: var(--text-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
   color: var(--color-primary-fg);
-  padding: var(--space-2);
+  padding: var(--space-1) var(--space-3);
   cursor: pointer;
-  line-height: 1;
+  line-height: 1.4;
+  transition: background 0.15s;
+}
+
+.info-button:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 </style>

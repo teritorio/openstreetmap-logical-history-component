@@ -137,7 +137,7 @@ function handleSubmit(): void {
   flex-direction: column;
   gap: var(--space-4);
   padding: var(--space-4);
-  background: var(--color-bg-surface);
+  background: var(--color-bg-white);
   height: 100%;
   overflow-y: auto;
 }
@@ -177,10 +177,19 @@ form {
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
-  background: var(--color-bg);
+  background: var(--color-bg-white);
   font-family: inherit;
   width: 100%;
   box-sizing: border-box;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+
+:deep([data-scope='field'][data-part='input']:focus) {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(8, 46, 78, 0.12);
+  outline: none;
 }
 
 .form-actions {
@@ -199,13 +208,18 @@ form {
 
 .btn-run {
   padding: var(--space-2) var(--space-4);
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #0d4a7a 100%);
   color: var(--color-primary-fg);
   border: none;
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
+  font-weight: 600;
   font-family: inherit;
   cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.15s,
+    opacity 0.15s;
 }
 
 .btn-run:is(:disabled) {
@@ -214,7 +228,7 @@ form {
 }
 
 .btn-run:not(:disabled):hover {
-  background: var(--color-primary-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .route-label {
@@ -277,16 +291,20 @@ form {
   width: 100%;
   text-align: left;
   padding: var(--space-1) var(--space-2);
-  background: var(--color-bg);
+  background: var(--color-bg-white);
   border: 1px solid var(--color-border-light);
+  border-left: 3px solid transparent;
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   cursor: pointer;
   font-family: inherit;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .presets li button:hover {
   background: var(--color-bg-hover);
-  border-color: var(--color-primary);
+  border-left-color: var(--color-primary);
 }
 </style>

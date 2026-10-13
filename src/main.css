@@ -5,7 +5,8 @@
   --color-primary-fg: #ffffff;
 
   /* Surfaces & backgrounds */
-  --color-bg: #ffffff;
+  --color-bg: #f4f6fb;
+  --color-bg-white: #ffffff;
   --color-bg-surface: #f0f1f3;
   --color-bg-hover: #e8eef4;
 
@@ -48,10 +49,12 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
+  --radius-xl: 12px;
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 * {
