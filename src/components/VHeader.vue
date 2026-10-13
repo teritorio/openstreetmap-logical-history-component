@@ -1,48 +1,42 @@
 <script setup lang="ts">
+import { Dialog } from '@ark-ui/vue'
 import { onMounted, shallowRef } from 'vue'
 import VDialog from './VDialog.vue'
-
-const emit = defineEmits<{
-  (e: 'toggleMenu'): void
-}>()
 
 const showDialog = shallowRef(true)
 
 onMounted(() => {
-  const hasSeenDialog = localStorage.getItem('seenDialog')
-
-  if (!hasSeenDialog) {
-    localStorage.setItem('seenDialog', 'true')
+  if (localStorage.getItem('seenDialog')) {
+    showDialog.value = false
   }
   else {
-    showDialog.value = false
+    localStorage.setItem('seenDialog', 'true')
   }
 })
 </script>
 
 <template>
-  <header>
-    <button class="toggle-button" @click="emit('toggleMenu')">
-      ☰
-    </button>
-    <img src="/teritorio.png" alt="Logo Teritorio">
-    <h1>OpenStreetMap Logical History</h1>
-    <button class="info-button" @click="showDialog = true">
-      &#x1f6c8; How it works ?
-    </button>
-  </header>
-  <VDialog v-if="showDialog" @close="showDialog = false" />
+  <Dialog.Root v-model:open="showDialog">
+    <header>
+      <img src="/teritorio.png" alt="Logo Teritorio">
+      <h1>OpenStreetMap Logical History</h1>
+      <Dialog.Trigger class="info-button">
+        &#x1f6c8; How it works?
+      </Dialog.Trigger>
+    </header>
+    <VDialog v-if="showDialog" />
+  </Dialog.Root>
 </template>
 
 <style lang="css" scoped>
 header {
-  background-color: #082e4e;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0.5em;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: var(--space-2);
+  padding: var(--space-2);
+  box-shadow: var(--shadow-md);
   width: 100%;
 }
 
@@ -53,22 +47,18 @@ img {
 
 .info-button {
   margin-left: auto;
-  font-size: 1.25em;
-}
-
-.toggle-button {
-  height: 48px;
-  width: 48px;
-  font-size: 1.5em;
-}
-
-.toggle-button,
-.info-button {
-  background: none;
-  border: none;
-  color: #fff;
-  padding: 0.5em;
+  font-size: var(--text-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-xl);
+  color: var(--color-primary-fg);
+  padding: var(--space-1) var(--space-3);
   cursor: pointer;
-  line-height: 1;
+  line-height: 1.4;
+  transition: background 0.15s;
+}
+
+.info-button:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 </style>

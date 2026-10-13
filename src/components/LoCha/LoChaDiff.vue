@@ -21,9 +21,6 @@ const props = withDefaults(
 )
 
 const groupedTagKeys = computed((): string[][] => {
-  if (props.src && !props.dst)
-    return [Object.keys(props.src.tags)]
-
   const keys: string[] = sortBy(
     uniq([
       ...Object.keys(props.src?.tags || {}),
@@ -49,32 +46,25 @@ const groupedTagKeys = computed((): string[][] => {
 })
 
 function actionIcon(key: string): string | undefined {
-  if (props.src && !props.dst)
-    return undefined
-
   return (
     props.diff?.[key]
     && (
       !props.src?.tags || !(key in props.src.tags)
         ? '➕'
-        : props.dst && !props.dst.tags[key]
-          ? '✖'
-          : '~')
+        : !props.dst || !props.dst.tags[key]
+            ? '✖'
+            : '~')
   )
 }
 
 function backgroundClass(key: string): string | undefined {
-  if (props.src && !props.dst) {
-    return undefined
-  }
-
   return (
     props.diff?.[key]
     && (!props.src?.tags || !(key in props.src.tags)
       ? 'attribute-new'
-      : props.dst && !props.dst.tags[key]
-        ? 'attribute-deleted'
-        : 'attribute-changed')
+      : !props.dst || !props.dst.tags[key]
+          ? 'attribute-deleted'
+          : 'attribute-changed')
   )
 }
 
@@ -82,12 +72,10 @@ function isRejected(key: string): boolean {
   const actions = props.diff?.[key]
   if (!actions || !actions[0])
     return false
-  return actions[0][0] === 'reject'
+  return actions[0][1] === 'reject'
 }
 
 function getRowClass(key: string): string | undefined {
-  if (props.src && !props.dst)
-    return 'no_changes'
   return isRejected(key) ? undefined : 'no_changes'
 }
 
@@ -187,6 +175,8 @@ const tagDiffs = computed(() => {
 
 table {
   table-layout: auto;
+  border-collapse: separate;
+  border-spacing: 0.25rem 0.15rem;
 }
 
 thead th {
@@ -197,7 +187,6 @@ table,
 th,
 td {
   border: none;
-  border-collapse: collapse;
   padding: 0.15rem;
 }
 

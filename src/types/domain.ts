@@ -18,7 +18,7 @@ export type Status = 'new' | 'delete' | 'updateBefore' | 'updateAfter'
  */
 export type Color = {
   [key in Status]: key extends 'new'
-    ? '#52c41a'
+    ? '#00A550'
     : key extends 'delete'
       ? '#FF0000'
       : key extends 'updateBefore'
@@ -52,6 +52,7 @@ export interface LoCha {
   groups: Ref<LoChaGroup[]>
   loCha: Ref<LoChaData | undefined>
   setLoCha: (loCha: LoChaData) => void
+  resetLoCha: () => void
   getStatus: (feature: IFeature) => Status
   getBeforeFeatures: (features: IFeature[]) => IFeature[]
   getAfterFeatures: (features: IFeature[]) => IFeature[]

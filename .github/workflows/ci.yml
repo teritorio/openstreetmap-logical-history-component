@@ -10,8 +10,8 @@ permissions:
 
 # Allow only one concurrent deployment at a time
 concurrency:
-  group: pages # Group deployments by name for concurrency control
-  cancel-in-progress: true # Cancel any in-progress deployments if a new one starts
+  group: ${{ github.ref }} # Group by ref so tag pushes don't cancel branch runs
+  cancel-in-progress: true # Cancel any in-progress run for the same ref
 
 jobs:
   # Setup environment and dependencies
@@ -91,6 +91,11 @@ jobs:
 
       - name: Build Static Content 🏗️
         run: yarn build:demo # Build the static site with Vite
+        env:
+          VITE_API_ENDPOINT: ${{ vars.VITE_API_ENDPOINT }}
+          VITE_KARMA_DATASET_URL: ${{ vars.VITE_KARMA_DATASET_URL }}
+          VITE_SENTRY_AUTH_TOKEN: ${{ secrets.VITE_SENTRY_AUTH_TOKEN }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
 
       - name: Setup GitHub Pages ⚙️
         uses: actions/configure-pages@v4

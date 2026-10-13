@@ -1,80 +1,28 @@
-import type { Reactive, Ref } from 'vue'
-import type { Error, LoChaData } from '@/types'
-import { reactive, ref } from 'vue'
+import type { CreateToasterReturn } from '@ark-ui/vue'
+import type { Ref } from 'vue'
+import type { LoChaData } from '@/types'
+import { inject, ref } from 'vue'
 import { transformFeatures } from '@/utils/feature-transform'
 
 export type { Action, Actions, ActionType, ActionTypeOptions, ApiLink, ApiLinkGroups, IFeature, LoChaData, Reason, ReasonGeom, ReasonTags } from '@/types'
 
-/**
- * Interface representing the reactive state and methods for handling API interactions.
- * Provides error handling, data fetching, and loading state management.
- */
+const HTML_TAGS_RE = /<[^>]+>/g
+const WHITESPACE_RE = /\s+/g
+
 interface ApiComposable {
-  /**
-   * A reactive error object that holds the current error state.
-   * When an error occurs during the API interaction, this object is updated.
-   * @example { message: 'Error message', type: 'error' }
-   */
-  error: Reactive<Error>
-
-  /**
-   * Fetches data from the API. This function can accept query parameters via the `params` argument.
-   * @param params - Optional URLSearchParams object that can be used to append query parameters to the API request.
-   * @returns A Promise resolving to an `LoChaData` or `undefined` if there was an issue.
-   */
-  fetchData: (params: Record<string, string | undefined>) => Promise<LoChaData | undefined>
-
-  /**
-   * A reactive reference indicating whether the API request is currently loading.
-   * This state is useful for showing loading indicators while the request is in progress.
-   * @example `true` if loading, `false` if finished.
-   */
   loading: Ref<boolean>
-
-  /**
-   * Sets the error state.
-   * This function updates the `error` reactive state with the given error object.
-   * @param err - The error object to be set.
-   */
-  setError: (err: Error) => void
-
-  /**
-   * Resets the error state
-   */
-  resetError: () => void
+  fetchData: (params: Record<string, string | undefined>) => Promise<LoChaData | undefined>
 }
 
-/**
- * Constants for API base URLs, dependent on the environment.
- *
- * @constant {string} API_BASE_URL_DEV - The base URL for the development environment.
- * @constant {string} API_BASE_URL_PROD - The base URL for the production environment.
- */
-
-/**
- * Provides a composable for API configuration and interaction.
- *
- * @returns The API composable object with error state and fetch functionality.
- */
 export function useApiConfig(): ApiComposable {
   const apiBaseUrl = import.meta.env.MODE === 'development'
     ? import.meta.env.VITE_APP_HOST
     : import.meta.env.VITE_API_ENDPOINT
 
-  const errorInitialState = {
-    message: undefined,
-    type: 'info',
-  } satisfies Error
-
-  const error = reactive<Error>(errorInitialState)
+  const toaster = inject<CreateToasterReturn>('toaster')
   const loading = ref(false)
+  let lastParams: Record<string, string | undefined> = {}
 
-  /**
-   * Constructs the full API URL with optional query parameters.
-   *
-   * @param params - Optional query parameters to append to the API endpoint.
-   * @returns The constructed API URL.
-   */
   function buildApiUrl(params: Record<string, string | undefined>): string {
     const searchParams = new URLSearchParams()
 
@@ -87,19 +35,13 @@ export function useApiConfig(): ApiComposable {
     return params ? `${apiBaseUrl}${endpoint}?${searchParams}` : `${apiBaseUrl}${endpoint}`
   }
 
-  /**
-   * Fetches data from the API and processes the response.
-   *
-   * @param params - Optional query parameters to include in the API request.
-   * @returns The API response with transformed features, or undefined if an error occurred.
-   */
   async function fetchData(params: Record<string, string | undefined>): Promise<LoChaData | undefined> {
-    resetError()
+    lastParams = params
     loading.value = true
 
     return await fetch(
       buildApiUrl(params),
-      { method: 'GET' },
+      { method: 'GET', headers: { Accept: 'application/geo+json' } },
     )
       .then(async (res) => {
         if (!res.ok) {
@@ -114,9 +56,15 @@ export function useApiConfig(): ApiComposable {
         features: transformFeatures(data),
       }))
       .catch((err) => {
-        setError({
-          message: err.message,
+        const raw: string = err.message ?? ''
+        const text = raw.replace(HTML_TAGS_RE, ' ').replace(WHITESPACE_RE, ' ').trim()
+        const description = text.length > 200 ? `${text.slice(0, 200)}…` : text
+
+        toaster?.create({
+          title: 'Request failed',
+          description: description || undefined,
           type: 'error',
+          action: { label: 'Retry', onClick: () => fetchData(lastParams) },
         })
 
         return undefined
@@ -124,19 +72,8 @@ export function useApiConfig(): ApiComposable {
       .finally(() => loading.value = false)
   }
 
-  function setError(err: Error): void {
-    Object.assign(error, err)
-  }
-
-  function resetError(): void {
-    Object.assign(error, { message: undefined, type: 'info' })
-  }
-
   return {
-    error,
-    fetchData,
     loading,
-    setError,
-    resetError,
+    fetchData,
   }
 }

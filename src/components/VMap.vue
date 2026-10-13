@@ -6,8 +6,8 @@ import turfBbox from '@turf/bbox'
 import { featureCollection as turfFeatureCollection } from '@turf/helpers'
 import { vIntersectionObserver } from '@vueuse/components'
 import maplibre from 'maplibre-gl'
-import { inject, shallowRef, watch } from 'vue'
-import { MAP_STYLE_URL_KEY } from '@/constants/injectionKeys'
+import { inject, ref, shallowRef, watch } from 'vue'
+import { MAP_LOCALE_KEY, MAP_STYLE_URL_KEY } from '@/constants/injectionKeys'
 import { MAP_STYLE_URL } from '@/constants/map'
 import { BBOX_SOURCE_ID, LAYERS, SOURCE_ID } from '@/constants/mapLayers'
 import { clipAndEnvelope, isBboxDegenerate, normalizeBboxForClipping } from '@/utils/geom'
@@ -21,16 +21,22 @@ const props = defineProps<{
 }>()
 
 const mapStyleUrl = inject(MAP_STYLE_URL_KEY, MAP_STYLE_URL)
+const NO_LOCALE = ref(undefined)
+const mapLocale = inject(MAP_LOCALE_KEY, NO_LOCALE)
 
 type MapMouseEventWithFeatures = MapMouseEvent & {
   features?: maplibre.MapGeoJSONFeature[]
 }
 
-const paddingOptions = {
-  top: 60,
-  left: 60,
-  right: 60,
-  bottom: 80,
+function getPadding(container: HTMLElement) {
+  const w = container.offsetWidth
+  const h = container.offsetHeight
+  return {
+    top: Math.min(60, Math.floor(h * 0.15)),
+    left: Math.min(60, Math.floor(w * 0.15)),
+    right: Math.min(60, Math.floor(w * 0.15)),
+    bottom: Math.min(80, Math.floor(h * 0.20)),
+  }
 }
 
 const map = shallowRef<maplibre.Map>()
@@ -59,16 +65,55 @@ watch(() => props.features, (newValue) => {
   }
 })
 
+watch(mapLocale, (newLocale) => {
+  if (!map.value || !newLocale) {
+    return
+  }
+  // MapLibre v4+ has no public locale setter — mutating _locale then cycling
+  // cooperativeGestures is the only workaround. See maplibre/maplibre-gl-js#5307.
+  const l = (map.value as any)._locale as Record<string, string>
+  Object.assign(l, newLocale)
+  map.value.cooperativeGestures.disable()
+  map.value.cooperativeGestures.enable()
+})
+
 function initMap() {
   if (!map.value) {
+    const container = document.getElementById(`map-${props.id}`)
+    if (!container)
+      return
+
     normalizedBbox = props.bbox ? normalizeBboxForClipping(props.bbox) : undefined
 
+    const geoFeatures = props.features.filter(f => f.geometry != null)
+    if (!geoFeatures.length)
+      return
+
     const clipped = normalizedBbox
-      ? clipAndEnvelope(props.features, normalizedBbox)
-      : turfFeatureCollection(props.features)
+      ? clipAndEnvelope(geoFeatures, normalizedBbox)
+      : turfFeatureCollection(geoFeatures)
 
     if (clipped) {
-      const boundsArray = turfBbox(clipped) as [number, number, number, number]
+      let rawBounds = turfBbox(clipped) as [number, number, number, number]
+
+      // Expand degenerate bounds (single point) so MapLibre fitBounds doesn't default to world level.
+      if (isBboxDegenerate(rawBounds)) {
+        rawBounds = [rawBounds[0] - 0.0001, rawBounds[1] - 0.0001, rawBounds[2] + 0.0001, rawBounds[3] + 0.0001]
+      }
+
+      // Clamp to original bbox: normalizedBbox adds fixed padding that can dwarf
+      // small query bboxes, causing clipped endpoints to fall outside the original bbox.
+      const b = props.bbox
+      let boundsArray: [number, number, number, number] = b
+        ? [
+            Math.max(rawBounds[0], b[0]),
+            Math.max(rawBounds[1], b[1]),
+            Math.min(rawBounds[2], b[2]),
+            Math.min(rawBounds[3], b[3]),
+          ]
+        : rawBounds
+      if (boundsArray[0] > boundsArray[2] || boundsArray[1] > boundsArray[3])
+        boundsArray = rawBounds
 
       const bounds: [[number, number], [number, number]] = [
         [boundsArray[0], boundsArray[1]],
@@ -80,12 +125,13 @@ function initMap() {
         container: `map-${props.id}`,
         bounds,
         fitBoundsOptions: {
-          padding: paddingOptions,
+          padding: getPadding(container),
           animate: false,
           maxZoom: 17,
         },
         style: mapStyleUrl,
         cooperativeGestures: true,
+        locale: mapLocale.value,
         attributionControl: false,
       })
       map.value.addControl(new maplibre.FullscreenControl())
@@ -124,8 +170,11 @@ function handleMapOnLoad(): void {
   if (!map.value)
     throw new Error('Call initMap() function first.')
 
-  if (props.bbox && !isBboxDegenerate(props.bbox)) {
-    displayBbox(props.bbox as [number, number, number, number])
+  if (props.bbox) {
+    const bbox = isBboxDegenerate(props.bbox)
+      ? [props.bbox[0] - 0.0001, props.bbox[1] - 0.0001, props.bbox[2] + 0.0001, props.bbox[3] + 0.0001] as [number, number, number, number]
+      : props.bbox as [number, number, number, number]
+    displayBbox(bbox)
   }
 
   map.value!.addSource(SOURCE_ID, {
@@ -236,5 +285,6 @@ function onIntersectionObserver([entry]: IntersectionObserverEntry[]) {
 .v-map {
   height: 280px;
   width: 100%;
+  isolation: isolate;
 }
 </style>

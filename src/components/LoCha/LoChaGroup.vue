@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { GroupSlotProps, LoChaGroup, ObjectDetailSlotProps } from '@/types'
+import type { GroupSlotProps, IFeature, LoChaGroup, ObjectDetailSlotProps } from '@/types'
 import { computed, inject, useSlots } from 'vue'
 import LoChaObject from '@/components/LoCha/LoChaObject.vue'
 import VMap from '@/components/VMap.vue'
@@ -10,6 +10,7 @@ const props = defineProps<{
   index: number
   features: LoChaGroup
   josmTarget?: string
+  dimmed?: boolean
 }>()
 
 defineEmits<{
@@ -17,14 +18,20 @@ defineEmits<{
 }>()
 
 defineSlots<{
+  'object-header'?: (props: ObjectDetailSlotProps) => void
   'object-detail'?: (props: ObjectDetailSlotProps) => void
+  'header-start-end'?: (props: GroupSlotProps) => void
   'header-center'?: (props: GroupSlotProps) => void
   'header-end'?: (props: GroupSlotProps) => void
   'content-start'?: (props: GroupSlotProps) => void
 }>()
 
 const runtimeSlots = useSlots()
-const gridColumns = computed(() => runtimeSlots['content-start'] ? 'repeat(4, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
+const hasContentStart = computed(() => !!runtimeSlots['content-start'])
+const hasObjectDetail = computed(() => !!runtimeSlots['object-detail'])
+const gridColumns = computed(() => hasContentStart.value ? 'repeat(4, minmax(0, 1fr))' : 'repeat(3, minmax(0, 1fr))')
+const newColumnStart = computed(() => hasContentStart.value ? 3 : 2)
+const vmapColumnStart = computed(() => hasContentStart.value ? 4 : 3)
 
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
 
@@ -38,7 +45,20 @@ const afterFeatures = computed(() => getAfterFeatures(props.features))
 const isSingleDelete = computed(() => beforeFeatures.value.length > 0 && afterFeatures.value.length === 0)
 const isSingleNew = computed(() => beforeFeatures.value.length === 0 && afterFeatures.value.length > 0)
 const isSingleDeletedUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !!afterFeatures.value[0]?.properties.deleted)
-const isSingleUpdate = computed(() => beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !afterFeatures.value[0]?.properties.deleted)
+const isSingleUpdate = computed(() => !loCha.value?.metadata.forceMultiColumn && beforeFeatures.value.length === 1 && afterFeatures.value.length === 1 && !afterFeatures.value[0]?.properties.deleted)
+
+const beforeFeaturesPerAfter = computed((): Map<string | number, IFeature[]> => {
+  const links = loCha.value?.metadata.links[props.index] ?? []
+  return new Map(
+    afterFeatures.value.map((afterFeature) => {
+      const beforeIds = links
+        .filter(link => link.after === afterFeature.id)
+        .map(link => link.before)
+        .filter(Boolean)
+      return [afterFeature.id as string | number, props.features.filter(f => beforeIds.includes(f.id as string))]
+    }),
+  )
+})
 
 const groupNameParts = computed(() => {
   const beforeNames = [...new Set(beforeFeatures.value.map(f => f.properties.tags?.name).filter(Boolean))]
@@ -62,10 +82,11 @@ const groupNameTitle = computed(() => {
 </script>
 
 <template>
-  <div :id="id" class="locha-group">
+  <div :id="id" class="locha-group" :class="{ 'locha-group--dimmed': dimmed }">
     <div class="group-header">
       <div class="header-start">
         <a class="anchor-button" :href="`#${id}`" @click.prevent="$emit('navigate', `#${id}`)">🔗</a>
+        <slot name="header-start-end" :index="index" />
         <h3 class="group-name" :title="groupNameTitle">
           <span v-if="groupNameParts.before" class="name-before">{{ groupNameParts.before }}</span>
           <span v-if="groupNameParts.before" class="name-separator"> → </span>
@@ -83,7 +104,7 @@ const groupNameTitle = computed(() => {
       <div v-if="$slots['content-start']" class="content-start">
         <slot name="content-start" :index="index" />
       </div>
-      <div v-if="!isSingleUpdate && !isSingleNew && !isSingleDeletedUpdate" class="before-list" :class="{ 'list--wide': isSingleDelete }">
+      <div v-if="!isSingleUpdate && !isSingleNew && !isSingleDeletedUpdate" class="before-list" :style="isSingleDelete ? { gridColumnStart: 2 } : {}">
         <ul>
           <li
             v-for="feature in beforeFeatures"
@@ -97,7 +118,7 @@ const groupNameTitle = computed(() => {
           </li>
         </ul>
       </div>
-      <div v-if="!isSingleDelete" class="after-list" :class="{ 'list--wide': isSingleNew || isSingleUpdate || isSingleDeletedUpdate }">
+      <div v-if="!isSingleDelete" class="after-list" :class="{ 'list--wide': isSingleUpdate }" :style="isSingleNew ? { gridColumnStart: newColumnStart } : isSingleDeletedUpdate ? { gridColumnStart: 2 } : {}">
         <ul>
           <template v-if="isSingleDeletedUpdate">
             <li>
@@ -125,7 +146,25 @@ const groupNameTitle = computed(() => {
               v-for="feature in afterFeatures"
               :key="feature.id"
             >
-              <LoChaObject :feature="feature" :josm-target="josmTarget">
+              <slot
+                v-if="$slots['object-header'] && (beforeFeaturesPerAfter.get(feature.id)?.length ?? 0) > 1"
+                name="object-header"
+                :feature="feature"
+                :index="index"
+              />
+              <LoChaObject
+                :feature="feature"
+                :josm-target="josmTarget"
+                :tools-only="hasObjectDetail && (beforeFeaturesPerAfter.get(feature.id)?.length ?? 0) > 1"
+              >
+                <template v-if="beforeFeaturesPerAfter.get(feature.id)?.length" #before>
+                  <LoChaObject
+                    v-for="beforeFeature in beforeFeaturesPerAfter.get(feature.id)"
+                    :key="beforeFeature.id"
+                    :feature="beforeFeature"
+                    :compact="true"
+                  />
+                </template>
                 <template v-if="$slots['object-detail']" #object-detail>
                   <slot name="object-detail" :feature="feature" :index="index" />
                 </template>
@@ -134,7 +173,7 @@ const groupNameTitle = computed(() => {
           </template>
         </ul>
       </div>
-      <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" />
+      <VMap :id="`${instanceId}-${props.index}`" :features="features" :bbox="loCha?.bbox" :style="{ gridColumnStart: vmapColumnStart }" />
     </div>
   </div>
 </template>
@@ -143,6 +182,11 @@ const groupNameTitle = computed(() => {
 .locha-group {
   border: 2px solid #cecece;
   background-color: #ffffff;
+  scroll-margin-top: var(--locha-scroll-offset, 0px);
+}
+
+.locha-group--dimmed {
+  opacity: 0.35;
 }
 
 .group-content {
@@ -172,28 +216,12 @@ const groupNameTitle = computed(() => {
   margin: 0;
   font-size: 1rem;
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  overflow: hidden;
   min-width: 0;
-}
-
-.name-before {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex-shrink: 1;
-  min-width: 0;
+  overflow-wrap: break-word;
 }
 
 .name-separator {
-  flex-shrink: 0;
   white-space: nowrap;
-}
-
-.name-after {
-  white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .anchor-button {
@@ -215,6 +243,7 @@ const groupNameTitle = computed(() => {
 .header-end {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.3em;
 }
 

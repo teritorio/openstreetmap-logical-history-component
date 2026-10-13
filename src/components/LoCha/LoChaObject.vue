@@ -3,12 +3,15 @@ import type { IFeature } from '@/types'
 import { computed, inject } from 'vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_KEY } from '@/constants/injectionKeys'
+import { getFeatureStatus } from '@/utils/feature-status'
 import { getDeepHistoryUrl, getJosmUrl, getOsmHistoryUrl, getOsmHistoryViewerUrl, getOsmUserUrl } from '@/utils/osm-links'
 
 const props = defineProps<{
   feature: IFeature
   josmTarget?: string
   compact?: boolean
+  toolsOnly?: boolean
+  dimmed?: boolean
 }>()
 
 defineSlots<{
@@ -16,7 +19,8 @@ defineSlots<{
   'object-detail'?: () => void
 }>()
 
-const { getStatus } = inject(LOCHA_KEY)!
+const locha = inject(LOCHA_KEY, null)
+const getStatus = locha?.getStatus ?? getFeatureStatus
 
 const status = computed(() => getStatus(props.feature))
 
@@ -35,9 +39,9 @@ const color = computed(() => loChaColors[status.value])
 </script>
 
 <template>
-  <article class="locha-object">
+  <article class="locha-object" :class="{ 'locha-object--dimmed': dimmed }">
     <div class="header-row">
-      <template v-if="$slots.before">
+      <template v-if="$slots.before && !toolsOnly">
         <div class="before-content">
           <slot name="before" />
         </div>
@@ -46,6 +50,7 @@ const color = computed(() => loChaColors[status.value])
       <header>
         <div class="wrap">
           <a
+            v-if="!toolsOnly"
             :href="getOsmHistoryUrl(feature.properties.objtype, feature.properties.id)"
             title="OSM History"
             target="_blank"
@@ -54,7 +59,7 @@ const color = computed(() => loChaColors[status.value])
             {{ `${feature.properties.objtype}${feature.properties.id}-v${feature.properties.version}` }}
           </a>
           <div
-            v-if="!compact && (status === 'new' || status === 'delete')"
+            v-if="!compact && !toolsOnly && (status === 'new' || status === 'delete')"
             class="status-content"
             :class="{
               'object-new': status === 'new',
@@ -107,11 +112,11 @@ const color = computed(() => loChaColors[status.value])
             </div>
           </div>
         </div>
-        <p class="date">
+        <p v-if="!toolsOnly" class="date">
           📅 {{ props.feature.properties.created }}
         </p>
         <a
-          v-if="feature.properties.username"
+          v-if="!toolsOnly && feature.properties.username"
           :href="getOsmUserUrl(feature.properties.username)"
           :title="`View ${feature.properties.username} OSM profile`"
           target="_blank"
@@ -134,6 +139,11 @@ article {
   padding: 0.25rem;
 }
 
+.locha-object--dimmed {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
 .header-row {
   display: flex;
   align-items: flex-start;
@@ -141,7 +151,7 @@ article {
 }
 
 .before-content {
-  flex: 1;
+  flex: 0 1 auto;
   min-width: 0;
 }
 

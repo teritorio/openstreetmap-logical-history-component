@@ -1,5 +1,6 @@
 import type { Color, IFeature, LoChaData, LoChaGroup, LoCha as LoChaInterface, Status } from '@/types'
 import { computed, ref } from 'vue'
+import { getFeatureStatus } from '@/utils/feature-status'
 import { transformFeatures } from '@/utils/feature-transform'
 
 export type { Color, LoCha, LoChaGroup, Status } from '@/types'
@@ -8,7 +9,7 @@ export type { Color, LoCha, LoChaGroup, Status } from '@/types'
  * A predefined object that maps status types to corresponding color codes.
  */
 export const loChaColors = {
-  new: '#52c41a',
+  new: '#00A550',
   delete: '#FF0000',
   updateBefore: '#FFA479',
   updateAfter: '#F2BE00',
@@ -53,8 +54,6 @@ export function useLoCha(): LoChaInterface {
    * @param data - The LoCha API response data to set.
    */
   function setLoCha(data: LoChaData): void {
-    _resetState()
-
     const transformedData = {
       ...data,
       features: transformFeatures(data),
@@ -72,24 +71,9 @@ export function useLoCha(): LoChaInterface {
   }
 
   function getStatus(feature: IFeature): Status {
-    if (feature.properties.is_new) {
-      return loChaStatus.new
-    }
-
-    if (feature.properties.deleted) {
-      return loChaStatus.delete
-    }
-
-    if (feature.properties.is_before) {
-      return loChaStatus.updateBefore
-    }
-
-    return loChaStatus.updateAfter
+    return getFeatureStatus(feature)
   }
 
-  /**
-   * Resets the LoCha state by clearing the LoCha data and resetting the feature arrays.
-   */
   function _resetState(): void {
     loCha.value = undefined
     groups.value = []
@@ -100,6 +84,7 @@ export function useLoCha(): LoChaInterface {
     loCha,
     groups,
     setLoCha,
+    resetLoCha: _resetState,
     getStatus,
     getBeforeFeatures,
     getAfterFeatures,

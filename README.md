@@ -27,15 +27,21 @@ import { LoCha } from '@teritorio/openstreetmap-logical-history-component'
 import '@teritorio/openstreetmap-logical-history-component/style.css'
 ```
 
+`LoChaObject` is also exported for standalone use — for example, to render a compact feature card inside a slot passed to `<LoCha>`:
+
+```ts
+import { LoCha, LoChaObject } from '@teritorio/openstreetmap-logical-history-component'
+```
+
 ### Basic example
 
 ```vue
 <script setup lang="ts">
-import type { ApiResponse } from '@teritorio/openstreetmap-logical-history-component'
+import type { LoChaData } from '@teritorio/openstreetmap-logical-history-component'
 import { LoCha } from '@teritorio/openstreetmap-logical-history-component'
 import { ref } from 'vue'
 
-const data = ref<ApiResponse>()
+const data = ref<LoChaData>()
 
 // Fetch data from your API and assign it to `data`
 </script>
@@ -47,11 +53,11 @@ const data = ref<ApiResponse>()
 
 ### Props
 
-| Prop              | Type          | Default     | Description                                                                    |
-| ----------------- | ------------- | ----------- | ------------------------------------------------------------------------------ |
-| `id`              | `string`      | —           | **Required.** A unique, deterministic identifier used to build anchor targets. |
-| `data`            | `ApiResponse` | `undefined` | The API response containing features and metadata to display.                  |
-| `reasonCollapsed` | `boolean`     | `true`      | Whether conflation reason details are collapsed by default.                    |
+| Prop              | Type        | Default     | Description                                                                    |
+| ----------------- | ----------- | ----------- | ------------------------------------------------------------------------------ |
+| `id`              | `string`    | —           | **Required.** A unique, deterministic identifier used to build anchor targets. |
+| `data`            | `LoChaData` | `undefined` | The API response containing features and metadata to display.                  |
+| `reasonCollapsed` | `boolean`   | `true`      | Whether conflation reason details are collapsed by default.                    |
 
 ### Slots
 
@@ -69,6 +75,14 @@ A scoped slot rendered once per feature inside each object card. Use it to displ
 #### `#header-center`
 
 A scoped slot rendered once per group in the center of the group header (between the group name and the end slot).
+
+| Prop    | Type     | Description      |
+| ------- | -------- | ---------------- |
+| `index` | `number` | The group index. |
+
+#### `#header-start-end`
+
+A scoped slot rendered once per group inside the left section of the group header, between the anchor button (🔗) and the group name. Useful for injecting a per-group action button close to the anchor.
 
 | Prop    | Type     | Description      |
 | ------- | -------- | ---------------- |
@@ -97,11 +111,14 @@ Example usage:
   <template #object-detail="{ feature, index }">
     <!-- Custom per-feature rendering -->
   </template>
-  <template #header-end="{ index }">
+  <template #header-start-end="{ index }">
     <button @click="acceptGroup(index)">Accept</button>
   </template>
+  <template #header-end="{ index }">
+    <!-- Optional: action at the far right of the group header -->
+  </template>
   <template #content-start="{ index }">
-    <!-- Custom first-column content (e.g. changesets) -->
+    <!-- Custom first-column content -->
   </template>
 </LoCha>
 ```
@@ -115,12 +132,12 @@ import type {
   Action,
   Actions,
   ActionType,
+  ActionTypeOptions,
   ApiLink,
   ApiLinkGroups,
-  ApiResponse,
-  Changeset,
   GroupSlotProps,
   IFeature,
+  LoChaData,
   ObjectDetailSlotProps,
   Reason,
   ReasonGeom,
@@ -128,13 +145,12 @@ import type {
 } from '@teritorio/openstreetmap-logical-history-component'
 ```
 
-### `ApiResponse` shape
+### `LoChaData` shape
 
-`ApiResponse` extends `GeoJSON.FeatureCollection` with:
+`LoChaData` extends `GeoJSON.FeatureCollection` with:
 
 - `features` — an array of `IFeature` objects (GeoJSON features with OSM-specific properties such as `objtype`, `version`, `username`, `tags`, etc.)
 - `metadata.links` — a record mapping link group IDs to arrays of `ApiLink` objects describing before/after relationships between features
-- `metadata.changesets` — an array of OSM changeset objects
 
 ## Development
 

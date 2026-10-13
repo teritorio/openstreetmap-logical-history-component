@@ -13,15 +13,15 @@ function isObject(entry?: NonNullable<Reason[keyof Reason]>): boolean {
   return !!entry && typeof entry === 'object' && !Array.isArray(entry)
 }
 
-function formatNumericValue(key: string, val: number | string): number | string {
+function formatNumericValue(key: string, val: number | string | null): number | string {
   switch (key) {
     case 'score':
       return `${Math.round(((1 - (val as number)) * 100))}%`
     case 'max_distance':
     case 'min_distance':
-      return `${Number.parseFloat((val as number).toFixed(2))}m`
+      return val != null ? `${Number.parseFloat((val as number).toFixed(2))}m` : '—'
     default:
-      return val
+      return val ?? '—'
   }
 }
 

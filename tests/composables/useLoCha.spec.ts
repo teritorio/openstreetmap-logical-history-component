@@ -61,6 +61,24 @@ describe('useLoCha', () => {
       })
       expect(getStatus(feature)).toBe('delete')
     })
+
+    it('returns "delete" for is_deleted features', () => {
+      const { getStatus } = useLoCha()
+      const feature = createFeature({
+        id: 'n1',
+        properties: { is_deleted: true },
+      })
+      expect(getStatus(feature)).toBe('delete')
+    })
+
+    it('prioritizes is_deleted over is_before', () => {
+      const { getStatus } = useLoCha()
+      const feature = createFeature({
+        id: 'n1',
+        properties: { is_deleted: true, is_before: true },
+      })
+      expect(getStatus(feature)).toBe('delete')
+    })
   })
 
   describe('setLoCha', () => {

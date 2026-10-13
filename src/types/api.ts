@@ -26,22 +26,6 @@ export interface Reason {
   conflate: string
 }
 
-export interface Changeset {
-  id: number
-  created_at: string
-  closed_at: string
-  open: boolean
-  user: string
-  uid: number
-  minlat: number
-  minlon: number
-  maxlat: number
-  maxlon: number
-  comments_count: number
-  changes_count: number
-  tags: Record<string, string>
-}
-
 export type ApiLinkGroups = ApiLink[][]
 
 /**
@@ -74,6 +58,7 @@ export interface IFeature extends GeoJSON.Feature {
     is_before?: boolean
     is_after?: boolean
     is_new?: boolean
+    is_deleted?: boolean
   }
 }
 
@@ -85,6 +70,18 @@ export interface LoChaData extends GeoJSON.FeatureCollection {
   features: IFeature[]
   metadata: {
     links: ApiLinkGroups
-    changesets: Changeset[] | null
+    /**
+     * When true, forces multi-column layout (before panel visible on the left)
+     * even for groups with a single before/after pair. Useful when the caller
+     * splits a N:1 merge group into separate LoCha instances per pair and wants
+     * to preserve the multi-column appearance.
+     *
+     * Note: this flag applies to **all groups** in the LoCha instance. For
+     * per-group control, split each group into a separate LoCha instance.
+     *
+     * Has no effect when the after feature is deleted — `isSingleDeletedUpdate`
+     * takes precedence in that case.
+     */
+    forceMultiColumn?: boolean
   }
 }

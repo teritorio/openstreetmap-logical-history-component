@@ -8,36 +8,12 @@ describe('useApi', () => {
   })
 
   describe('useApiConfig', () => {
-    it('returns error, fetchData, loading, setError, resetError', async () => {
+    it('returns fetchData and loading', async () => {
       const { useApiConfig } = await import('@/composables/useApi')
       const api = useApiConfig()
 
-      expect(api.error).toBeDefined()
       expect(api.fetchData).toBeTypeOf('function')
       expect(api.loading).toBeDefined()
-      expect(api.setError).toBeTypeOf('function')
-      expect(api.resetError).toBeTypeOf('function')
-    })
-  })
-
-  describe('setError / resetError', () => {
-    it('sets the error state', async () => {
-      const { useApiConfig } = await import('@/composables/useApi')
-      const { error, setError } = useApiConfig()
-
-      setError({ message: 'Something failed', type: 'error' })
-      expect(error.message).toBe('Something failed')
-      expect(error.type).toBe('error')
-    })
-
-    it('resets the error state', async () => {
-      const { useApiConfig } = await import('@/composables/useApi')
-      const { error, setError, resetError } = useApiConfig()
-
-      setError({ message: 'Error', type: 'error' })
-      resetError()
-      expect(error.message).toBeUndefined()
-      expect(error.type).toBe('info')
     })
   })
 
@@ -60,19 +36,17 @@ describe('useApi', () => {
       expect(loading.value).toBe(false)
     })
 
-    it('returns undefined and sets error on fetch failure', async () => {
+    it('returns undefined on fetch failure', async () => {
       vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('Network error')))
 
       const { useApiConfig } = await import('@/composables/useApi')
-      const { fetchData, error } = useApiConfig()
+      const { fetchData } = useApiConfig()
 
       const result = await fetchData({ date_start: '2024-01-01' })
       expect(result).toBeUndefined()
-      expect(error.message).toBe('Network error')
-      expect(error.type).toBe('error')
     })
 
-    it('returns undefined and sets error on non-ok response', async () => {
+    it('returns undefined on non-ok response', async () => {
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
         ok: false,
         status: 500,
@@ -81,28 +55,10 @@ describe('useApi', () => {
       }))
 
       const { useApiConfig } = await import('@/composables/useApi')
-      const { fetchData, error } = useApiConfig()
+      const { fetchData } = useApiConfig()
 
       const result = await fetchData({ date_start: '2024-01-01' })
       expect(result).toBeUndefined()
-      expect(error.message).toBe('Server error message')
-      expect(error.type).toBe('error')
-    })
-
-    it('resets error before each fetch', async () => {
-      vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
-        ok: true,
-        json: () => Promise.resolve(createApiResponse([], [])),
-      }))
-
-      const { useApiConfig } = await import('@/composables/useApi')
-      const { fetchData, error, setError } = useApiConfig()
-
-      setError({ message: 'Previous error', type: 'error' })
-      expect(error.message).toBe('Previous error')
-
-      await fetchData({ date_start: '2024-01-01' })
-      expect(error.message).toBeUndefined()
     })
 
     it('filters out undefined and empty params from the URL', async () => {
