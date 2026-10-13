@@ -10,6 +10,7 @@ const props = defineProps<{
   index: number
   features: LoChaGroup
   josmTarget?: string
+  dimmed?: boolean
 }>()
 
 defineEmits<{
@@ -81,7 +82,7 @@ const groupNameTitle = computed(() => {
 </script>
 
 <template>
-  <div :id="id" class="locha-group">
+  <div :id="id" class="locha-group" :class="{ 'locha-group--dimmed': dimmed }">
     <div class="group-header">
       <div class="header-start">
         <a class="anchor-button" :href="`#${id}`" @click.prevent="$emit('navigate', `#${id}`)">🔗</a>
@@ -145,6 +146,12 @@ const groupNameTitle = computed(() => {
               v-for="feature in afterFeatures"
               :key="feature.id"
             >
+              <slot
+                v-if="$slots['object-header'] && (beforeFeaturesPerAfter.get(feature.id)?.length ?? 0) > 1"
+                name="object-header"
+                :feature="feature"
+                :index="index"
+              />
               <LoChaObject
                 :feature="feature"
                 :josm-target="josmTarget"
@@ -157,9 +164,6 @@ const groupNameTitle = computed(() => {
                     :feature="beforeFeature"
                     :compact="true"
                   />
-                </template>
-                <template v-if="$slots['object-header']" #object-header>
-                  <slot name="object-header" :feature="feature" :index="index" />
                 </template>
                 <template v-if="$slots['object-detail']" #object-detail>
                   <slot name="object-detail" :feature="feature" :index="index" />
@@ -179,6 +183,10 @@ const groupNameTitle = computed(() => {
   border: 2px solid #cecece;
   background-color: #ffffff;
   scroll-margin-top: var(--locha-scroll-offset, 0px);
+}
+
+.locha-group--dimmed {
+  opacity: 0.35;
 }
 
 .group-content {

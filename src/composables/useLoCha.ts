@@ -54,8 +54,6 @@ export function useLoCha(): LoChaInterface {
    * @param data - The LoCha API response data to set.
    */
   function setLoCha(data: LoChaData): void {
-    _resetState()
-
     const transformedData = {
       ...data,
       features: transformFeatures(data),

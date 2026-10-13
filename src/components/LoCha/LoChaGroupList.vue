@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import type { GroupSlotProps, ObjectDetailSlotProps } from '@/types'
+import type { GroupSlotProps, LoChaGroup, ObjectDetailSlotProps } from '@/types'
 import { inject, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from 'vue'
-import LoChaGroup from '@/components/LoCha/LoChaGroup.vue'
+import LoChaGroupComponent from '@/components/LoCha/LoChaGroup.vue'
 import { loChaColors } from '@/composables/useLoCha'
 import { LOCHA_INSTANCE_ID_KEY, LOCHA_KEY } from '@/constants/injectionKeys'
+import { isMinorChange } from '@/utils/feature-status'
 import { scrollToSection } from '@/utils/scrollToSection'
 
 const props = defineProps<{
   hash?: string
+  grayOutThreshold?: number
 }>()
 
 defineSlots<{
@@ -17,11 +19,23 @@ defineSlots<{
   'header-center'?: (props: GroupSlotProps) => void
   'header-end'?: (props: GroupSlotProps) => void
   'content-start'?: (props: GroupSlotProps) => void
+  'filters'?: () => void
 }>()
 
-const { groups } = inject(LOCHA_KEY)!
+const { groups, loCha } = inject(LOCHA_KEY)!
 const instanceId = inject(LOCHA_INSTANCE_ID_KEY)!
+
 const highlightBorderColor = loChaColors.delete
+
+function shouldDimGroup(group: LoChaGroup, index: number): boolean {
+  if (props.grayOutThreshold === undefined)
+    return false
+  const links = loCha.value?.metadata.links[index] ?? []
+  const afterFeatures = group.filter(f => !f.properties.is_before)
+  if (!afterFeatures.length)
+    return false
+  return afterFeatures.every(feature => isMinorChange(feature, links, props.grayOutThreshold!))
+}
 const currentHash = ref<string>()
 const listRef = useTemplateRef<HTMLElement>('listRef')
 const scrollRef = useTemplateRef<HTMLElement>('scrollRef')
@@ -97,9 +111,12 @@ onUnmounted(() => {
 
 <template>
   <div ref="listRef" class="locha-group-list">
+    <div class="locha-filters">
+      <slot name="filters" />
+    </div>
     <ul ref="scrollRef">
-      <li v-for="(group, index) in groups" :key="index" :class="{ selected: currentHash === `#${groupId(index)}` }">
-        <LoChaGroup :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" @navigate="navigateToHash">
+      <li v-for="(group, index) in groups" :key="group[0].properties.links" :class="{ selected: currentHash === `#${groupId(index)}` }">
+        <LoChaGroupComponent :id="groupId(index)" :features="group" :index="index" :josm-target="josmTargetName()" :dimmed="shouldDimGroup(group, index)" @navigate="navigateToHash">
           <template v-if="$slots['object-header']" #object-header="slotProps">
             <slot name="object-header" v-bind="slotProps" />
           </template>
@@ -118,7 +135,7 @@ onUnmounted(() => {
           <template v-if="$slots['content-start']" #content-start="slotProps">
             <slot name="content-start" v-bind="slotProps" />
           </template>
-        </LoChaGroup>
+        </LoChaGroupComponent>
       </li>
     </ul>
     <iframe :name="josmTargetName()" style="display: none" />
@@ -159,5 +176,12 @@ ul {
   display: flex;
   flex-direction: column;
   gap: 0.5em;
+}
+
+.locha-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
 }
 </style>

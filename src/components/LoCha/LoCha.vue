@@ -13,6 +13,7 @@ const props = withDefaults(defineProps<{
   mapLocale?: Record<string, string>
   reasonCollapsed?: boolean
   hash?: string
+  grayOutThreshold?: number
 }>(), {
   mapStyleUrl: MAP_STYLE_URL,
   reasonCollapsed: true,
@@ -25,6 +26,7 @@ defineSlots<{
   'header-center'?: (props: GroupSlotProps) => void
   'header-end'?: (props: GroupSlotProps) => void
   'content-start'?: (props: GroupSlotProps) => void
+  'filters'?: () => void
 }>()
 
 provide(REASON_COLLAPSED_KEY, props.reasonCollapsed)
@@ -59,7 +61,7 @@ watch(() => props.data, (newValue) => {
     <p v-if="!featureCount" class="user-feedback">
       ⚠️ No data
     </p>
-    <LoChaGroupList v-else :hash="hash">
+    <LoChaGroupList v-else :hash="hash" :gray-out-threshold="grayOutThreshold">
       <template v-if="$slots['object-header']" #object-header="slotProps">
         <slot name="object-header" v-bind="slotProps" />
       </template>
@@ -77,6 +79,9 @@ watch(() => props.data, (newValue) => {
       </template>
       <template v-if="$slots['content-start']" #content-start="slotProps">
         <slot name="content-start" v-bind="slotProps" />
+      </template>
+      <template v-if="$slots.filters" #filters>
+        <slot name="filters" />
       </template>
     </LoChaGroupList>
   </section>
