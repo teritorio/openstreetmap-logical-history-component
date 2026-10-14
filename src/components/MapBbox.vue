@@ -232,14 +232,10 @@ watch(
     if (!map.value)
       return
     syncBboxLayers(newBbox)
-    if (newBbox && newBbox !== oldBbox) {
-      if (skipNextFit) {
-        skipNextFit = false
-      }
-      else {
-        fitMapToBbox(newBbox)
-      }
-    }
+    const shouldFit = !!(newBbox && newBbox !== oldBbox && !skipNextFit)
+    skipNextFit = false
+    if (shouldFit)
+      fitMapToBbox(newBbox)
   },
 )
 
