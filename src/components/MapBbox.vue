@@ -65,6 +65,7 @@ const EMPTY_FC: GeoJSON.FeatureCollection = { type: 'FeatureCollection', feature
 
 let isInteracting = false
 let stopInteraction: (() => void) | undefined
+let skipNextFit = false
 
 function bboxToPolygon(coords: [number, number, number, number]): GeoJSON.Feature<GeoJSON.Polygon> {
   const [west, south, east, north] = coords
@@ -118,7 +119,7 @@ function fitMapToBbox(bbox: string): void {
   if (!coords || !map.value)
     return
   const [west, south, east, north] = coords
-  map.value.fitBounds([[west, south], [east, north]], { padding: 20, duration: 0 })
+  map.value.fitBounds([[west, south], [east, north]], { padding: 100, duration: 0 })
 }
 
 function getZoom(): number {
@@ -144,6 +145,7 @@ function beginInteraction(cursor: string, computeBbox: (e: maplibre.MapMouseEven
   if (!map.value)
     return
   isInteracting = true
+  skipNextFit = true
   map.value.dragPan.disable()
   map.value.getCanvas().style.cursor = cursor
 
@@ -217,6 +219,7 @@ function startDrag(origin: maplibre.LngLat): void {
 const { isDrawing, toggle: toggleDrawMode } = useDrawMode(map, {
   onDrawMove: bbox => drawRect(bbox),
   onDrawEnd: (bbox) => {
+    skipNextFit = true
     syncBboxLayers(bbox)
     emit('updateBbox', bbox)
   },
@@ -229,7 +232,9 @@ watch(
     if (!map.value)
       return
     syncBboxLayers(newBbox)
-    if (newBbox && newBbox !== oldBbox)
+    const shouldFit = !!(newBbox && newBbox !== oldBbox && !skipNextFit)
+    skipNextFit = false
+    if (shouldFit)
       fitMapToBbox(newBbox)
   },
 )

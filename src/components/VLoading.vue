@@ -1,7 +1,7 @@
 <template>
   <div class="loading-container" role="status" aria-live="polite">
     <div class="spinner" aria-hidden="true" />
-    <span>Computing history, this may take a moment…</span>
+    <span>Fetching data from Overpass and computing history, this may take a moment…</span>
   </div>
 </template>
 

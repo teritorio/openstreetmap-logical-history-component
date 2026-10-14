@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CreateToasterReturn } from '@ark-ui/vue'
 import type { ApiLink, FormData, IFeature, LoChaData } from '@/types'
-import { Checkbox, NumberInput, Splitter, Toast, Toaster } from '@ark-ui/vue'
+import { Checkbox, NumberInput, Splitter, Toast, Toaster, Tooltip } from '@ark-ui/vue'
 import { computed, inject, reactive, ref, shallowRef, toRef, useTemplateRef, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import DateRangeSlider from '@/components/DateRangeSlider.vue'
@@ -23,6 +23,7 @@ const $api = useApiConfig()
 const { loading } = $api
 const geojson = ref<LoChaData>()
 const view = ref<'search' | 'results'>('search')
+const savedSearchParams = shallowRef<FormData | null>(null)
 
 const route = useRoute()
 const router = useRouter()
@@ -94,6 +95,7 @@ watch(
 )
 
 async function fetchData(query: Record<string, string | undefined>) {
+  savedSearchParams.value = { ...formValues }
   geojson.value = await $api.fetchData(query)
   if (geojson.value)
     view.value = 'results'
@@ -182,6 +184,17 @@ function goBack() {
   view.value = 'search'
 }
 
+watch(
+  () => route.query.date_start,
+  (dateStart) => {
+    if (!dateStart) {
+      if (savedSearchParams.value)
+        Object.assign(formValues, savedSearchParams.value)
+      view.value = 'search'
+    }
+  },
+)
+
 const grayOutThreshold = ref(2)
 </script>
 
@@ -220,6 +233,7 @@ const grayOutThreshold = ref(2)
             v-model:end="formValues.dateEnd"
             :histogram-data="histogramData"
             :date-range="dateRange"
+            :need-zoom="needZoom"
           />
         </section>
         <Splitter.Root class="main-split" :panels="splitterPanels" :default-size="[25, 75]">
@@ -266,33 +280,51 @@ const grayOutThreshold = ref(2)
           </div>
           <div class="toolbar-sep" aria-hidden="true" />
           <div class="toolbar-right">
-            <Checkbox.Root class="results-route" :checked="formValues.includeRelationTypeRoute" disabled>
-              <Checkbox.Control class="checkbox-control">
-                <Checkbox.Indicator class="checkbox-indicator">
-                  ✓
-                </Checkbox.Indicator>
-              </Checkbox.Control>
-              <Checkbox.Label>Include route relations</Checkbox.Label>
-              <Checkbox.HiddenInput />
-            </Checkbox.Root>
-            <NumberInput.Root
-              class="results-grayout"
-              :model-value="String(grayOutThreshold)"
-              :min="0"
-              :max="100"
-              @update:model-value="grayOutThreshold = Number($event)"
-            >
-              <NumberInput.Label>Dim minor changes below (m)</NumberInput.Label>
-              <NumberInput.Control class="number-input-control">
-                <NumberInput.DecrementTrigger class="number-input-trigger">
-                  −
-                </NumberInput.DecrementTrigger>
-                <NumberInput.Input class="number-input-field" />
-                <NumberInput.IncrementTrigger class="number-input-trigger">
-                  +
-                </NumberInput.IncrementTrigger>
-              </NumberInput.Control>
-            </NumberInput.Root>
+            <Tooltip.Root :open-delay="300" :close-delay="100">
+              <Tooltip.Trigger as-child>
+                <Checkbox.Root class="results-route" :checked="formValues.includeRelationTypeRoute" disabled>
+                  <Checkbox.Control class="checkbox-control">
+                    <Checkbox.Indicator class="checkbox-indicator">
+                      ✓
+                    </Checkbox.Indicator>
+                  </Checkbox.Control>
+                  <Checkbox.Label>Include route relations</Checkbox.Label>
+                  <Checkbox.HiddenInput />
+                </Checkbox.Root>
+              </Tooltip.Trigger>
+              <Tooltip.Positioner>
+                <Tooltip.Content class="toolbar-tooltip-content">
+                  This option was set when the query was run. To change it, go back and run a new search.
+                </Tooltip.Content>
+              </Tooltip.Positioner>
+            </Tooltip.Root>
+            <Tooltip.Root :open-delay="300" :close-delay="100">
+              <Tooltip.Trigger as-child>
+                <NumberInput.Root
+                  class="results-grayout"
+                  :model-value="String(grayOutThreshold)"
+                  :min="0"
+                  :max="100"
+                  @update:model-value="grayOutThreshold = Number($event)"
+                >
+                  <NumberInput.Label>Dim minor changes below (m)</NumberInput.Label>
+                  <NumberInput.Control class="number-input-control">
+                    <NumberInput.DecrementTrigger class="number-input-trigger">
+                      −
+                    </NumberInput.DecrementTrigger>
+                    <NumberInput.Input class="number-input-field" />
+                    <NumberInput.IncrementTrigger class="number-input-trigger">
+                      +
+                    </NumberInput.IncrementTrigger>
+                  </NumberInput.Control>
+                </NumberInput.Root>
+              </Tooltip.Trigger>
+              <Tooltip.Positioner>
+                <Tooltip.Content class="toolbar-tooltip-content">
+                  Groups with no tag changes are dimmed if their geometry shift is at most this distance (in metres). At 0, only groups with neither tag nor geometry changes are dimmed.
+                </Tooltip.Content>
+              </Tooltip.Positioner>
+            </Tooltip.Root>
           </div>
         </div>
         <LoCha id="demo" :data="geojson" :reason-collapsed="false" :gray-out-threshold="grayOutThreshold">
@@ -376,6 +408,9 @@ main {
 .results-screen {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .results-toolbar {
@@ -609,5 +644,16 @@ main {
   .toolbar-sep {
     display: none;
   }
+}
+
+.toolbar-tooltip-content {
+  background: var(--color-text);
+  color: var(--color-bg-white);
+  font-size: var(--text-xs, 0.75rem);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  max-width: 260px;
+  line-height: 1.4;
+  box-shadow: var(--shadow-md);
 }
 </style>

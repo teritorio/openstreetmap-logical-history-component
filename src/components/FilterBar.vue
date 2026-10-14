@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormData } from '@/types'
-import { Checkbox, Field } from '@ark-ui/vue'
+import { Checkbox, Field, Tooltip } from '@ark-ui/vue'
 import { ref, watch, watchEffect } from 'vue'
 import { MIN_ZOOM } from '@/constants/map'
 import { presets } from '@/data/presets'
@@ -90,19 +90,28 @@ function handleSubmit(): void {
         />
       </Field.Root>
 
-      <Checkbox.Root
-        class="route-label"
-        :checked="props.includeRelationTypeRoute"
-        @update:checked="emit('update:includeRelationTypeRoute', $event === true)"
-      >
-        <Checkbox.Control class="route-checkbox-control">
-          <Checkbox.Indicator class="route-checkbox-indicator">
-            ✓
-          </Checkbox.Indicator>
-        </Checkbox.Control>
-        <Checkbox.Label>Include route relations</Checkbox.Label>
-        <Checkbox.HiddenInput />
-      </Checkbox.Root>
+      <Tooltip.Root :open-delay="300" :close-delay="100">
+        <Tooltip.Trigger as-child>
+          <Checkbox.Root
+            class="route-label"
+            :checked="props.includeRelationTypeRoute"
+            @update:checked="emit('update:includeRelationTypeRoute', $event === true)"
+          >
+            <Checkbox.Control class="route-checkbox-control">
+              <Checkbox.Indicator class="route-checkbox-indicator">
+                ✓
+              </Checkbox.Indicator>
+            </Checkbox.Control>
+            <Checkbox.Label>Include route relations</Checkbox.Label>
+            <Checkbox.HiddenInput />
+          </Checkbox.Root>
+        </Tooltip.Trigger>
+        <Tooltip.Positioner>
+          <Tooltip.Content class="tooltip-content">
+            By default, OSM route relations (e.g. hiking or cycling routes) are excluded because they generate a large number of results. Enable to include them.
+          </Tooltip.Content>
+        </Tooltip.Positioner>
+      </Tooltip.Root>
 
       <div class="form-actions">
         <p v-if="needZoom" class="zoom-warning" role="alert">
@@ -151,6 +160,7 @@ form {
 .form-row {
   display: flex;
   gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 .form-field {
@@ -294,7 +304,7 @@ form {
   padding: var(--space-1) var(--space-2);
   background: var(--color-bg-white);
   border: 1px solid var(--color-border-light);
-  border-left: 3px solid transparent;
+  border-left: 3px solid var(--color-border-light);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   cursor: pointer;
@@ -307,5 +317,16 @@ form {
 .presets li button:hover {
   background: var(--color-bg-hover);
   border-left-color: var(--color-primary);
+}
+
+.tooltip-content {
+  background: var(--color-text);
+  color: var(--color-bg-white);
+  font-size: var(--text-xs, 0.75rem);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  max-width: 240px;
+  line-height: 1.4;
+  box-shadow: var(--shadow-md);
 }
 </style>
