@@ -119,7 +119,7 @@ function fitMapToBbox(bbox: string): void {
   if (!coords || !map.value)
     return
   const [west, south, east, north] = coords
-  map.value.fitBounds([[west, south], [east, north]], { padding: 60, duration: 0 })
+  map.value.fitBounds([[west, south], [east, north]], { padding: 100, duration: 0 })
 }
 
 function getZoom(): number {
