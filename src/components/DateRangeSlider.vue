@@ -7,6 +7,7 @@ const props = defineProps<{
   end?: string
   histogramData?: [number, number][]
   dateRange?: { min_date: string, max_date: string } | null
+  needZoom?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -15,6 +16,7 @@ const emit = defineEmits<{
 }>()
 
 const isEmpty = computed(() => !props.histogramData?.length)
+const showEmptyState = computed(() => isEmpty.value && !!props.needZoom)
 
 const AXIS_STYLE = {
   axisLine: { lineStyle: { color: '#d0d2d5' } },
@@ -170,8 +172,8 @@ watch(() => [props.start, props.end] as const, ([start, end]) => {
       role="img"
       aria-label="Change frequency histogram — use the date inputs below to adjust the range"
     />
-    <div class="date-range-empty" :class="{ 'date-range-empty--visible': isEmpty }" aria-live="polite" aria-atomic="true">
-      <span v-if="isEmpty">No change data available for this area</span>
+    <div class="date-range-empty" :class="{ 'date-range-empty--visible': showEmptyState }" aria-live="polite" aria-atomic="true">
+      <span v-if="showEmptyState">No change data available for this area</span>
     </div>
   </div>
 </template>
