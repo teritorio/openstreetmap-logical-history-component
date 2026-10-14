@@ -23,6 +23,7 @@ const $api = useApiConfig()
 const { loading } = $api
 const geojson = ref<LoChaData>()
 const view = ref<'search' | 'results'>('search')
+const savedSearchParams = shallowRef<FormData | null>(null)
 
 const route = useRoute()
 const router = useRouter()
@@ -94,6 +95,7 @@ watch(
 )
 
 async function fetchData(query: Record<string, string | undefined>) {
+  savedSearchParams.value = { ...formValues }
   geojson.value = await $api.fetchData(query)
   if (geojson.value)
     view.value = 'results'
@@ -185,8 +187,11 @@ function goBack() {
 watch(
   () => route.query.date_start,
   (dateStart) => {
-    if (!dateStart)
+    if (!dateStart) {
+      if (savedSearchParams.value)
+        Object.assign(formValues, savedSearchParams.value)
       view.value = 'search'
+    }
   },
 )
 
