@@ -304,7 +304,7 @@ form {
   padding: var(--space-1) var(--space-2);
   background: var(--color-bg-white);
   border: 1px solid var(--color-border-light);
-  border-left: 3px solid transparent;
+  border-left: 3px solid var(--color-border-light);
   border-radius: var(--radius-sm);
   font-size: var(--text-sm);
   cursor: pointer;
