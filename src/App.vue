@@ -183,9 +183,9 @@ function goBack() {
 }
 
 watch(
-  () => route.query,
-  (query) => {
-    if (!query.date_start || !query.bbox)
+  () => route.query.date_start,
+  (dateStart) => {
+    if (!dateStart)
       view.value = 'search'
   },
 )
