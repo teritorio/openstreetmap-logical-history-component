@@ -316,7 +316,7 @@ const grayOutThreshold = ref(2)
               </Tooltip.Trigger>
               <Tooltip.Positioner>
                 <Tooltip.Content class="toolbar-tooltip-content">
-                  Groups whose geometry change is smaller than this threshold (in metres) are visually dimmed. Set to 0 to show all groups at full opacity.
+                  Groups with no tag changes are dimmed if their geometry shift is at most this distance (in metres). At 0, only groups with neither tag nor geometry changes are dimmed.
                 </Tooltip.Content>
               </Tooltip.Positioner>
             </Tooltip.Root>
