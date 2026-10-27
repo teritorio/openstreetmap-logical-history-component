@@ -1,7 +1,7 @@
 import type * as GeoJSON from 'geojson'
 import type { ComputedRef, Ref } from 'vue'
 import type { KarmaManifest } from '@/lib/karma-api'
-import { cellToBoundary, cellToParent } from 'h3-js'
+import { cellToBoundary } from 'h3-js'
 import { computed, onMounted, ref, watch } from 'vue'
 import { bboxToCells, cellsMinMaxSet } from '@/lib/h3-bbox'
 import { loadManifest } from '@/lib/karma-api'
@@ -18,26 +18,6 @@ interface QueryDates {
   endMonth: string
 }
 
-function getDisplayRes(resultSize: number, manifestRes: number): number {
-  if (resultSize > 3500)
-    return Math.max(0, manifestRes - 3)
-  if (resultSize > 500)
-    return Math.max(0, manifestRes - 2)
-  if (resultSize > 70)
-    return Math.max(0, manifestRes - 1)
-  return manifestRes
-}
-
-function aggregateCells(byCell: Map<bigint, number>, toRes: number): Map<bigint, number> {
-  const result = new Map<bigint, number>()
-  for (const [cell, count] of byCell) {
-    const parentHex = cellToParent(cell.toString(16), toRes)
-    const parentCell = BigInt(`0x${parentHex}`)
-    result.set(parentCell, (result.get(parentCell) ?? 0) + count)
-  }
-  return result
-}
-
 function h3CellsToGeoJSON(byCell: Map<bigint, number>): GeoJSON.FeatureCollection {
   const features: GeoJSON.Feature[] = []
   for (const [cell, count] of byCell.entries()) {
@@ -52,10 +32,8 @@ function h3CellsToGeoJSON(byCell: Map<bigint, number>): GeoJSON.FeatureCollectio
   return { type: 'FeatureCollection', features }
 }
 
-function buildHeatmap(byCell: Map<bigint, number>, manifestRes: number): GeoJSON.FeatureCollection {
-  const displayRes = getDisplayRes(byCell.size, manifestRes)
-  const displayCells = displayRes === manifestRes ? byCell : aggregateCells(byCell, displayRes)
-  return h3CellsToGeoJSON(displayCells)
+function buildHeatmap(byCell: Map<bigint, number>): GeoJSON.FeatureCollection {
+  return h3CellsToGeoJSON(byCell)
 }
 
 function buildHistogram(byDay: Map<string, number>): [number, number][] {
@@ -186,7 +164,7 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
         fetchBboxData(viewportBboxVal, manifestSnap, dates),
         fetchBboxData(bboxVal, manifestSnap, dates),
       ])
-      heatmapData.value = viewportResult ? buildHeatmap(viewportResult.byCell, manifestSnap.h3_resolution) : null
+      heatmapData.value = viewportResult ? buildHeatmap(viewportResult.byCell) : null
       histogramData.value = bboxResult ? buildHistogram(bboxResult.byDay) : []
     }
     else if (bboxVal) {
@@ -198,7 +176,7 @@ export function useKarmaData(opts: UseKarmaDataOptions): {
     else {
       // No bbox: single viewport query for both
       const result = await fetchBboxData(viewportBboxVal, manifestSnap, dates)
-      heatmapData.value = result ? buildHeatmap(result.byCell, manifestSnap.h3_resolution) : null
+      heatmapData.value = result ? buildHeatmap(result.byCell) : null
       histogramData.value = result ? buildHistogram(result.byDay) : []
     }
   }
